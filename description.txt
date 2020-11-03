@@ -1,0 +1,24 @@
+Hello and welcome to Spooky Terraria!
+
+First of all, this was inspired by both Fundy on YouTube and Slenderman: the 8 pages.
+This mod is still a work in progress, so nothing is final.
+
+BE SURE TO CREATE A NEW CHARACTER WITH THIS MOD ENABLED FIRST.
+
+In this mod, your world gets a whole lot darker and creepier, along with a new NPC, the Stalker.
+The stalker is a high stealth creature who can attack you when you least expect it, so be sure to use your flashlight accordingly.
+The one way you will know the Stalker is near you is a heartbeat. Your heartbeat links to the Stalker. The faster your heartbeat gets, the closer you are.
+Another thing: Heartrate is now an important factor in the mod.
+If your heartrate goes above 240, you die.
+
+Some extra spooky things like ambience have been added!
+In the forest you can hear crickets, owls, and eerie winds.
+
+At the ocean, you can hear crashing waves, which are loud.
+
+In the snow, you can hear faint snowfall.
+
+A NOTE TO ALL: This is intended for SINGLE PLAYER GAMEPLAY.
+Playing multiplayer can result in client sided issues like the flashlight not doing what it is supposed to,
+heads rotating incorrectly, or Stalkers not spawning properly. So if you choose to play multiplayer, this is what will happen to you.
+
