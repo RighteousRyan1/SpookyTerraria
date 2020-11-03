@@ -1,0 +1,6 @@
+bin/
+obj/
+Properties/
+MetEx.csproj
+.vs
+.idea
