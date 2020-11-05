@@ -24,6 +24,10 @@ namespace SpookyTerraria.OtherItems
             item.maxStack = 1;
             item.scale = 1f;
         }
+        public override void UpdateInventory(Player player)
+        {
+            player.GetModPlayer<SpookyPlayer>().accHeartMonitor = true;
+        }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             Player player = Main.player[Main.myPlayer];

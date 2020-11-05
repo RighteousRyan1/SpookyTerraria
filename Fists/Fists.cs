@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -21,14 +23,29 @@ namespace SpookyTerraria.Fists
             item.useAnimation = 10;
             item.useStyle = ItemUseStyleID.SwingThrow;
             item.knockBack = 3;
-            item.value = 0;
             item.rare = ItemRarityID.Blue;
             item.autoReuse = true;
             item.noUseGraphic = true;
             item.holdStyle = ItemHoldStyleID.HoldingOut;
             item.useTurn = true;
-            item.pick = 10;
+            item.pick = 8;
             item.axe = 2;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            // Get the vanilla damage tooltip
+            TooltipLine tt = tooltips.FirstOrDefault(x => x.Name == "AxePower" && x.mod == "Terraria");
+            if (tt != null)
+            {
+                if (item.axe == 10)
+                {
+                    tt.text = "10% axe power";
+                }
+                if (item.axe != 10)
+                {
+                    tt.text = $"{item.axe * 5}% axe power";
+                }
+            }
         }
         public override void UseItemHitbox(Player player, ref Rectangle hitbox, ref bool noHitbox)
         {

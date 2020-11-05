@@ -1,7 +1,6 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static Terraria.ModLoader.ModContent;
 using Microsoft.Xna.Framework;
 
 namespace SpookyTerraria.NPCs
@@ -46,7 +45,7 @@ namespace SpookyTerraria.NPCs
         }
         public override float SpawnChance(NPCSpawnInfo spawnInfo)
         {
-            return !Main.player[Main.myPlayer].GetModPlayer<SpookyPlayer>().stalkerConditionMet ? .25f : 0f;
+            return !Main.player[Main.myPlayer].GetModPlayer<SpookyPlayer>().stalkerConditionMet && !ModContent.GetInstance<SpookyTerraria>().beatGame && Main.player[Main.myPlayer].townNPCs < 4 ? .25f : 0f;
         }
         public override void PostAI()
         {
