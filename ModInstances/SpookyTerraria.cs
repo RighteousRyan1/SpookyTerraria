@@ -113,31 +113,12 @@ namespace SpookyTerraria
                 Ref<Effect> Darkness = new Ref<Effect>(GetEffect("Effects/Darkness"));
                 Filters.Scene["Darkness"] = new Filter(new ScreenShaderData(Darkness, "Darkness"), EffectPriority.VeryHigh);
             }
-
-
-            /*On.Terraria.UI.ItemSlot.SellOrTrash += NoSellForPapers;
-            On.Terraria.Chest.UsingChest += PagesCannotBePutInChests;*/
             if (!Main.dedServ)
             {
                 Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
         }
-
-        /*private void NoSellForPapers(On.Terraria.UI.ItemSlot.orig_SellOrTrash orig, Item[] inv, int context, int slot)
-        {
-            // Do not allow selling or trashing papers...
-        }*/
-
-        /*private int PagesCannotBePutInChests(On.Terraria.Chest.orig_UsingChest orig, int i)
-        {
-            int j;
-            for (j = 0; j < Main.maxInventory; j++)
-            {
-                return 0;
-            }
-            return orig(i);
-        }*/
         public int oldManTimer;
         public override void PostUpdateEverything()
         {

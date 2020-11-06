@@ -20,10 +20,6 @@ namespace SpookyTerraria.OtherItems
             }
             item.favorited = true;
         }
-        public override void PostUpdate()
-        {
-            item.TurnToAir();
-        }
         public override void SetDefaults()
         {
             item.width = 40;
@@ -31,6 +27,10 @@ namespace SpookyTerraria.OtherItems
             item.rare = ItemRarityID.White;
             item.maxStack = 300;
             item.createTile = ModContent.TileType<PageTile>();
+        }
+        public override bool OnPickup(Player player)
+        {
+            return base.OnPickup(player);
         }
     }
 }
