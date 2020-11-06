@@ -18,6 +18,7 @@ namespace SpookyTerraria
     {
         public override bool InstancePerEntity => true;
         public override bool CloneNewInstances => true;
+
         public int heartBeatTimer;
 
         public override void EditSpawnPool(IDictionary<int, float> pool, NPCSpawnInfo spawnInfo)
@@ -34,10 +35,12 @@ namespace SpookyTerraria
             if (ModContent.GetInstance<SpookyConfigServer>().excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool)
             {
                 pool.Clear();
-
-                foreach (var SpookyNPCs in Lists_SpookyNPCs.SpookyNPCs)
+                if (!player.GetModPlayer<SpookyPlayer>().stalkerConditionMet)
                 {
-                    pool.Add(SpookyNPCs, 1f);
+                    foreach (var SpookyNPCs in Lists_SpookyNPCs.SpookyNPCs)
+                    {
+                        pool.Add(SpookyNPCs, 1f);
+                    }
                 }
             }
         }
@@ -278,6 +281,7 @@ namespace SpookyTerraria
         public override void PostAI(NPC npc)
         {
             Player player = Main.player[Main.myPlayer];
+            float distanceToStalker = npc.Distance(player.Center);
             if (npc.type == ModContent.NPCType<Stalker>())
             {
                 if (!player.dead)
@@ -287,22 +291,22 @@ namespace SpookyTerraria
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                     }
-                    if (heartBeatTimer == 50 && npc.Distance(player.Center) >= 750f)
+                    if (heartBeatTimer == 50 && (distanceToStalker >= 750f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 40 && npc.Distance(player.Center) < 750f)
+                    if (heartBeatTimer == 40 && (distanceToStalker < 750f && distanceToStalker >= 300f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 30 && npc.Distance(player.Center) < 300f)
+                    if (heartBeatTimer == 30 && (distanceToStalker < 300f && distanceToStalker >= 100f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 25 && npc.Distance(player.Center) < 100f)
+                    if (heartBeatTimer == 25 && (distanceToStalker < 100f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;

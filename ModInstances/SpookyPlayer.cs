@@ -228,22 +228,22 @@ namespace SpookyTerraria
                     hbDecTimer = 0;
                     hbIncTimer++;
                     float distnaceToStalker = player.Distance(npc.Center);
-                    if (distnaceToStalker >= 750f && hbIncTimer == 50) // Slow heartrate increase
+                    if (distnaceToStalker >= 750f && hbIncTimer >= 50) // Slow heartrate increase
                     {
                         heartRate++;
                         hbIncTimer = 0;
                     }
-                    if (distnaceToStalker < 750f && hbIncTimer == 25) // Semi-Fast heartrate increase
+                    if (distnaceToStalker < 750f && hbIncTimer >= 25) // Semi-Fast heartrate increase
                     {
                         heartRate++;
                         hbIncTimer = 0;
                     }
-                    if (distnaceToStalker < 300f && hbIncTimer == 12) // FAST INCREASE IN HEARTRATE!
+                    if (distnaceToStalker < 300f && hbIncTimer >= 12) // FAST INCREASE IN HEARTRATE!
                     {
                         heartRate++;
                         hbIncTimer = 0;
                     }
-                    if (distnaceToStalker < 100f && hbIncTimer == 5) // SANIK!
+                    if (distnaceToStalker < 100f && hbIncTimer >= 8) // SANIK!
                     {
                         heartRate++;
                         hbIncTimer = 0;
@@ -299,7 +299,7 @@ namespace SpookyTerraria
                             heartRate--;
                             hbDecTimer = 0;
                         }
-                        if (heartRate > 60 && hbDecTimer == 15)
+                        if (heartRate > 60 && hbDecTimer >= 15)
                         {
                             heartRate--;
                         }
@@ -324,20 +324,6 @@ namespace SpookyTerraria
             {
                 player.ChangeDir(-1);
             }
-            // Stalkers
-
-            for (int i = 0; i < Main.maxNPCs; i++)
-            {
-                NPC npc = Main.npc[i];
-                if (npc.type == ModContent.NPCType<Stalker>())
-                {
-                    if (npc.active)
-                    {
-                        stalkerConditionMet = true;
-                    }
-                }
-            }
-
             // Ambience
             hootTimer++;
             breezeTimer++;
