@@ -291,22 +291,22 @@ namespace SpookyTerraria
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                     }
-                    if (heartBeatTimer == 50 && (distanceToStalker >= 750f))
+                    if (heartBeatTimer >= 50 && (distanceToStalker >= 750f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 40 && (distanceToStalker < 750f && distanceToStalker >= 300f))
+                    if (heartBeatTimer >= 40 && (distanceToStalker < 750f && distanceToStalker >= 300f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 30 && (distanceToStalker < 300f && distanceToStalker >= 100f))
+                    if (heartBeatTimer >= 30 && (distanceToStalker < 300f && distanceToStalker >= 100f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;
                     }
-                    if (heartBeatTimer == 25 && (distanceToStalker < 100f))
+                    if (heartBeatTimer >= 25 && (distanceToStalker < 100f))
                     {
                         Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/HeartBeat"), npc.Center);
                         heartBeatTimer = 2;

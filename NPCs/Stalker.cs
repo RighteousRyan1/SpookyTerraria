@@ -27,9 +27,7 @@ namespace SpookyTerraria.NPCs
             npc.DeathSound = SoundID.NPCDeath1;
             npc.value = 60f;
             npc.knockBackResist = 0f;
-            npc.aiStyle = -1;
             Main.npcFrameCount[npc.type] = 2;
-            aiType = -1;
             npc.alpha = 220;
         }
         public override void ModifyHitPlayer(Player target, ref int damage, ref bool crit)

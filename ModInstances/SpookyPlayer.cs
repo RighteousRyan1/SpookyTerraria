@@ -16,11 +16,11 @@ namespace SpookyTerraria
 {
 	public class SoundPlayer : ModPlayer
     {
+
         public int caveRumbleTimer;
         public int oceanWavesTimer;
         public int blizzTimer;
         public int cricketsTimer;
-
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
