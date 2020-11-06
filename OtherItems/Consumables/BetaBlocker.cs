@@ -17,6 +17,11 @@ namespace SpookyTerraria.OtherItems.Consumables
             item.height = 40;
             item.rare = ItemRarityID.Green;
             item.maxStack = 30;
+            item.UseSound = SoundID.Item2;
+            item.useStyle = ItemUseStyleID.EatingUsing;
+            item.useTime = 12;
+            item.useAnimation = 12;
+            item.consumable = true;
         }
         public override bool UseItem(Player player)
         {
