@@ -114,6 +114,24 @@ namespace SpookyTerraria
         public override void GetChat(NPC npc, ref string chat)
         {
             Player player = Main.player[Main.myPlayer];
+            if (npc.type == NPCID.Painter)
+            {
+                switch (Main.rand.Next(5))
+                {
+                    case 1:
+                        chat = "Painting in black isn't the best idea nowadays...";
+                        break;
+                    case 2 when player.CountItem(ModContent.ItemType<Paper>()) >= 75:
+                        chat = "My paint is going to fall over! Stop this!";
+                        break;
+                    case 3:
+                        chat = $"Wanna know a nerd fact?\nThe exact date is {System.DateTime.Now}. Don't ask why I know this.";
+                        break;
+                    case 4:
+                        chat = "The crickets and the sounds of nature are nice to listen to while painting.";
+                        break;
+                }
+            }
             if (npc.type == NPCID.ArmsDealer)
             {
                 switch (Main.rand.Next(5))

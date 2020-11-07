@@ -137,10 +137,9 @@ namespace SpookyTerraria
             items.Add(item2);
             items.Add(item3);
         }
+        public int msgTimer;
         public override void OnEnterWorld(Player player)
         {
-            Mod ST = ModLoader.GetMod("SpookyTerraria");
-            Main.NewText($"Spooky Terraria is on Alpha version {ST.Version}.", Color.DarkGray);
             heartRate = 80;
             if (!ModContent.GetInstance<SpookyTerraria>().beatGame)
             {
@@ -313,6 +312,19 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
+            if (msgTimer < 301)
+            {
+                msgTimer++;
+            }
+            Mod ST = ModLoader.GetMod("SpookyTerraria");
+            if (msgTimer == 120)
+            {
+                Main.NewText($"Spooky Terraria is on Alpha version {ST.Version}.", Color.DarkGray);
+            }
+            if (msgTimer == 300)
+            {
+                Main.NewText($"Also, in participation in the alpha version of this mod, I kindly ask you to report any bugs to my discord server (https://discord.gg/pT2BzSG).", Color.DarkGray);
+            }
             IncrementHeartRate(); // Increment Appropriately
             DecrementHeartRate(); // Decrement Appropriately
 
@@ -373,11 +385,32 @@ namespace SpookyTerraria
         }
         public override void PostUpdateRunSpeeds()
         {
-            if (player.velocity.Y == 0)
+            // Handle stamina, etc
+            bool staminaIsZero = player.GetModPlayer<StaminaPlayer>().Stamina == 0;
+            bool sprintHandling = SpookyTerraria.Sprint.Current && player.velocity.X != 0 && player.velocity.Y == 0;
+            bool tooLowStamina = player.velocity.X != 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina <= 25 && player.GetModPlayer<StaminaPlayer>().Stamina > 0;
+            bool notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 = player.velocity.X != 0 && player.velocity.Y == 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina > 25;
+            if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25)
             {
                 player.maxRunSpeed = 1.5f * (heartRate / 80f);
                 player.accRunSpeed = 1.5f * (heartRate / 80f);
             }
+            if (sprintHandling && !staminaIsZero)
+            {
+                player.maxRunSpeed = 1.5f * (heartRate / 80f) * 2f;
+                player.accRunSpeed = 1.5f * (heartRate / 80f) * 2f;
+            }
+            else if (!tooLowStamina)
+            {
+                player.maxRunSpeed = 1.5f * (heartRate / 80f);
+                player.accRunSpeed = 1.5f * (heartRate / 80f);
+            }
+            if (tooLowStamina)
+            {
+                player.maxRunSpeed = 1.5f * (heartRate / 80f) / 2f;
+                player.accRunSpeed = 1.5f * (heartRate / 80f) / 2f; // Fix the sprinting 
+            }
+            // Main.NewText($"{tooLowStamina} (Stamina <= 25%) {sprintHandling} (Sprinting) {notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25} (No Sprint or Low Stamina) {staminaIsZero} (Stamina is Zero)");
             if (ModLoader.GetMod("TerrariaOverhaul") == null)
             {
                 if (player.legFrame.Y == player.legFrame.Height * 9 && isOnGrassyTile) // Check for step timer
@@ -415,7 +448,7 @@ namespace SpookyTerraria
         public int lightTimer;
         public override void PostUpdateMiscEffects()
         {
-            Player.jumpSpeed *= 0.8f;
+            Player.jumpSpeed *= (float)player.GetModPlayer<StaminaPlayer>().Stamina / 100;
             Item item = player.HeldItem;
             if (item.type == ModContent.ItemType<Flashlight.Flashlight>())
             {

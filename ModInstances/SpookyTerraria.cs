@@ -19,6 +19,11 @@ namespace SpookyTerraria
     public class SpookyTerraria : Mod
     {
         public bool beatGame;
+        public static ModHotKey Sprint;
+        public override void Unload()
+        {
+            Sprint = null;
+        }
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // Vanilla: Info Accessories Bar
         {
             int miniMapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map / Minimap"));
@@ -67,6 +72,23 @@ namespace SpookyTerraria
                         InterfaceScaleType.UI)
                     );
                 }
+                string staminaPercent = $"Stamina: {player.GetModPlayer<StaminaPlayer>().Stamina}%";
+                int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
+                if (index != -1)
+                {
+                    layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                        "SpookyTerraria: Stamina",
+                        delegate
+                        {
+                            Utils.DrawBorderString(Main.spriteBatch,
+                            staminaPercent,
+                            new Vector2(Main.screenWidth + xOffset - 500f, yOffset + 5f),
+                            Color.Crimson);
+                            return true;
+                        },
+                        InterfaceScaleType.UI)
+                    );
+                }
             }
         }
         public SpookyTerraria() { ModContent.GetInstance<SpookyTerraria>(); }
@@ -106,6 +128,7 @@ namespace SpookyTerraria
         }
         public override void Load()
         {
+            Sprint = RegisterHotKey("Sprint", "LeftShift");
             // Shader initialization
 
             if (!Main.dedServ)
