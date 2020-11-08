@@ -133,13 +133,18 @@ namespace SpookyTerraria
             item2.SetDefaults(ModContent.ItemType<Fists.Fists>(), false);
             Item item3 = new Item();
             item3.SetDefaults(ModContent.ItemType<HeartrateMonitor>(), false);
+            Item item4 = new Item();
+            item4.SetDefaults(ModContent.ItemType<Battery>(), false);
+            item4.stack = 3;
             items.Add(item1);
             items.Add(item2);
             items.Add(item3);
+            items.Add(item4);
         }
         public int msgTimer;
         public override void OnEnterWorld(Player player)
         {
+            player.GetModPlayer<StaminaPlayer>().Stamina = 100;
             heartRate = 80;
             if (!ModContent.GetInstance<SpookyTerraria>().beatGame)
             {
@@ -196,21 +201,24 @@ namespace SpookyTerraria
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
         {
         }
+        float MinMax;
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
             if (!Main.gameMenu)
             {
                 if (!Main.player[1].active)
                 {
+                    float i = player.headRotation;
+                    MinMax = Utils.Clamp(i - 0.5f, -1f, 1f);
                     if (ModLoader.GetMod("TerrariaOverhaul") == null)
                     {
                         if (player.direction == 1)
                         {
-                            player.headRotation = (Main.MouseWorld - player.Center).ToRotation();
+                            player.headRotation = -MinMax * (Main.MouseWorld - player.Center).ToRotation() * player.direction;
                         }
                         if (player.direction == -1)
                         {
-                            player.headRotation = (Main.MouseWorld - player.Center).ToRotation() - MathHelper.Pi;
+                            player.headRotation = -MinMax * (-Main.MouseWorld - -player.Center).ToRotation();
                         }
                     }
                 }
@@ -218,6 +226,7 @@ namespace SpookyTerraria
         }
         public void IncrementHeartRate()
         {
+            
             for (int index = 0; index < Main.maxNPCs; index++)
             {
                 NPC npc = Main.npc[index];
@@ -312,10 +321,21 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
+            if (player.direction == -1)
+            {
+                MathHelper.Clamp(player.headRotation, -5.5f, -1f);
+            }
+            else if (player.direction == 1)
+            {
+                MathHelper.Clamp(player.headRotation, -1f, 1f); // Why no clamp value????
+            }
             if (msgTimer < 301)
             {
                 msgTimer++;
             }
+            //byte[] i = new byte[] { 1, 2, 3 };
+            //Microsoft.Xna.Framework.Audio.SoundEffect Poop = new Microsoft.Xna.Framework.Audio.SoundEffect(i, 1, Microsoft.Xna.Framework.Audio.AudioChannels.Stereo);
+            //poop
             Mod ST = ModLoader.GetMod("SpookyTerraria");
             if (msgTimer == 120)
             {
@@ -328,13 +348,16 @@ namespace SpookyTerraria
             IncrementHeartRate(); // Increment Appropriately
             DecrementHeartRate(); // Decrement Appropriately
 
-            if (Main.MouseWorld.X > player.Center.X)
+            if (!Main.dedServ)
             {
-                player.ChangeDir(1);
-            }
-            else
-            {
-                player.ChangeDir(-1);
+                if (Main.MouseWorld.X > player.Center.X)
+                {
+                    player.ChangeDir(1);
+                }
+                else
+                {
+                    player.ChangeDir(-1);
+                }
             }
             // Ambience
             hootTimer++;

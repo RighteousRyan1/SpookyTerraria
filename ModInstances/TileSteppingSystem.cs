@@ -24,6 +24,13 @@ namespace SpookyTerraria.ModIntances
         {
             return base.KillSound(i, j, type);
         }
+        public override void SetDefaults()
+        {
+            if (Main.player[Main.myPlayer].HeldItem.type == ItemID.CarriageLantern)
+            {
+                Main.placementPreview = false;
+            }
+        }
         public override void FloorVisuals(int type, Player player)
         {
             if (type == TileID.Grass || type == TileID.Dirt || type == TileID.BlueMoss || type == TileID.BrownMoss

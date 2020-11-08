@@ -24,12 +24,24 @@ namespace SpookyTerraria
         {
             Sprint = null;
         }
+        public override void AddRecipes()
+        {
+            ModRecipe recipe = new ModRecipe(this);
+            recipe.AddRecipeGroup(RecipeGroupID.IronBar, 5);
+            recipe.AddIngredient(ItemID.Torch);
+            recipe.AddTile(TileID.WorkBenches);
+            recipe.SetResult(ItemID.CarriageLantern);
+            recipe.AddRecipe();
+        }
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // Vanilla: Info Accessories Bar
         {
             int miniMapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map / Minimap"));
             if (miniMapIndex > -1)
             {
-                layers.RemoveAt(miniMapIndex);
+				if (ModLoader.GetMod("SpookyTerraria") != null)
+				{
+					layers.RemoveAt(miniMapIndex);
+				}
             }
             Player player = Main.player[Main.myPlayer];
             for (int textIndex = 0; textIndex < 1; textIndex++)
@@ -76,7 +88,7 @@ namespace SpookyTerraria
                 int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
                 if (index != -1)
                 {
-                    layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                    layers.Insert(index, new LegacyGameInterfaceLayer(
                         "SpookyTerraria: Stamina",
                         delegate
                         {
@@ -115,6 +127,16 @@ namespace SpookyTerraria
         }
         public override void PreSaveAndQuit()
         {
+            Player player = Main.player[Main.myPlayer];
+            Main.mapEnabled = true;
+            Main.mapStyle = 3;
+            player.controlMap = true;
+            player.mapFullScreen = false;
+            player.releaseMapFullscreen = true;
+            player.releaseMapStyle = true;
+            player.mapAlphaDown = true;
+            player.mapAlphaUp = true;
+            player.mapStyle = true;
             int soundSlot = GetSoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Breezes");
             if (Utils.IndexInRange(Main.music, soundSlot))
             {
@@ -158,15 +180,18 @@ namespace SpookyTerraria
                     }
                 }
             }
-            Main.mapEnabled = false;
-            Main.mapStyle = 1;
-            player.controlMap = false;
-            player.mapFullScreen = false;
-            player.releaseMapFullscreen = false;
-            player.releaseMapStyle = false;
-            player.mapAlphaDown = false;
-            player.mapAlphaUp = false;
-            player.mapStyle = false;
+            if (!Main.gameMenu && ModLoader.GetMod("SpookyTerraria") != null)
+            {
+                Main.mapEnabled = false;
+                Main.mapStyle = 1;
+                player.controlMap = false;
+                player.mapFullScreen = false;
+                player.releaseMapFullscreen = false;
+                player.releaseMapStyle = false;
+                player.mapAlphaDown = false;
+                player.mapAlphaUp = false;
+                player.mapStyle = false;
+            }
             int oldManIndex = NPC.FindFirstNPC(NPCID.OldMan);
             if (oldManIndex > -1)
             {
@@ -179,6 +204,7 @@ namespace SpookyTerraria
                 {
                     NPC.NewNPC(Main.dungeonX * 16 + 8, Main.dungeonY * 16, NPCID.OldMan);
                     Main.NewText("The Old Man has returned.", Color.DarkGoldenrod);
+					oldManTimer = 0;
                 }
             }
             Main.slimeRain = false;

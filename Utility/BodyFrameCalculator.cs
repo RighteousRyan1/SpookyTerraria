@@ -2,7 +2,7 @@ using Terraria.ID;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace MusicFromOnePointFour
+namespace SpookyTerraria.Utilities
 {
 	public static class BodyFrameCalculator // Thanks, ambrose
 	{

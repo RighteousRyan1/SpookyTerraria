@@ -14,10 +14,6 @@ namespace SpookyTerraria.OtherItems
 		}
         public override void UpdateInventory(Player player)
         {
-            if (item.stack > 300)
-            {
-                item.stack = 300;
-            }
             item.favorited = true;
         }
         public override void SetDefaults()
@@ -26,11 +22,12 @@ namespace SpookyTerraria.OtherItems
             item.height = 40;
             item.rare = ItemRarityID.White;
             item.maxStack = 300;
-            item.createTile = ModContent.TileType<PageTile>();
+            // item.createTile = ModContent.TileType<PageTile>();
         }
         public override bool OnPickup(Player player)
         {
-            return base.OnPickup(player);
+            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"), player.Center);
+            return true;
         }
     }
 }
