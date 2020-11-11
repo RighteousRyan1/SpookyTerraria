@@ -5,16 +5,27 @@ using System;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using System.Collections.Generic;
 
 namespace SpookyTerraria.ModIntances
 {
     public class SpookyGlobalItem : GlobalItem
     {
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            if (item.type == ItemID.CarriageLantern)
+            {
+                tooltips.Add(new TooltipLine(mod, "Fuck'd", "nrd")
+                {
+                    text = "Can be used as a holdable lantern for light\nDoes not require any fuel of any sort"
+                });
+            }
+        }
         public override void SetDefaults(Item item)
         {
             if (item.type == ItemID.CarriageLantern)
             {
-                item.holdStyle = ItemHoldStyleID.HoldingUp;
+                item.holdStyle = ItemHoldStyleID.HoldingUp; // TODO: Fix moonwalking bug
             }
         }
         public override void HoldItem(Item item, Player player)

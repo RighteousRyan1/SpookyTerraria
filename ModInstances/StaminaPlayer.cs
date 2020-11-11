@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpookyTerraria.Utilities;
 using System;
 using Terraria;
 using Terraria.Graphics.Effects;
@@ -58,7 +59,7 @@ namespace SpookyTerraria.ModIntances
         }
         public override void PostUpdate()
         {
-            HandleSprinting();
+            HandleSprinting(); // TODO: Fix stamina bug
         }
     }
 }
