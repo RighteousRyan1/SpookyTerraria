@@ -115,6 +115,7 @@ namespace SpookyTerraria.Flashlight
                 player.itemLocation = player.MountedCenter + new Vector2(6 * player.direction, 4);
                 if (Main.myPlayer == player.whoAmI) // This client
                 {
+                    player.itemLocation = player.itemLocation.Floor();
                     Vector2 playerToCursor = (Main.MouseWorld - player.Center);
                     playerToCursor.Normalize();
                     player.itemRotation = playerToCursor.ToRotation() + (float)Math.PI / 4.0f;
@@ -142,7 +143,8 @@ namespace SpookyTerraria.Flashlight
             Light(player);
             // Main.NewTextMultiline($"Light Percent: {lightPercent * 100}%\nLight Range: {lightRange} tiles");
             consumeBatteryTimer++;
-            if (consumeBatteryTimer >= 1800 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+			// ... Not too sure whether or not the timer should be 45 seconds or a minute, or even 30. Will keep at 60 for now.
+            if (consumeBatteryTimer >= 3600 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
             {
                 player.ConsumeItem(ModContent.ItemType<Battery>());
                 consumeBatteryTimer = 0;

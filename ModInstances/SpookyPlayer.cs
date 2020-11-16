@@ -11,6 +11,8 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using SpookyTerraria.ModIntances;
+using SpookyTerraria.Buffs;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpookyTerraria
 {
@@ -81,6 +83,7 @@ namespace SpookyTerraria
         public override void UpdateBiomeVisuals()
         {
             player.ManageSpecialBiomeVisuals("SpookyTerraria:BlackSky", !ModContent.GetInstance<SpookyTerraria>().beatGame && !Main.gameMenu);
+            // player.ManageSpecialBiomeVisuals("SpookyTerraria:Darkness", player.HasBuff(ModContent.BuffType<Shrouded_3>()));
         }
     }
 	public class SpookyPlayer : ModPlayer
@@ -198,6 +201,27 @@ namespace SpookyTerraria
             }
             return true;
         }
+        public override void PreUpdate()
+        {
+            // TODO: Do something with this shit bro
+            bool hasShroudedIIIRequirement = Lighting.GetSubLight(player.Top).X == 0f;
+            bool hasShroudedIIRequirement = Lighting.GetSubLight(player.Top).X > 0f
+                && Lighting.GetSubLight(player.Top).X < 0.05f;
+            bool hasShroudedIRequirement = Lighting.GetSubLight(player.Top).X >= 0.05f
+                && Lighting.GetSubLight(player.Top).X < 0.1f;
+            if (hasShroudedIIIRequirement && !hasShroudedIIRequirement && hasShroudedIIIRequirement)
+            {
+                player.AddBuff(ModContent.BuffType<Shrouded_3>(), 2, false);
+            }
+            if (hasShroudedIIRequirement && !hasShroudedIIIRequirement && !hasShroudedIRequirement)
+            {
+                player.AddBuff(ModContent.BuffType<Shrouded_2>(), 2, false);
+            }
+            if (!hasShroudedIIRequirement && !hasShroudedIIIRequirement && hasShroudedIRequirement)
+            {
+                player.AddBuff(ModContent.BuffType<Shrouded_1>(), 2, false);
+            }
+        }
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
         {
         }
@@ -214,7 +238,7 @@ namespace SpookyTerraria
                     {
                         if (player.direction == 1)
                         {
-                            player.headRotation = -MinMax * (Main.MouseWorld - player.Center).ToRotation() * player.direction;
+                            player.headRotation = -MinMax * (Main.MouseWorld - player.Center).ToRotation();
                         }
                         if (player.direction == -1)
                         {
@@ -413,22 +437,22 @@ namespace SpookyTerraria
             bool sprintHandling = SpookyTerraria.Sprint.Current && player.velocity.X != 0 && player.velocity.Y == 0;
             bool tooLowStamina = player.velocity.X != 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina <= 25 && player.GetModPlayer<StaminaPlayer>().Stamina > 0;
             bool notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 = player.velocity.X != 0 && player.velocity.Y == 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina > 25;
-            if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25)
+            if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 && !player.mount.Active)
             {
                 player.maxRunSpeed = 1.5f * (heartRate / 80f);
                 player.accRunSpeed = 1.5f * (heartRate / 80f);
             }
-            if (sprintHandling && !staminaIsZero)
+            if (sprintHandling && !staminaIsZero && !player.mount.Active)
             {
                 player.maxRunSpeed = 1.5f * (heartRate / 80f) * 2f;
                 player.accRunSpeed = 1.5f * (heartRate / 80f) * 2f;
             }
-            else if (!tooLowStamina)
+            else if (!tooLowStamina && !player.mount.Active)
             {
                 player.maxRunSpeed = 1.5f * (heartRate / 80f);
                 player.accRunSpeed = 1.5f * (heartRate / 80f);
             }
-            if (tooLowStamina)
+            if (tooLowStamina && !player.mount.Active)
             {
                 player.maxRunSpeed = 1.5f * (heartRate / 80f) / 2f;
                 player.accRunSpeed = 1.5f * (heartRate / 80f) / 2f; // Fix the sprinting 

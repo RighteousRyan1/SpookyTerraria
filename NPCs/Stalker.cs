@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework;
 
 namespace SpookyTerraria.NPCs
 {
+    // TODO: Multiple stalker spawns
+    // TODO: Heartrate fix when near stalker
 	public class Stalker : ModNPC
 	{
         /// <summary>
