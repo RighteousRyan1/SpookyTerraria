@@ -88,15 +88,43 @@ namespace SpookyTerraria
     }
 	public class SpookyPlayer : ModPlayer
     {
+        /// <summary>
+        /// Determines whether or not the player has equipped the heartrate monitor
+        /// </summary>
         public bool accHeartMonitor;
-
+        /// <summary>
+        /// Decrementation timer for heartbeats
+        /// </summary>
         public int hbDecTimer;
+        /// <summary>
+        /// Incrementation timer for heartbeats
+        /// </summary>
         public int hbIncTimer;
+        /// <summary>
+        /// The player's heartrate
+        /// </summary>
         public int heartRate;
+        /// <summary>
+        /// Is > 0 stalkers alive?
+        /// </summary>
         public bool stalkerConditionMet;
+        /// <summary>
+        /// Time for tree breezes
+        /// </summary>
         public int breezeTimer;
+        /// <summary>
+        /// Time for owl hoots
+        /// </summary>
         public int hootTimer; // Time to hoot
+        /// <summary>
+        /// Obsolete and deprecated
+        /// </summary>
         public int stepTimer;
+        /// <summary>
+        /// Is the player in the forest
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
@@ -112,6 +140,11 @@ namespace SpookyTerraria
                 && !player.ZoneDesert
                 && player.ZoneOverworldHeight;
         }
+        /// <summary>
+        /// Is the player underground?
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         public static bool PlayerUnderground(Player player)
         {
             return !player.ZoneJungle
@@ -225,6 +258,9 @@ namespace SpookyTerraria
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
         {
         }
+        /// <summary>
+        /// Clamped value of player.headRotation
+        /// </summary>
         float MinMax;
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
@@ -250,7 +286,7 @@ namespace SpookyTerraria
         }
         public void IncrementHeartRate()
         {
-            
+
             for (int index = 0; index < Main.maxNPCs; index++)
             {
                 NPC npc = Main.npc[index];
@@ -302,6 +338,9 @@ namespace SpookyTerraria
                 }
             }
         }
+        /// <summary>
+        /// (Sadly) extremely hardcoded heartrate decrementation. Remaking of this soon?
+        /// </summary>
         public void DecrementHeartRate()
         {
             for (int index = 0; index < Main.maxNPCs; index++)
@@ -421,8 +460,17 @@ namespace SpookyTerraria
             // Main.NewText(stalkerConditionMet);
             // Main.NewText($"{hbDecTimer} <= Decrement, {hbIncTimer} <= Increment");
         }
+        /// <summary>
+        /// Is the player on a grassy tile?
+        /// </summary>
         public bool isOnGrassyTile = false;
+        /// <summary>
+        /// Is the player on a wood tile?
+        /// </summary>
         public bool isOnWoodTile = false;
+        /// <summary>
+        /// Is the player on a wood tile?
+        /// </summary>
         public bool isOnStoneTile = false;
         public override void NaturalLifeRegen(ref float regen)
         {
@@ -433,8 +481,8 @@ namespace SpookyTerraria
         public override void PostUpdateRunSpeeds()
         {
             // Handle stamina, etc
-            bool staminaIsZero = player.GetModPlayer<StaminaPlayer>().Stamina == 0;
-            bool sprintHandling = SpookyTerraria.Sprint.Current && player.velocity.X != 0 && player.velocity.Y == 0;
+            bool staminaIsZero = player.GetModPlayer<StaminaPlayer>().Stamina == 0; // Stamina is zero.
+            bool sprintHandling = SpookyTerraria.Sprint.Current && player.velocity.X != 0 && player.velocity.Y == 0; // Is the player holding shift, etc.
             bool tooLowStamina = player.velocity.X != 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina <= 25 && player.GetModPlayer<StaminaPlayer>().Stamina > 0;
             bool notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 = player.velocity.X != 0 && player.velocity.Y == 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina > 25;
             if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 && !player.mount.Active)

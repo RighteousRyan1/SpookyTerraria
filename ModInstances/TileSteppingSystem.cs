@@ -1,16 +1,8 @@
 using Terraria.Graphics.Effects;
 using Microsoft.Xna.Framework;
-using SpookyTerraria.NPCs;
-using SpookyTerraria.OtherItems;
-using SpookyTerraria.TownNPCSpawnBooks;
-using System.Collections.Generic;
-using System.ComponentModel;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
-using SpookyTerraria.ModIntances;
 
 namespace SpookyTerraria.ModIntances
 {
