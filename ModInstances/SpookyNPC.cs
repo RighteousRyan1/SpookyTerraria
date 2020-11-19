@@ -20,7 +20,17 @@ namespace SpookyTerraria
         public override bool CloneNewInstances => true;
 
         public int heartBeatTimer;
-
+        public override void SetupShop(int type, Chest shop, ref int nextSlot)
+        {
+            switch (type)
+            {
+                case NPCID.Merchant:
+                    shop.item[nextSlot].SetDefaults(ModContent.ItemType<Battery>());
+                    shop.item[nextSlot].shopCustomPrice = Item.buyPrice(platinum: 0, gold: 0, silver: 20, copper: 0);
+                    nextSlot++;
+                    break;
+            }
+        }
         public override void EditSpawnPool(IDictionary<int, float> pool, NPCSpawnInfo spawnInfo)
         {
             Player player = Main.player[Main.myPlayer];

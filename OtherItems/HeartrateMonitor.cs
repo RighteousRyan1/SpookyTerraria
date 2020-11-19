@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 using Microsoft.Xna.Framework;
+using Terraria.Localization;
 
 namespace SpookyTerraria.OtherItems
 {
@@ -13,8 +14,18 @@ namespace SpookyTerraria.OtherItems
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Heartrate Monitor");
-			Tooltip.SetDefault("Measures your heartrate\nThe higher your heartrate, the faster you move, but your life regen weakens");
-		}
+
+            DisplayName.AddTranslation(GameCulture.Spanish, "Monitor de pulso cardiaco");
+            DisplayName.AddTranslation(GameCulture.French, "Moniteur de fréquence cardiaque");
+            DisplayName.AddTranslation(GameCulture.German, "Herzfrequenz-Messgerät");
+            DisplayName.AddTranslation(GameCulture.Italian, "Monitoraggio del battito cardiaco");
+            Tooltip.SetDefault("Measures your heartrate\nThe higher your heartrate, the faster you move, but your life regen weakens");
+
+            Tooltip.AddTranslation(GameCulture.Spanish, "Mide tu frecuencia cardíaca\nCuanto mayor sea tu frecuencia cardíaca, más rápido te moverás, pero tu regeneración de vida se debilita");
+            Tooltip.AddTranslation(GameCulture.French, "Mesure votre rythme cardiaque\nPlus votre rythme cardiaque est élevé, plus vous bougez vite, mais votre régénération de vie s'affaiblit");
+            Tooltip.AddTranslation(GameCulture.German, "Misst Ihren Herzschlag\nJe höher Ihre Herzfrequenz, desto schneller bewegen Sie sich, aber Ihre Lebensregeneration wird schwächer");
+            Tooltip.AddTranslation(GameCulture.Spanish, "Misura il tuo battito cardiaco\nPiù alto è il tuo battito cardiaco, più velocemente ti muovi, ma la tua vita si indebolisce");
+        }
 
         public override void SetDefaults()
         {

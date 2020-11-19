@@ -5,6 +5,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace SpookyTerraria.Flashlight
 {
@@ -20,6 +21,7 @@ namespace SpookyTerraria.Flashlight
         public override void SetStaticDefaults()
         {
             Tooltip.SetDefault("Use this to light up where you point around you in the direction of your mouse\nCan be used as a makeshift weapon");
+            // Notice there is no localization for this item because the item.setNameOverride.
         }
         public override void SetDefaults()
         {
@@ -35,7 +37,6 @@ namespace SpookyTerraria.Flashlight
         }
         public override void UpdateInventory(Player player)
         {
-            // ⬛⬛⬛⬛⬛⬛⬛⬛☐
             if (player.CountItem(ModContent.ItemType<Battery>()) == 0)
             {
                 item.SetNameOverride($"Flashlight (☐☐☐☐☐)");
@@ -143,7 +144,7 @@ namespace SpookyTerraria.Flashlight
             Light(player);
             // Main.NewTextMultiline($"Light Percent: {lightPercent * 100}%\nLight Range: {lightRange} tiles");
             consumeBatteryTimer++;
-			// ... Not too sure whether or not the timer should be 45 seconds or a minute, or even 30. Will keep at 60 for now.
+            // ... Not too sure whether or not the timer should be 45 seconds or a minute, or even 30. Will keep at 60 for now.
             if (consumeBatteryTimer >= 3600 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
             {
                 player.ConsumeItem(ModContent.ItemType<Battery>());

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using SpookyTerraria.OtherItems;
 
 namespace SpookyTerraria.ModIntances
 {
@@ -15,6 +16,19 @@ namespace SpookyTerraria.ModIntances
         public override bool KillSound(int i, int j, int type)
         {
             return base.KillSound(i, j, type);
+        }
+        public override void KillTile(int i, int j, int type, ref bool fail, ref bool effectOnly, ref bool noItem)
+        {
+            /*if (type == TileID.Iron || type == TileID.Lead)
+            {
+                if (Main.rand.NextFloat() < 0.15f)
+                {
+                    if (!fail)
+                    {
+                        Item.NewItem(new Vector2(i, j).ToWorldCoordinates(), ModContent.ItemType<Battery>(), Main.rand.Next(1, 3));
+                    }
+                }
+            }*/
         }
         public override void SetDefaults()
         {

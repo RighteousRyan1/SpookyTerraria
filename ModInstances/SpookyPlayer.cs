@@ -13,6 +13,7 @@ using Terraria.ModLoader.Config;
 using SpookyTerraria.ModIntances;
 using SpookyTerraria.Buffs;
 using Microsoft.Xna.Framework.Audio;
+using SpookyTerraria.Utilities;
 
 namespace SpookyTerraria
 {
@@ -38,24 +39,139 @@ namespace SpookyTerraria
                 && !player.ZoneDesert
                 && player.ZoneOverworldHeight;
         }
-
+        /*public static byte[] i = new byte[] { 1, 2, 3 };
+        public static SoundEffect soundEffect = new SoundEffect(i, 1, AudioChannels.Mono);
+        public static SoundEffectInstance wtf = soundEffect.CreateInstance();*/
+        public SoundEffectInstance Crickets;
+        public override void OnEnterWorld(Player player)
+        {
+        }
+        public override void DrawEffects(PlayerDrawInfo drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
+        {
+            if (!Main.hasFocus)
+            {
+                player.GetModPlayer<SpookyPlayer>().breezeTimer = 0;
+                oceanWavesTimer = 0;
+                cricketsTimer = 0;
+                blizzTimer = 0;
+                caveRumbleTimer = 0;
+            }
+        }
+        public override void PostUpdate()
+        {
+        }
+        // FIXME: I PLAN ON MOVING THIS ENTIRE SYSTEM TO MUSIC IF I CANNOT GET IT TO WORK
         public override void PostUpdateMiscEffects()
         {
+            Main.soundInstanceMenuTick.Stop();
+            SoundEffectInstance breezeSounds;
+            breezeSounds = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Breezes"));
+            SoundEffectInstance crickets;
+            crickets = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/ForestAmbience"));
+            SoundEffectInstance waves;
+            waves = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/OceanAmbience"));
+            SoundEffectInstance blizz;
+            blizz = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/SnowAmbience"));
+            SoundEffectInstance cavesSound;
+            cavesSound = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/CaveRumble"));
+            // Use SoundEffectInstance Eventually
             caveRumbleTimer++;
             cricketsTimer++;
             blizzTimer++;
             oceanWavesTimer++;
+            // Main.NewText($"CaveRumble: {caveRumbleTimer}, OceanWaves: {oceanWavesTimer}, Crickets: {cricketsTimer}, Blizzard: {blizzTimer}");
+            if (Main.gameMenu)
+            {
+                cavesSound.Stop();
+                crickets.Stop();
+                breezeSounds.Stop();
+                blizz.Stop();
+                waves.Stop();
+            }
+            if (player.ZoneRockLayerHeight) // Rock Layer
+            {
+                waves.Stop();
+                crickets.Stop();
+                breezeSounds.Stop();
+                blizz.Stop();
+                oceanWavesTimer = 0;
+                cricketsTimer = 0;
+                blizzTimer = 0;
+                GeneralHelpers.ResetTimer(oceanWavesTimer);
+                GeneralHelpers.ResetTimer(cricketsTimer);
+                GeneralHelpers.ResetTimer(blizzTimer);
+                // Checked
+            }
+            if (player.ZoneBeach) // Beach
+            {
+                crickets.Stop();
+                breezeSounds.Stop();
+                blizz.Stop();
+                cavesSound.Stop();
+                cricketsTimer = 0;
+                caveRumbleTimer = 0;
+                blizzTimer = 0;
+                GeneralHelpers.ResetTimer(caveRumbleTimer);
+                GeneralHelpers.ResetTimer(cricketsTimer);
+                GeneralHelpers.ResetTimer(blizzTimer);
+                // Checked
+            }
+            if (player.ZoneDirtLayerHeight)
+            {
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+            }
+            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Snow
+            {
+                waves.Stop();
+                crickets.Stop();
+                breezeSounds.Stop();
+                cavesSound.Stop();
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                cricketsTimer = 0;
+                GeneralHelpers.ResetTimer(oceanWavesTimer);
+                GeneralHelpers.ResetTimer(cricketsTimer);
+                GeneralHelpers.ResetTimer(blizzTimer);
+                // checked
+            }
+            if (PlayerIsInForest(player)) // Forest
+            {
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                blizzTimer = 0;
+                GeneralHelpers.ResetTimer(oceanWavesTimer);
+                GeneralHelpers.ResetTimer(caveRumbleTimer);
+                GeneralHelpers.ResetTimer(blizzTimer);
+                /// checked
+            }
             if (player.ZoneRockLayerHeight && caveRumbleTimer == 1680)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
                 caveRumbleTimer = 0;
+            }
+            if (caveRumbleTimer == 2)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
+            }
+            if (oceanWavesTimer == 2)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
+            }
+            if (blizzTimer == 2)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
+            }
+            if (cricketsTimer == 2)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
             }
             if (player.ZoneBeach && oceanWavesTimer == 9060)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
                 oceanWavesTimer = 0;
             }
-            if (player.ZoneBeach && !player.ZoneDirtLayerHeight && blizzTimer == 6060)
+            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight && blizzTimer == 6060)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
                 blizzTimer = 0;
@@ -171,7 +287,7 @@ namespace SpookyTerraria
             item3.SetDefaults(ModContent.ItemType<HeartrateMonitor>(), false);
             Item item4 = new Item();
             item4.SetDefaults(ModContent.ItemType<Battery>(), false);
-            item4.stack = 3;
+            item4.stack = 5;
             items.Add(item1);
             items.Add(item2);
             items.Add(item3);
@@ -448,7 +564,7 @@ namespace SpookyTerraria
             // I really need wolves howling in the snow
             if (ModContent.GetInstance<SpookyConfigClient>().toggleWind)
             {
-                if (breezeTimer == 2650)
+                if (breezeTimer >= 2650)
                 {
                     if (Main.rand.NextFloat() < 0.35f)
                     {

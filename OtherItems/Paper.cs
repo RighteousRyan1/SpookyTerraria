@@ -1,6 +1,7 @@
 using SpookyTerraria.Tiles;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace SpookyTerraria.OtherItems
@@ -10,8 +11,18 @@ namespace SpookyTerraria.OtherItems
 		public override void SetStaticDefaults() 
 		{
 			DisplayName.SetDefault("Page");
-			Tooltip.SetDefault("A token for your victory");
-		}
+
+            DisplayName.AddTranslation(GameCulture.Spanish, "Página");
+            DisplayName.AddTranslation(GameCulture.French, "Page");
+            DisplayName.AddTranslation(GameCulture.German, "Seite");
+            DisplayName.AddTranslation(GameCulture.Italian, "Pagina");
+            Tooltip.SetDefault("A token for your victory");
+
+            Tooltip.AddTranslation(GameCulture.Spanish, "Una muestra de tu victoria");
+            Tooltip.AddTranslation(GameCulture.French, "Un gage pour votre victoire");
+            Tooltip.AddTranslation(GameCulture.German, "Ein Zeichen für Ihren Sieg");
+            Tooltip.AddTranslation(GameCulture.Spanish, "Un segno per la tua vittoria");
+        }
         public override void UpdateInventory(Player player)
         {
             item.favorited = true;

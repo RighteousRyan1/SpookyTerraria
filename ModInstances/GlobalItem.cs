@@ -23,6 +23,7 @@ namespace SpookyTerraria.ModIntances
         }
         public override void SetDefaults(Item item)
         {
+            item.useTurn = false;
             if (item.type == ItemID.CarriageLantern)
             {
                 item.holdStyle = ItemHoldStyleID.HoldingUp; // TODO: Fix moonwalking bug
