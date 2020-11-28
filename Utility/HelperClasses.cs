@@ -20,13 +20,109 @@ namespace SpookyTerraria.ModIntances
             ModContent.NPCType<Stalker>()
         };
     }
+    public static class EntityHelper
+    {
+        public static void HaltVelocity(this Projectile projectile)
+        {
+            projectile.velocity.X = 0;
+            projectile.velocity.Y = 0;
+        }
+    }
     public class SpookyTerrariaUtils
     {
-        // Ignore this
-        //public static void HaltVelocity(this Projectile projectile)
-        //{
-
-        //}
+        public enum BodyFrames
+        {
+            stand,
+            armUp,
+            armDiagonalUp,
+            armHoldOut,
+            armDiagonalDown,
+            jumping,
+            walking1,
+            walking2,
+            walking3,
+            walking4,
+            walking5,
+            walking6,
+            walking7,
+            walking8,
+            walking9,
+            walking10,
+            walking11,
+            walking12,
+            walking13,
+        }
+        /// <summary>
+        /// Set body frame, read documentation
+        /// </summary>
+        /// <param name="type"></param>
+        public static void SetBodyFrame(int type)
+        {
+            Player player = Main.player[Main.myPlayer];
+            switch (type)
+            {
+                case 0:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 0;
+                    break;
+                case 1:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 1;
+                    break;
+                case 2:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 2;
+                    break;
+                case 3:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 3;
+                    break;
+                case 4:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 4;
+                    break;
+                case 5:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 5;
+                    break;
+                case 6:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 6;
+                    break;
+                case 7:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 7;
+                    break;
+                case 8:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 8;
+                    break;
+                case 9:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 9;
+                    break;
+                case 10:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 10;
+                    break;
+                case 11:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 11;
+                    break;
+                case 12:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 12;
+                    break;
+                case 13:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 13;
+                    break;
+                case 14:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 14;
+                    break;
+                case 15:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 15;
+                    break;
+                case 16:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 16;
+                    break;
+                case 17:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 17;
+                    break;
+                case 18:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 18;
+                    break;
+                case 19:
+                    player.bodyFrame.Y = player.bodyFrame.Height * 18;
+                    break;
+            }
+        }
         /// <summary>
         /// To be worked on...
         /// </summary>

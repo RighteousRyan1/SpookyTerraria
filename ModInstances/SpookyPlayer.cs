@@ -74,6 +74,8 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
+            // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking1;
+
             // 109 == flipper
             // 131 == turtle
             // 168 == fishron mount
@@ -99,8 +101,34 @@ namespace SpookyTerraria
     }
     public class BeatGamePlayer : ModPlayer
     {
+        public bool punchPhase1;
+        public bool punchPhase2;
+        public bool punchPhase3;
+        public bool punchPhase4;
+        public bool punchPhase5;
+        public bool punchPhase6;
+        public bool punchPhase7;
+        public bool punchPhase8;
+        public bool punchPhase9;
+        public bool punchPhase10;
+
+        public bool punchingUp;
+        public bool punchingNeutral;
+        public bool punchingDown;
+        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
+        {
+            // layers.RemoveAt()
+        }
+        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
+        {
+
+        }
         public override void PostUpdate()
         {
+            // NOt chaing thanks: 1
+            // Not change frames in order: 5, 6, 1, 12
+            // walking5, walking6, walking1, walking9, walking10, walking11, 
+            // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking13;
             if (player.CountItem(ModContent.ItemType<Paper>()) >= 300)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = true;
@@ -296,8 +324,16 @@ namespace SpookyTerraria
         /// Clamped value of player.headRotation
         /// </summary>
         float MinMax;
+
+
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
+
+
+
+
+
+
             if (!Main.gameMenu)
             {
                 if (!Main.player[1].active)
