@@ -1,4 +1,4 @@
 displayName = Spooky Terraria (Alpha)
 author = Ryan, Mello
-version = 0.1.7
+version = 0.2
 homepage = https://discord.gg/pT2BzSG
