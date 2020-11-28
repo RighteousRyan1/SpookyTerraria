@@ -57,65 +57,65 @@ namespace SpookyTerraria
         public override void NPCLoot(NPC npc)
         {
             bool downedBossAny = NPC.downedBoss1 || NPC.downedBoss2 || NPC.downedBoss3 || NPC.downedSlimeKing;
-            if (Main.rand.NextFloat() < 0.04f)
+            if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<GuideBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<MerchantBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<NurseBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<ArmsDealBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<DyeTraderBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<PainterBook>());
             }
-            else if (Main.rand.NextFloat() < 0.04f)
+            else if (Main.rand.NextFloat() < 0.02f)
             {
                 Item.NewItem(npc.getRect(), ModContent.ItemType<DemoBook>());
             }
             if (downedBossAny)
             {
-                if (Main.rand.NextFloat() < 0.04f)
+                if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<DryadBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<StylistBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<AnglerBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<TaxCollectBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<TravMerchBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<WitDocBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<PartyGirlBook>());
                 }
-                else if (Main.rand.NextFloat() < 0.04f)
+                else if (Main.rand.NextFloat() < 0.02f)
                 {
                     Item.NewItem(npc.getRect(), ModContent.ItemType<ClothierBook>());
                 }

@@ -74,6 +74,16 @@ namespace SpookyTerraria.ModIntances
                     staminaDecrementTimer = 0;
                 }
             }
+            if (!isSprinting && !currentlyJumping && player.wet && player.mount.Active)
+            {
+                staminaIncrementTimer = 0;
+                staminaDecrementTimer++;
+                if (staminaDecrementTimer >= 12)
+                {
+                    Stamina++;
+                    staminaDecrementTimer = 0;
+                }
+            }
             if (Stamina < 0)
             {
                 Stamina = 0;

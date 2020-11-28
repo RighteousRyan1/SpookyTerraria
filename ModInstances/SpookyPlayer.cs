@@ -74,24 +74,6 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
-            // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking1;
-
-            // 109 == flipper
-            // 131 == turtle
-            // 168 == fishron mount
-            player.ChangeDir(player.wet && player.velocity.X > 0 ? 1 : -1);
-            if (player.wet && !player.mount.Active)
-            {
-                player.fullRotation = player.velocity.ToRotation() + MathHelper.PiOver2;
-            }
-            else if (player.wet && player.mount.Active)
-            {
-                player.fullRotation = 0;
-            }
-            else if (!player.wet && !player.mount.Active)
-            {
-                player.fullRotation = 0;
-            }
         }
         // FIXME: I PLAN ON MOVING THIS ENTIRE SYSTEM TO MUSIC IF I CANNOT GET IT TO WORK
         public override void PostUpdateMiscEffects()
@@ -101,20 +83,6 @@ namespace SpookyTerraria
     }
     public class BeatGamePlayer : ModPlayer
     {
-        public bool punchPhase1;
-        public bool punchPhase2;
-        public bool punchPhase3;
-        public bool punchPhase4;
-        public bool punchPhase5;
-        public bool punchPhase6;
-        public bool punchPhase7;
-        public bool punchPhase8;
-        public bool punchPhase9;
-        public bool punchPhase10;
-
-        public bool punchingUp;
-        public bool punchingNeutral;
-        public bool punchingDown;
         public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
         {
             // layers.RemoveAt()
@@ -146,6 +114,18 @@ namespace SpookyTerraria
     }
     public class SpookyPlayer : ModPlayer
     {
+        /// <summary>
+        /// Used Directly for the fists, this determines the first phase of a punch
+        /// </summary>
+        public bool punchPhase1;
+        public bool punchPhase2;
+        public bool punchPhase3;
+        public bool punchPhase4;
+        public bool punchingUp;
+        public bool punchingNeutral;
+        public bool punchingDown;
+        public bool punchingCharged;
+        public bool punchingLight;
         /// <summary>
         /// Determines whether or not the player has equipped the heartrate monitor
         /// </summary>
@@ -292,9 +272,66 @@ namespace SpookyTerraria
             }
             return true;
         }
+        public Vector2 facingRightToFistOffset;
+        public Vector2 facingLeftToFistOffset;
         public override void PreUpdate()
         {
-
+            /*
+            if (punchPhase1 && punchingCharged && player.itemAnimation != 0)
+            {
+                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 7, player.MountedCenter.Y + 5);
+                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 7, player.MountedCenter.Y + 5);
+                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);            
+            }
+            else if (punchPhase2 && punchingCharged && player.itemAnimation != 0)
+            {
+                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 4, player.MountedCenter.Y + 5);
+                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 4, player.MountedCenter.Y + 5);
+                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);
+            }
+            else if (punchPhase4 && punchingCharged && player.itemAnimation != 0)
+            {
+                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 7, player.MountedCenter.Y + 5);
+                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 10, player.MountedCenter.Y);
+                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);
+            }
+            */
+            // ^ Maybe something for a new mod ;-;
+            // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking1;
+            // 109 == flipper
+            // 131 == turtle
+            // 168 == fishron mount
+            if (player.wet && !player.mount.Active && player.velocity.Y != 0)
+            {
+                player.fullRotation = player.velocity.ToRotation() + MathHelper.PiOver2;
+            }
+            else if (player.wet && !player.mount.Active && player.velocity.Y == 0)
+            {
+                if (player.velocity.X > 0 && player.fullRotation != 6.25f)
+                {
+                    player.fullRotation -= 0.3f;
+                }
+                else if (player.velocity.X <= 0 && player.fullRotation != 0)
+                {
+                    player.fullRotation += 0.3f;
+                }
+                if (player.fullRotation < 0)
+                {
+                    player.fullRotation = 0;
+                }
+                if (player.fullRotation > 6.25f)
+                {
+                    player.fullRotation = 6.25f;
+                }
+            }
+            else if (player.wet && player.mount.Active)
+            {
+                player.fullRotation = 0;
+            }
+            else if (!player.wet && !player.mount.Active)
+            {
+                player.fullRotation = 0;
+            }
             Main.soundInstanceMenuTick.Volume = 0f;
             Main.soundInstanceMenuOpen.Volume = 0f;
             Main.soundInstanceMenuClose.Volume = 0f;
@@ -328,12 +365,6 @@ namespace SpookyTerraria
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-
-
-
-
-
-
             if (!Main.gameMenu)
             {
                 if (!Main.player[1].active)
@@ -356,7 +387,6 @@ namespace SpookyTerraria
         }
         public void IncrementHeartRate()
         {
-
             for (int index = 0; index < Main.maxNPCs; index++)
             {
                 NPC npc = Main.npc[index];

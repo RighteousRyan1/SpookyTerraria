@@ -22,6 +22,10 @@ namespace SpookyTerraria.ModIntances
     }
     public static class EntityHelper
     {
+        /// <summary>
+        /// Completely zeroes the velocity of the projectile.
+        /// </summary>
+        /// <param name="projectile"></param>
         public static void HaltVelocity(this Projectile projectile)
         {
             projectile.velocity.X = 0;
@@ -259,7 +263,7 @@ namespace SpookyTerraria.ModIntances
             Main.inventoryBack3Texture = mod.GetTexture("Assets/ArmorSlotUI");
 
             // Main.inventoryBack4Texture = mod.GetTexture("Assets/Box");
-            // Main.inventoryBack5Texture = mod.GetTexture("Assets/Box");
+            Main.inventoryBack5Texture = mod.GetTexture("Assets/ChestUI");
 
             Main.inventoryBack6Texture = mod.GetTexture("Assets/ShopUI");
             Main.inventoryBack7Texture = mod.GetTexture("Assets/TrashSlot");

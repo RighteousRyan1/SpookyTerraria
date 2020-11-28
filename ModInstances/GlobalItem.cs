@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpookyTerraria.ModIntances
 {
@@ -15,10 +16,20 @@ namespace SpookyTerraria.ModIntances
         {
             if (item.type == ItemID.CarriageLantern)
             {
-                tooltips.Add(new TooltipLine(mod, "Fuck'd", "nrd")
+                tooltips.Add(new TooltipLine(mod, "HoldableLantern", "HoldableLantern")
                 {
                     text = "Can be used as a holdable lantern for light\nDoes not require any fuel of any sort"
                 });
+            }
+            TooltipLine damageLine = tooltips.FirstOrDefault(x => x.Name == "Damage" && x.mod == "Terraria");
+            if (damageLine != null)
+            {
+                damageLine.overrideColor = Color.LawnGreen;
+            }
+            TooltipLine critLine = tooltips.FirstOrDefault(x => x.Name == "CritChance" && x.mod == "Terraria");
+            if (critLine != null)
+            {
+                critLine.overrideColor = Color.Red;
             }
         }
         public override void SetDefaults(Item item)
@@ -34,31 +45,20 @@ namespace SpookyTerraria.ModIntances
             if (item.type == ItemID.CarriageLantern)
             {
                 Main.placementPreview = false;
-                Vector2 playerToCursor = (Main.MouseWorld - player.Center);
-                playerToCursor.Normalize();
-                player.ChangeDir(Main.MouseWorld.X > player.Center.X ? 1 : -1);
-                Lighting.AddLight(player.itemLocation, Color.Goldenrod.ToVector3() * (float)Main.essScale);
+                Lighting.AddLight(player.itemLocation, Color.Goldenrod.ToVector3() * Main.essScale);
             }
         }
         public override void PostUpdate(Item item)
         {
             if (item.type == ItemID.CarriageLantern)
             { 
-                Lighting.AddLight(item.Center, Color.Goldenrod.ToVector3() * (float)Main.essScale);
+                Lighting.AddLight(item.Center, Color.Goldenrod.ToVector3() * Main.essScale);
             }
         }
         public override bool HoldItemFrame(Item item, Player player)
         {
             if (item.type == ItemID.CarriageLantern)
             {
-                if (Main.MouseWorld.X > player.Center.X)
-                {
-                    player.ChangeDir(1);
-                }
-                else
-                {
-                    player.ChangeDir(-1);
-                }
                 player.bodyFrame.Y = player.bodyFrame.Height * 2;
                 return true;
             }
@@ -66,26 +66,16 @@ namespace SpookyTerraria.ModIntances
         }
         public override void HoldStyle(Item item, Player player)
         {
+            player.itemLocation = player.itemLocation.Floor();
             if (item.type == ItemID.CarriageLantern)
             {
-                if (Main.myPlayer == player.whoAmI) // This client
-                {
-                    if (Main.MouseWorld.X > player.Center.X)
-                    {
-                        player.ChangeDir(1);
-                    }
-                    else
-                    {
-                        player.ChangeDir(-1);
-                    }
-                }
                 float initialRotationLeft = -0.79f;
                 if (player.direction == -1)
                 {
                     Vector2 origin = new Vector2(0, 18);
                     player.itemRotation += initialRotationLeft;
                     player.itemLocation.Y = player.Center.Y - origin.RotatedBy(player.itemRotation).Y * player.direction;
-                    player.itemLocation.X = player.Center.X + (origin.RotatedBy(player.itemRotation).X) * player.direction;
+                    player.itemLocation.X = player.Center.X + origin.RotatedBy(player.itemRotation).X * player.direction;
                 }
                 else if (player.direction == 1)
                 {
@@ -93,7 +83,7 @@ namespace SpookyTerraria.ModIntances
                     Vector2 origin = new Vector2(0, -18);
                     // player.itemRotation = MathHelper.PiOver4 + player.velocity.X - (new Vector2(10, 0).RotatedBy(player.itemRotation).X);
                     player.itemLocation.Y = player.Center.Y - origin.RotatedBy(player.itemRotation).Y * player.direction;
-                    player.itemLocation.X = player.Center.X - (origin.RotatedBy(player.itemRotation).X) * player.direction;
+                    player.itemLocation.X = player.Center.X - origin.RotatedBy(player.itemRotation).X * player.direction;
                 }
             }
         }

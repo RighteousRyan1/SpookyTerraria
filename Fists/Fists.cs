@@ -12,13 +12,14 @@ namespace SpookyTerraria.Fists
 {
 	public class Fists : ModItem
 	{
+        public bool withinBoundsOfAttack;
         public class CustomUseStyle
         {
             public const int Punching = 15;
         }
 		public override void SetStaticDefaults() 
 		{
-			Tooltip.SetDefault("Left click for fighting, right click for mining\n'The bare necessities'");
+			Tooltip.SetDefault("Left click for light attacks\nRight click for powerful, slow attacks\n'The bare necessities'");
 		}
         public override void SetDefaults()
         {
@@ -45,89 +46,108 @@ namespace SpookyTerraria.Fists
         {
             if (player.altFunctionUse == 2)
             {
-                item.melee = true;
-                item.width = 5;
-                item.height = 5;
-                item.useTime = 20;
-                item.useAnimation = 20;
-                item.knockBack = 3;
-                item.rare = ItemRarityID.Blue;
-                item.autoReuse = true;
-                item.noUseGraphic = true;
-                item.useStyle = CustomUseStyle.Punching;
-                item.useTurn = true;
-                item.pick = 8;
-                item.axe = 2;
+                item.pick = 12;
+                item.axe = 3;
             }
             else if (player.altFunctionUse != 2)
             {
-                item.damage = 6;
-                item.melee = true;
-                item.width = 5;
-                item.height = 5;
-                item.useTime = 20;
-                item.useAnimation = 20;
-                item.knockBack = 3;
-                item.rare = ItemRarityID.Blue;
-                item.autoReuse = true;
-                item.noUseGraphic = true;
-                item.useStyle = CustomUseStyle.Punching;
-                item.useTurn = true;
-                item.pick = 0;
-                item.axe = 0;
+                item.pick = 8;
+                item.axe = 2;
             }
             return true;
         }
+        public override void ModifyWeaponDamage(Player player, ref float add, ref float mult, ref float flat)
+        {
+            if (player.altFunctionUse == 2)
+            {
+                mult = 2.5f;
+            }
+            else if (player.altFunctionUse != 2)
+            {
+                mult = 1f;
+            }
+        }
+        public override float UseTimeMultiplier(Player player)
+        {
+            return player.altFunctionUse == 2 ? 0.5f : 1f;
+        }
+        public override float MeleeSpeedMultiplier(Player player)
+        {
+            return player.altFunctionUse == 2 ? 0.5f : 1f;
+        }
+        public override void GetWeaponKnockback(Player player, ref float knockback)
+        {
+            if (player.GetModPlayer<SpookyPlayer>().punchingCharged)
+            {
+                knockback = 10f;
+            }
+            else if (player.GetModPlayer<SpookyPlayer>().punchingLight)
+            {
+                knockback = 1f;
+            }
+        }
+        public override void GetWeaponCrit(Player player, ref int crit)
+        {
+            if (player.GetModPlayer<SpookyPlayer>().punchingCharged)
+            {
+                crit *= (int)(item.crit * 2.5f);
+            }
+            else if (player.GetModPlayer<SpookyPlayer>().punchingLight)
+            {
+                crit = (int)(item.crit * 1f);
+            }
+        }
+        public override void OnHitNPC(Player player, NPC target, int damage, float knockBack, bool crit)
+        {
+        }
         public override void HoldItem(Player player)
         {
-            int indexInRange = Main.rand.Next(1, 7);
-            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, $"Sounds/Custom/Fists/Whiff{indexInRange}");
         }
         public override bool UseItemFrame(Player player)
         {
             player.itemLocation = player.Center;
-            player.GetModPlayer<BeatGamePlayer>().punchPhase1 = player.itemAnimation < player.itemAnimationMax * 1f && player.itemAnimation > player.itemAnimationMax * 0.8f;
-            player.GetModPlayer<BeatGamePlayer>().punchPhase2 = player.itemAnimation < player.itemAnimationMax * 0.8f && player.itemAnimation > player.itemAnimationMax * 0.6f;
-            player.GetModPlayer<BeatGamePlayer>().punchPhase3 = player.itemAnimation < player.itemAnimationMax * 0.6f && player.itemAnimation > player.itemAnimationMax * 0.4f;
-            player.GetModPlayer<BeatGamePlayer>().punchPhase4 = player.itemAnimation < player.itemAnimationMax * 0.4f && player.itemAnimation > player.itemAnimationMax * 0f;
+            player.GetModPlayer<SpookyPlayer>().punchPhase1 = player.itemAnimation < player.itemAnimationMax * 1f && player.itemAnimation > player.itemAnimationMax * 0.8f;
+            player.GetModPlayer<SpookyPlayer>().punchPhase2 = player.itemAnimation < player.itemAnimationMax * 0.8f && player.itemAnimation > player.itemAnimationMax * 0.6f;
+            player.GetModPlayer<SpookyPlayer>().punchPhase3 = player.itemAnimation < player.itemAnimationMax * 0.6f && player.itemAnimation > player.itemAnimationMax * 0.4f;
+            player.GetModPlayer<SpookyPlayer>().punchPhase4 = player.itemAnimation < player.itemAnimationMax * 0.4f && player.itemAnimation > player.itemAnimationMax * 0f;
 
             Vector2 playerToCursor = (Main.MouseWorld - player.Center);
             playerToCursor.Normalize();
 
-            if (player.GetModPlayer<BeatGamePlayer>().punchPhase1)
+            if (player.GetModPlayer<SpookyPlayer>().punchPhase1)
             {
                 player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking5;
             }
-            if (player.GetModPlayer<BeatGamePlayer>().punchPhase2)
+            if (player.GetModPlayer<SpookyPlayer>().punchPhase2)
             {
                 player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking6;
             }
-            if (player.GetModPlayer<BeatGamePlayer>().punchPhase3)
+            if (player.GetModPlayer<SpookyPlayer>().punchPhase3)
             {
                 player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking1;
             }
-            if (player.GetModPlayer<BeatGamePlayer>().punchPhase4)
+            if (player.GetModPlayer<SpookyPlayer>().punchPhase4)
             {
                 if (BodyFrameCalculator.GetBodyFrameFromRotation(playerToCursor.ToRotation()) > 0.7853982f && BodyFrameCalculator.GetBodyFrameFromRotation(playerToCursor.ToRotation()) < 2.3561945f)
                 {
-                    player.GetModPlayer<BeatGamePlayer>().punchingDown = false;
-                    player.GetModPlayer<BeatGamePlayer>().punchingNeutral = false;
-                    player.GetModPlayer<BeatGamePlayer>().punchingUp = true;
+                    player.GetModPlayer<SpookyPlayer>().punchingDown = false;
+                    player.GetModPlayer<SpookyPlayer>().punchingNeutral = false;
+                    player.GetModPlayer<SpookyPlayer>().punchingUp = true;
                     player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.armDiagonalUp;
                 }
                 else
                 {
                     if (Math.Max(BodyFrameCalculator.GetBodyFrameFromRotation(playerToCursor.ToRotation()), 3) == 3)
                     {
-                        player.GetModPlayer<BeatGamePlayer>().punchingDown = false;
-                        player.GetModPlayer<BeatGamePlayer>().punchingNeutral = true;
-                        player.GetModPlayer<BeatGamePlayer>().punchingUp = false;
+                        player.GetModPlayer<SpookyPlayer>().punchingDown = false;
+                        player.GetModPlayer<SpookyPlayer>().punchingNeutral = true;
+                        player.GetModPlayer<SpookyPlayer>().punchingUp = false;
                     }
                     else if (Math.Max(BodyFrameCalculator.GetBodyFrameFromRotation(playerToCursor.ToRotation()), 3) == 4)
                     {
-                        player.GetModPlayer<BeatGamePlayer>().punchingUp = false;
-                        player.GetModPlayer<BeatGamePlayer>().punchingNeutral = false;
-                        player.GetModPlayer<BeatGamePlayer>().punchingDown = true;
+                        player.GetModPlayer<SpookyPlayer>().punchingUp = false;
+                        player.GetModPlayer<SpookyPlayer>().punchingNeutral = false;
+                        player.GetModPlayer<SpookyPlayer>().punchingDown = true;
                     }
                     player.bodyFrame.Y = Math.Max(BodyFrameCalculator.GetBodyFrameFromRotation(playerToCursor.ToRotation()), 3) * player.bodyFrame.Height;
                 }
@@ -137,7 +157,33 @@ namespace SpookyTerraria.Fists
         }
         public override void UseStyle(Player player)
         {
-            base.UseStyle(player);
+            if (player.itemAnimation > player.itemAnimationMax * 0.4 && player.itemAnimation < player.itemAnimationMax * 0.3)
+            {
+                withinBoundsOfAttack = true;
+            }
+            if (player.altFunctionUse == 2)
+            {
+                player.GetModPlayer<SpookyPlayer>().punchingCharged = true;
+                player.GetModPlayer<SpookyPlayer>().punchingLight = false;
+            }
+            else if (player.altFunctionUse == 0)
+            {
+                player.GetModPlayer<SpookyPlayer>().punchingCharged = false;
+                player.GetModPlayer<SpookyPlayer>().punchingLight = true;
+            }
+            int indexInRange = Main.rand.Next(1, 7);
+            int indexInRange2 = Main.rand.Next(1, 4);
+            if (player.itemAnimation == (int)(player.itemAnimationMax * 0.4f))
+            {
+                if (player.altFunctionUse == 2)
+                {
+                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, $"Sounds/Custom/Fists/WhiffSlow{indexInRange2}"));
+                }
+                if (player.altFunctionUse == 0)
+                {
+                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, $"Sounds/Custom/Fists/Whiff{indexInRange}"));
+                }
+            }
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
@@ -157,44 +203,74 @@ namespace SpookyTerraria.Fists
         }
         public override void UseItemHitbox(Player player, ref Rectangle hitbox, ref bool noHitbox)
         {
-            bool up = player.GetModPlayer<BeatGamePlayer>().punchingUp;
-            bool neutral = player.GetModPlayer<BeatGamePlayer>().punchingNeutral;
-            bool down = player.GetModPlayer<BeatGamePlayer>().punchingDown;
-            if (player.GetModPlayer<BeatGamePlayer>().punchPhase1 || player.GetModPlayer<BeatGamePlayer>().punchPhase2 || player.GetModPlayer<BeatGamePlayer>().punchPhase3)
+            if (withinBoundsOfAttack)
             {
-                noHitbox = true;
-                hitbox.Width = 0;
-                hitbox.Height = 0;
-                hitbox.Y += 999999;
-                hitbox.X += 999999;
+                Main.NewText('a');
             }
-            else if (neutral)
+            bool chargedAttack = player.GetModPlayer<SpookyPlayer>().punchingCharged;
+            bool lightAttack = player.GetModPlayer<SpookyPlayer>().punchingLight;
+
+            bool up = player.GetModPlayer<SpookyPlayer>().punchingUp;
+            bool neutral = player.GetModPlayer<SpookyPlayer>().punchingNeutral;
+            bool down = player.GetModPlayer<SpookyPlayer>().punchingDown;
+            if (player.GetModPlayer<SpookyPlayer>().punchPhase1 || player.GetModPlayer<SpookyPlayer>().punchPhase2 || player.GetModPlayer<SpookyPlayer>().punchPhase3)
             {
-                hitbox.Width = 8;
-                hitbox.Height = 8;
-                noHitbox = false;
-                hitbox.Y += 27;
-                hitbox.X += player.direction == 1 ? 10 : 12;
+                hitbox.Width = player.Hitbox.Width;
+                hitbox.Height = player.Hitbox.Height;
+                hitbox.Y += player.Hitbox.Y;
+                hitbox.X = player.Hitbox.X;
             }
-            else if (up)
+            else if (neutral && lightAttack)
             {
-                hitbox.Width = 8;
-                hitbox.Height = 8;
+                hitbox.Width = 16;
+                hitbox.Height = 16;
                 noHitbox = false;
-                hitbox.Y += 10;
-                hitbox.X += player.direction == 1 ? 10 : 12;
+                hitbox.Y += 23;
+                hitbox.X += player.direction == 1 ? 10 : 6;
             }
-            else if (down)
+            else if (up && lightAttack)
             {
-                hitbox.Width = 8;
-                hitbox.Height = 8;
+                hitbox.Width = 16;
+                hitbox.Height = 16;
                 noHitbox = false;
-                hitbox.Y += 45;
-                hitbox.X += player.direction == 1 ? 10 : 12;
+                hitbox.Y += 8;
+                hitbox.X += player.direction == 1 ? 6 : 10;
+            }
+            else if (down && lightAttack)
+            {
+                hitbox.Width = 16;
+                hitbox.Height = 16;
+                noHitbox = false;
+                hitbox.Y += 38;
+                hitbox.X += player.direction == 1 ? 6 : 8;
+            }
+            else if (neutral && chargedAttack)
+            {
+                hitbox.Width = 24;
+                hitbox.Height = 24;
+                noHitbox = false;
+                hitbox.Y += 23;
+                hitbox.X += player.direction == 1 ? 10 : -3;
+            }
+            else if (up && chargedAttack)
+            {
+                hitbox.Width = 24;
+                hitbox.Height = 24;
+                noHitbox = false;
+                hitbox.Y += 0;
+                hitbox.X += player.direction == 1 ? 6 : 6;
+            }
+            else if (down && chargedAttack)
+            {
+                hitbox.Width = 24;
+                hitbox.Height = 24;
+                noHitbox = false;
+                hitbox.Y += 38;
+                hitbox.X += player.direction == 1 ? 6 : 2;
             }
         }
         public override void AddRecipes()
-        {
+        {   
             ModRecipe recipe = new ModRecipe(mod);
             recipe.SetResult(this);
             recipe.AddRecipe();
