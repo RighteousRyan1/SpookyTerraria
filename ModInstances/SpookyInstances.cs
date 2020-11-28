@@ -17,6 +17,12 @@ namespace SpookyTerraria
         [DefaultValue(true)]
         [Tooltip("Owls no longer hoot.")]
         public bool toggleHoots;
+
+        [Label("UI Revamp")]
+        [DefaultValue(true)]
+        [Tooltip("Completely overhauls Terraria UI to look a little better")]
+        [ReloadRequired]
+        public bool betterUI;
     }
     public class SpookyConfigServer : ModConfig
     {

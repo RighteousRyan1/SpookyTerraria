@@ -37,11 +37,11 @@ namespace SpookyTerraria.Fists
             TooltipLine tt = tooltips.FirstOrDefault(x => x.Name == "AxePower" && x.mod == "Terraria");
             if (tt != null)
             {
-                if (item.axe == 10)
+                if (item.axe == 2)
                 {
-                    tt.text = "10% axe power";
+                    tt.text = "8% axe power";
                 }
-                if (item.axe != 10)
+                if (item.axe != 2)
                 {
                     tt.text = $"{item.axe * 5}% axe power";
                 }

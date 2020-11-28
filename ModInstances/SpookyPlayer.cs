@@ -14,16 +14,19 @@ using SpookyTerraria.ModIntances;
 using SpookyTerraria.Buffs;
 using Microsoft.Xna.Framework.Audio;
 using SpookyTerraria.Utilities;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.UI;
+using System;
 
 namespace SpookyTerraria
 {
 	public class SoundPlayer : ModPlayer
     {
-
-        public int caveRumbleTimer;
-        public int oceanWavesTimer;
-        public int blizzTimer;
-        public int cricketsTimer;
+        // FIXME: If multiplayer goes haywire, remake these to NOT abuse static variables
+        public static int caveRumbleTimer;
+        public static int oceanWavesTimer;
+        public static int blizzTimer;
+        public static int cricketsTimer;
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
@@ -50,6 +53,7 @@ namespace SpookyTerraria
         {
             if (!Main.hasFocus)
             {
+                player.GetModPlayer<SpookyPlayer>().hootTimer = 0;
                 player.GetModPlayer<SpookyPlayer>().breezeTimer = 0;
                 oceanWavesTimer = 0;
                 cricketsTimer = 0;
@@ -57,130 +61,40 @@ namespace SpookyTerraria
                 caveRumbleTimer = 0;
             }
         }
+        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
+        {
+            player.fullRotationOrigin = player.Hitbox.Size() / 2;
+        }
+        public override void PreUpdate()
+        {
+            if (player.wet)
+            {
+                player.AddBuff(BuffID.Flipper, 2);
+            }
+        }
         public override void PostUpdate()
         {
+            // 109 == flipper
+            // 131 == turtle
+            // 168 == fishron mount
+            player.ChangeDir(player.wet && player.velocity.X > 0 ? 1 : -1);
+            if (player.wet && !player.mount.Active)
+            {
+                player.fullRotation = player.velocity.ToRotation() + MathHelper.PiOver2;
+            }
+            else if (player.wet && player.mount.Active)
+            {
+                player.fullRotation = 0;
+            }
+            else if (!player.wet && !player.mount.Active)
+            {
+                player.fullRotation = 0;
+            }
         }
         // FIXME: I PLAN ON MOVING THIS ENTIRE SYSTEM TO MUSIC IF I CANNOT GET IT TO WORK
         public override void PostUpdateMiscEffects()
         {
-            Main.soundInstanceMenuTick.Stop();
-            SoundEffectInstance breezeSounds;
-            breezeSounds = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Breezes"));
-            SoundEffectInstance crickets;
-            crickets = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/ForestAmbience"));
-            SoundEffectInstance waves;
-            waves = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/OceanAmbience"));
-            SoundEffectInstance blizz;
-            blizz = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/SnowAmbience"));
-            SoundEffectInstance cavesSound;
-            cavesSound = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/CaveRumble"));
-            // Use SoundEffectInstance Eventually
-            caveRumbleTimer++;
-            cricketsTimer++;
-            blizzTimer++;
-            oceanWavesTimer++;
-            // Main.NewText($"CaveRumble: {caveRumbleTimer}, OceanWaves: {oceanWavesTimer}, Crickets: {cricketsTimer}, Blizzard: {blizzTimer}");
-            if (Main.gameMenu)
-            {
-                cavesSound.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();
-                waves.Stop();
-            }
-            if (player.ZoneRockLayerHeight) // Rock Layer
-            {
-                waves.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                GeneralHelpers.ResetTimer(oceanWavesTimer);
-                GeneralHelpers.ResetTimer(cricketsTimer);
-                GeneralHelpers.ResetTimer(blizzTimer);
-                // Checked
-            }
-            if (player.ZoneBeach) // Beach
-            {
-                crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();
-                cavesSound.Stop();
-                cricketsTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                GeneralHelpers.ResetTimer(caveRumbleTimer);
-                GeneralHelpers.ResetTimer(cricketsTimer);
-                GeneralHelpers.ResetTimer(blizzTimer);
-                // Checked
-            }
-            if (player.ZoneDirtLayerHeight)
-            {
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-            }
-            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Snow
-            {
-                waves.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                cavesSound.Stop();
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                cricketsTimer = 0;
-                GeneralHelpers.ResetTimer(oceanWavesTimer);
-                GeneralHelpers.ResetTimer(cricketsTimer);
-                GeneralHelpers.ResetTimer(blizzTimer);
-                // checked
-            }
-            if (PlayerIsInForest(player)) // Forest
-            {
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                GeneralHelpers.ResetTimer(oceanWavesTimer);
-                GeneralHelpers.ResetTimer(caveRumbleTimer);
-                GeneralHelpers.ResetTimer(blizzTimer);
-                /// checked
-            }
-            if (player.ZoneRockLayerHeight && caveRumbleTimer == 1680)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
-                caveRumbleTimer = 0;
-            }
-            if (caveRumbleTimer == 2)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
-            }
-            if (oceanWavesTimer == 2)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
-            }
-            if (blizzTimer == 2)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
-            }
-            if (cricketsTimer == 2)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
-            }
-            if (player.ZoneBeach && oceanWavesTimer == 9060)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
-                oceanWavesTimer = 0;
-            }
-            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight && blizzTimer == 6060)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
-                blizzTimer = 0;
-            }
-            if (PlayerIsInForest(player) && cricketsTimer == 2700)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
-                cricketsTimer = 0;
-            }
+            SoundEngine.Play();
         }
     }
     public class BeatGamePlayer : ModPlayer
@@ -202,7 +116,7 @@ namespace SpookyTerraria
             // player.ManageSpecialBiomeVisuals("SpookyTerraria:Darkness", player.HasBuff(ModContent.BuffType<Shrouded_3>()));
         }
     }
-	public class SpookyPlayer : ModPlayer
+    public class SpookyPlayer : ModPlayer
     {
         /// <summary>
         /// Determines whether or not the player has equipped the heartrate monitor
@@ -352,6 +266,10 @@ namespace SpookyTerraria
         }
         public override void PreUpdate()
         {
+
+            Main.soundInstanceMenuTick.Volume = 0f;
+            Main.soundInstanceMenuOpen.Volume = 0f;
+            Main.soundInstanceMenuClose.Volume = 0f;
             // TODO: Do something with this shit bro
             bool hasShroudedIIIRequirement = Lighting.GetSubLight(player.Top).X == 0f;
             bool hasShroudedIIRequirement = Lighting.GetSubLight(player.Top).X > 0f
@@ -527,6 +445,7 @@ namespace SpookyTerraria
             IncrementHeartRate(); // Increment Appropriately
             DecrementHeartRate(); // Decrement Appropriately
 
+            // TODO: Maybe add player.wet here
             if (!Main.dedServ)
             {
                 if (Main.MouseWorld.X > player.Center.X)
@@ -596,64 +515,42 @@ namespace SpookyTerraria
         }
         public override void PostUpdateRunSpeeds()
         {
+            SpookyTerrariaUtils.HandleMaxRunSpeeds(4);
+
             // Handle stamina, etc
             bool staminaIsZero = player.GetModPlayer<StaminaPlayer>().Stamina == 0; // Stamina is zero.
             bool sprintHandling = SpookyTerraria.Sprint.Current && player.velocity.X != 0 && player.velocity.Y == 0; // Is the player holding shift, etc.
             bool tooLowStamina = player.velocity.X != 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina <= 25 && player.GetModPlayer<StaminaPlayer>().Stamina > 0;
             bool notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 = player.velocity.X != 0 && player.velocity.Y == 0 && !SpookyTerraria.Sprint.Current && player.GetModPlayer<StaminaPlayer>().Stamina > 25;
-            if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 && !player.mount.Active)
+            if (!player.wet)
             {
-                player.maxRunSpeed = 1.5f * (heartRate / 80f);
-                player.accRunSpeed = 1.5f * (heartRate / 80f);
-            }
-            if (sprintHandling && !staminaIsZero && !player.mount.Active)
-            {
-                player.maxRunSpeed = 1.5f * (heartRate / 80f) * 2f;
-                player.accRunSpeed = 1.5f * (heartRate / 80f) * 2f;
-            }
-            else if (!tooLowStamina && !player.mount.Active)
-            {
-                player.maxRunSpeed = 1.5f * (heartRate / 80f);
-                player.accRunSpeed = 1.5f * (heartRate / 80f);
-            }
-            if (tooLowStamina && !player.mount.Active)
-            {
-                player.maxRunSpeed = 1.5f * (heartRate / 80f) / 2f;
-                player.accRunSpeed = 1.5f * (heartRate / 80f) / 2f; // Fix the sprinting 
+                if (notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25 && !player.mount.Active)
+                {
+                    player.maxRunSpeed = 1.5f * (heartRate / 80f);
+                    player.accRunSpeed = 1.5f * (heartRate / 80f);
+                }
+                if (sprintHandling && !staminaIsZero && !player.mount.Active)
+                {
+                    player.maxRunSpeed = 1.5f * (heartRate / 80f) * 2f;
+                    player.accRunSpeed = 1.5f * (heartRate / 80f) * 2f;
+                }
+                else if (!tooLowStamina && !player.mount.Active)
+                {
+                    player.maxRunSpeed = 1.5f * (heartRate / 80f);
+                    player.accRunSpeed = 1.5f * (heartRate / 80f);
+                }
+                if (tooLowStamina && !player.mount.Active)
+                {
+                    player.maxRunSpeed = 1.5f * (heartRate / 80f) / 2f;
+                    player.accRunSpeed = 1.5f * (heartRate / 80f) / 2f; // Fix the sprinting 
+                }
             }
             // Main.NewText($"{tooLowStamina} (Stamina <= 25%) {sprintHandling} (Sprinting) {notJumpingAndNotLowStaminaAndStaminaIsGreaterThan25} (No Sprint or Low Stamina) {staminaIsZero} (Stamina is Zero)");
             if (ModLoader.GetMod("TerrariaOverhaul") == null)
             {
-                if (player.legFrame.Y == player.legFrame.Height * 9 && isOnGrassyTile) // Check for step timer
-                {
-                    stepTimer = 40;
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/GrassStep1"), player.Bottom); // Play sound
-                }
-                if (player.legFrame.Y == player.legFrame.Height * 16 && isOnGrassyTile)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/GrassStep2"), player.Bottom); // Play sound
-                    stepTimer = 0;
-                }
-                if (player.legFrame.Y == player.legFrame.Height * 9 && isOnStoneTile) // Check for step timer
-                {
-                    stepTimer = 40;
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/StoneStep1"), player.Bottom); // Play sound
-                }
-                if (player.legFrame.Y == player.legFrame.Height * 16 && isOnStoneTile)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/StoneStep2"), player.Bottom); // Play sound
-                    stepTimer = 0;
-                }
-                if (player.legFrame.Y == player.legFrame.Height * 9 && isOnWoodTile) // Check for step timer
-                {
-                    stepTimer = 40;
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/WoodStep1"), player.Bottom); // Play sound
-                }
-                if (player.legFrame.Y == player.legFrame.Height * 16 && isOnWoodTile)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/WoodStep2"), player.Bottom); // Play sound
-                    stepTimer = 0;
-                }
+                SpookyTerrariaUtils instance = new SpookyTerrariaUtils();
+                // x.PlayStepSound("Sounds/Custom/Ambient/HootOne", "Sounds/Custom/Ambient/HootTwo", "Sounds/Custom/Ambient/HootOne", "Sounds/Custom/Ambient/HootTwo", "Sounds/Custom/Ambient/HootOne", "Sounds/Custom/Ambient/HootTwo");
+                instance.PlayStepSound();
             }
         }
         public int lightTimer;

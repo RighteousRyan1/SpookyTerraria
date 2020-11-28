@@ -5,6 +5,7 @@ using SpookyTerraria.ModIntances;
 using SpookyTerraria.NPCs;
 using SpookyTerraria.OtherItems;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.Graphics.Effects;
@@ -22,6 +23,14 @@ namespace SpookyTerraria
         public static ModHotKey Sprint;
         public override void Unload()
         {
+            // Wtf...
+
+            SpookyTerrariaUtils.ReturnTexturesToDefaults();
+
+            // Main.inventoryTickOffTexture = GetTexture("Terraria/Images/X");
+            // Main.inventoryTickOffTexture = GetTexture("Terraria/Images/X");
+            Main.chatBackTexture = Main.instance.OurLoad<Texture2D>("Images" + Path.DirectorySeparatorChar + "Chat_Back");
+            Main.inventoryBackTexture = Main.instance.OurLoad<Texture2D>("Images" + Path.DirectorySeparatorChar + "Inventory_Back");
             Sprint = null;
         }
         public override void AddRecipes()
@@ -76,7 +85,7 @@ namespace SpookyTerraria
                             {
                                 Utils.DrawBorderString(Main.spriteBatch,
                                     heartRateText,
-                                    new Vector2(Main.screenWidth + xOffset - 150f,  yOffset + 5f),
+                                    new Vector2(Main.screenWidth + xOffset - 375f,  yOffset + 5f),
                                     player.GetModPlayer<SpookyPlayer>().heartRate < 100 ? new Color(93, 199, 90) : Color.IndianRed);
                             }
                             return true;
@@ -94,7 +103,7 @@ namespace SpookyTerraria
                         {
                             Utils.DrawBorderString(Main.spriteBatch,
                             staminaPercent,
-                            new Vector2(Main.screenWidth + xOffset - 500f, yOffset + 5f),
+                            new Vector2(Main.screenWidth + xOffset - 415f, yOffset + 30f),
                             Color.Crimson);
                             return true;
                         },
@@ -148,6 +157,14 @@ namespace SpookyTerraria
             }
             base.PreSaveAndQuit();
         }
+        public override void PostSetupContent()
+        {
+            SpookyConfigClient recievedInstance = ModContent.GetInstance<SpookyConfigClient>();
+            if (recievedInstance.betterUI)
+            {
+                SpookyTerrariaUtils.ModifyUITextures();
+            }
+        }
         public override void Load()
         {
             Sprint = RegisterHotKey("Sprint", "LeftShift");
@@ -164,10 +181,26 @@ namespace SpookyTerraria
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
         }
+        public override void Close()
+        {
+            SpookyTerrariaUtils.ReturnTexturesToDefaults();
+            base.Close();
+        }
+        /// <summary>
+        /// Timer until the old man respawns
+        /// </summary>
         public int oldManTimer;
+        public override void MidUpdateDustTime()
+        {
+            Main.soundInstanceMenuTick.Volume = 0f;
+            Main.soundInstanceMenuOpen.Volume = 0f;
+            Main.soundInstanceMenuClose.Volume = 0f;
+        }
         public override void PostUpdateEverything()
         {
-
+            Main.soundInstanceMenuTick.Volume = 0f;
+            Main.soundInstanceMenuOpen.Volume = 0f;
+            Main.soundInstanceMenuClose.Volume = 0f;
             Player player = Main.player[Main.myPlayer];
             if (Main.netMode != NetmodeID.Server)
             {
@@ -204,7 +237,7 @@ namespace SpookyTerraria
                 {
                     NPC.NewNPC(Main.dungeonX * 16 + 8, Main.dungeonY * 16, NPCID.OldMan);
                     Main.NewText("The Old Man has returned.", Color.DarkGoldenrod);
-					oldManTimer = 0;
+                    oldManTimer = 0;
                 }
             }
             Main.slimeRain = false;

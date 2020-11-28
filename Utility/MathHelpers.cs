@@ -62,13 +62,6 @@ namespace SpookyTerraria.Utilities
             return x >> y;
         }
     }
-    public class GeneralHelpers
-    {
-        public static void ResetTimer(int timerToReset)
-        {
-            timerToReset = 0;
-        }
-    }
     public static class AudioHelper
     {
         public static void StopSound(this Mod mod, Vector2 pos, string fileName, Player player)
