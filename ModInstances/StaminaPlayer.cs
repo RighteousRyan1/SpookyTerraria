@@ -37,8 +37,7 @@ namespace SpookyTerraria.ModIntances
                     }
                 }
             }
-
-            bool isSprinting = SpookyTerraria.Sprint.Current && Stamina != 0 && player.velocity.X != 0 && player.velocity.Y == 0;
+            bool isSprinting = SpookyTerraria.Sprint.Current && Stamina != 0 && Math.Abs(player.velocity.X) > 1.5f && player.velocity.Y == 0;
             bool currentlyJumping = player.velocity.Y < 0 && !player.mount.Active;
 
             if (isSprinting)
@@ -95,7 +94,7 @@ namespace SpookyTerraria.ModIntances
         }
         public override void PostUpdate()
         {
-            HandleSprinting(); // TODO: Fix stamina bug
+            HandleSprinting();
         }
     }
 }

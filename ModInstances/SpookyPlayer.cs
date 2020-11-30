@@ -61,13 +61,14 @@ namespace SpookyTerraria
                 caveRumbleTimer = 0;
             }
         }
-        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
-        {
-            player.fullRotationOrigin = player.Hitbox.Size() / 2;
-        }
         public override void PreUpdate()
         {
-            if (player.wet)
+            Tile mouseTile = Framing.GetTileSafely(Main.MouseWorld.ToWorldCoordinates() / 16);
+            if (mouseTile != null)
+            {
+            }
+
+            if (player.wet && player.velocity.Y != 0)
             {
                 player.AddBuff(BuffID.Flipper, 2);
             }
@@ -97,11 +98,11 @@ namespace SpookyTerraria
             // Not change frames in order: 5, 6, 1, 12
             // walking5, walking6, walking1, walking9, walking10, walking11, 
             // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking13;
-            if (player.CountItem(ModContent.ItemType<Paper>()) >= 300)
+            if (player.CountItem(ModContent.ItemType<Paper>()) >= 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = true;
             }
-            else if (player.CountItem(ModContent.ItemType<Paper>()) < 300)
+            else if (player.CountItem(ModContent.ItemType<Paper>()) < 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = false;
             }
@@ -114,6 +115,22 @@ namespace SpookyTerraria
     }
     public class SpookyPlayer : ModPlayer
     {
+        /// <summary>
+        /// The player's page count
+        /// </summary>
+        public static int pages;
+        /// <summary>
+        /// Determines whether or not the player has a buff
+        /// </summary>
+        public bool hasBuff;
+        /// <summary>
+        /// The player has more than 11 buffs at once.
+        /// </summary>
+        public bool hasGreaterThan11Buffs;
+        /// <summary>
+        /// [Deprecated] [Unused]
+        /// </summary>
+        public bool fallingTooFast;
         /// <summary>
         /// Used Directly for the fists, this determines the first phase of a punch
         /// </summary>
@@ -241,9 +258,13 @@ namespace SpookyTerraria
             }
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Breezes"));
         }
+        public bool hoveringBuff;
         public override void ResetEffects()
         {
+            hoveringBuff = false;
             accHeartMonitor = false;
+            hasBuff = false;
+            hasGreaterThan11Buffs = false;
         }
         public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
         {
@@ -301,37 +322,7 @@ namespace SpookyTerraria
             // 109 == flipper
             // 131 == turtle
             // 168 == fishron mount
-            if (player.wet && !player.mount.Active && player.velocity.Y != 0)
-            {
-                player.fullRotation = player.velocity.ToRotation() + MathHelper.PiOver2;
-            }
-            else if (player.wet && !player.mount.Active && player.velocity.Y == 0)
-            {
-                if (player.velocity.X > 0 && player.fullRotation != 6.25f)
-                {
-                    player.fullRotation -= 0.3f;
-                }
-                else if (player.velocity.X <= 0 && player.fullRotation != 0)
-                {
-                    player.fullRotation += 0.3f;
-                }
-                if (player.fullRotation < 0)
-                {
-                    player.fullRotation = 0;
-                }
-                if (player.fullRotation > 6.25f)
-                {
-                    player.fullRotation = 6.25f;
-                }
-            }
-            else if (player.wet && player.mount.Active)
-            {
-                player.fullRotation = 0;
-            }
-            else if (!player.wet && !player.mount.Active)
-            {
-                player.fullRotation = 0;
-            }
+
             Main.soundInstanceMenuTick.Volume = 0f;
             Main.soundInstanceMenuOpen.Volume = 0f;
             Main.soundInstanceMenuClose.Volume = 0f;
@@ -365,26 +356,8 @@ namespace SpookyTerraria
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (!Main.gameMenu)
-            {
-                if (!Main.player[1].active)
-                {
-                    float i = player.headRotation;
-                    MinMax = Utils.Clamp(i - 0.5f, -1f, 1f);
-                    if (ModLoader.GetMod("TerrariaOverhaul") == null)
-                    {
-                        if (player.direction == 1)
-                        {
-                            player.headRotation = -MinMax * (Main.MouseWorld - player.Center).ToRotation();
-                        }
-                        if (player.direction == -1)
-                        {
-                            player.headRotation = -MinMax * (-Main.MouseWorld - -player.Center).ToRotation();
-                        }
-                    }
-                }
-            }
         }
+        // This is being moved to BetterMechanics, if need be, it will be a dependency?
         public void IncrementHeartRate()
         {
             for (int index = 0; index < Main.maxNPCs; index++)
@@ -484,14 +457,6 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
-            if (player.direction == -1)
-            {
-                MathHelper.Clamp(player.headRotation, -5.5f, -1f);
-            }
-            else if (player.direction == 1)
-            {
-                MathHelper.Clamp(player.headRotation, -1f, 1f); // Why no clamp value????
-            }
             if (msgTimer < 301)
             {
                 msgTimer++;
@@ -512,17 +477,6 @@ namespace SpookyTerraria
             DecrementHeartRate(); // Decrement Appropriately
 
             // TODO: Maybe add player.wet here
-            if (!Main.dedServ)
-            {
-                if (Main.MouseWorld.X > player.Center.X)
-                {
-                    player.ChangeDir(1);
-                }
-                else
-                {
-                    player.ChangeDir(-1);
-                }
-            }
             // Ambience
             hootTimer++;
             breezeTimer++;

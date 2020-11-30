@@ -1,12 +1,17 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using SpookyTerraria.ModIntances;
 using SpookyTerraria.NPCs;
 using SpookyTerraria.OtherItems;
+using SpookyTerraria.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
@@ -19,12 +24,88 @@ namespace SpookyTerraria
 {
     public class SpookyTerraria : Mod
     {
+        private bool stopTitleMusic;
+        private ManualResetEvent titleMusicStopped;
+        private int customTitleMusicSlot;
+        public SpookyTerraria() { ModContent.GetInstance<SpookyTerraria>(); }
+        private void ChangeMenuMusic(ILContext il)
+        {
+            ILCursor ilcursor = new ILCursor(il);
+            ILCursor ilcursor2 = ilcursor;
+            MoveType moveType = MoveType.After;
+            Func<Instruction, bool>[] array = new Func<Instruction, bool>[1];
+            array[0] = (Instruction i) => ILPatternMatchingExt.MatchLdfld<Main>(i, "newMusic");
+            ilcursor2.GotoNext(moveType, array);
+            ilcursor.EmitDelegate<Func<int, int>>(delegate (int newMusic)
+            {
+                if (newMusic != 6)
+                {
+                    return newMusic;
+                }
+                return customTitleMusicSlot;
+            });
+        }
+        private void MenuMusicSetSpooky()
+        {
+            customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Spooky");
+            IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
+        }
+        private void MenuMusicSetSpookyRemix()
+        {
+            customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/SpookRemix");
+            IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
+        }
         public bool beatGame;
         public static ModHotKey Sprint;
+        public override void PostSetupContent()
+        {
+            if (ModLoader.GetMod("TerrariaOverhaul") == null && ModLoader.GetMod("ShovelKnightMusic") == null)
+            {
+                if (Main.rand.Next(1, 3) == 1)
+                {
+                    MenuMusicSetSpooky();
+                }
+                else
+                {
+                    MenuMusicSetSpookyRemix();
+                }
+            }
+            SpookyConfigClient recievedInstance = ModContent.GetInstance<SpookyConfigClient>();
+            if (recievedInstance.betterUI)
+            {
+                SpookyTerrariaUtils.ModifyUITextures();
+            }
+        }
+        public override void Load()
+        {
+            Mod spooky = ModLoader.GetMod("SpookyTerraria");
+            Main.versionNumber = $"Terraria {Main.versionNumber}\n{spooky.Name} v{spooky.Version}";
+
+            Sprint = RegisterHotKey("Sprint", "LeftShift");
+
+            // Shader initialization
+
+            if (!Main.dedServ)
+            {
+                Ref<Effect> Darkness = new Ref<Effect>(GetEffect("Effects/Darkness"));
+                Filters.Scene["Darkness"] = new Filter(new ScreenShaderData(Darkness, "Darkness"), EffectPriority.VeryHigh);
+            }
+            if (!Main.dedServ)
+            {
+                Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
+                SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
+            }
+        }
         public override void Unload()
         {
+            ManualResetEvent manualResetEvent = titleMusicStopped;
+            if (manualResetEvent != null)
+            {
+                manualResetEvent.Set();
+            }
+            titleMusicStopped = null;
             // Wtf...
-
+            Main.versionNumber = $"v1.3.5.3";
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
 
             // Main.inventoryTickOffTexture = GetTexture("Terraria/Images/X");
@@ -47,72 +128,50 @@ namespace SpookyTerraria
             int miniMapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map / Minimap"));
             if (miniMapIndex > -1)
             {
-				if (ModLoader.GetMod("SpookyTerraria") != null)
-				{
-					layers.RemoveAt(miniMapIndex);
-				}
+                if (ModLoader.GetMod("SpookyTerraria") != null)
+                {
+                    layers.RemoveAt(miniMapIndex);
+                }
             }
             Player player = Main.player[Main.myPlayer];
-            for (int textIndex = 0; textIndex < 1; textIndex++)
+            string heartRateText = $"BPM: {player.GetModPlayer<SpookyPlayer>().heartRate}";
+            int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
+            if (mouseTextIndex != -1)
             {
-                int xOffset = 0;
-                int yOffset = 0;
-                if (textIndex == 0)
-                {
-                    xOffset = -2;
-                }
-                if (textIndex == 1)
-                {
-                    xOffset = 2;
-                }
-                if (textIndex == 2)
-                {
-                    yOffset = -2;
-                }
-                if (textIndex == 3)
-                {
-                    yOffset = 2;
-                }
-                string heartRateText = $"BPM: {player.GetModPlayer<SpookyPlayer>().heartRate}";
-                int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
-                if (mouseTextIndex != -1)
-                {
-                    layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                        "SpookyTerraria: BPM",
-                        delegate
-                        {
-                            if (player.GetModPlayer<SpookyPlayer>().accHeartMonitor)
-                            {
-                                Utils.DrawBorderString(Main.spriteBatch,
-                                    heartRateText,
-                                    new Vector2(Main.screenWidth + xOffset - 375f,  yOffset + 5f),
-                                    player.GetModPlayer<SpookyPlayer>().heartRate < 100 ? new Color(93, 199, 90) : Color.IndianRed);
-                            }
-                            return true;
-                        },
-                        InterfaceScaleType.UI)
-                    );
-                }
-                string staminaPercent = $"Stamina: {player.GetModPlayer<StaminaPlayer>().Stamina}%";
-                int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
-                if (index != -1)
-                {
-                    layers.Insert(index, new LegacyGameInterfaceLayer(
-                        "SpookyTerraria: Stamina",
-                        delegate
+                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                    "SpookyTerraria: BPM",
+                    delegate
+                    {
+                        if (player.GetModPlayer<SpookyPlayer>().accHeartMonitor)
                         {
                             Utils.DrawBorderString(Main.spriteBatch,
-                            staminaPercent,
-                            new Vector2(Main.screenWidth + xOffset - 415f, yOffset + 30f),
-                            Color.Crimson);
-                            return true;
-                        },
-                        InterfaceScaleType.UI)
-                    );
-                }
+                                heartRateText,
+                                new Vector2(Main.screenWidth - 375f, 5f),
+                                player.GetModPlayer<SpookyPlayer>().heartRate < 100 ? new Color(93, 199, 90) : Color.IndianRed);
+                        }
+                        return true;
+                    },
+                    InterfaceScaleType.UI)
+                );
+            }
+            string staminaPercent = $"Stamina: {player.GetModPlayer<StaminaPlayer>().Stamina}%";
+            int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
+            if (index != -1)
+            {
+                layers.Insert(index, new LegacyGameInterfaceLayer(
+                    "SpookyTerraria: Stamina",
+                    delegate
+                    {
+                        Utils.DrawBorderString(Main.spriteBatch,
+                        staminaPercent,
+                        new Vector2(Main.screenWidth - 415f, 30f),
+                        Color.Crimson);
+                        return true;
+                    },
+                    InterfaceScaleType.UI)
+                );
             }
         }
-        public SpookyTerraria() { ModContent.GetInstance<SpookyTerraria>(); }
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
@@ -157,32 +216,26 @@ namespace SpookyTerraria
             }
             base.PreSaveAndQuit();
         }
-        public override void PostSetupContent()
-        {
-            SpookyConfigClient recievedInstance = ModContent.GetInstance<SpookyConfigClient>();
-            if (recievedInstance.betterUI)
-            {
-                SpookyTerrariaUtils.ModifyUITextures();
-            }
-        }
-        public override void Load()
-        {
-            Sprint = RegisterHotKey("Sprint", "LeftShift");
-            // Shader initialization
-
-            if (!Main.dedServ)
-            {
-                Ref<Effect> Darkness = new Ref<Effect>(GetEffect("Effects/Darkness"));
-                Filters.Scene["Darkness"] = new Filter(new ScreenShaderData(Darkness, "Darkness"), EffectPriority.VeryHigh);
-            }
-            if (!Main.dedServ)
-            {
-                Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
-                SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
-            }
-        }
         public override void Close()
         {
+            int soundSlot2 = GetSoundSlot((SoundType)51, "Sounds/Music/MainMenu/SpookRemix");
+            int soundSlot1 = GetSoundSlot((SoundType)51, "Sounds/Music/MainMenu/Spooky");
+            if (Utils.IndexInRange(Main.music, soundSlot1))
+            {
+                Music musicIndex = Main.music[soundSlot1];
+                if (musicIndex != null && musicIndex.IsPlaying)
+                {
+                    Main.music[soundSlot1].Stop(AudioStopOptions.Immediate);
+                }
+            }
+            if (Utils.IndexInRange(Main.music, soundSlot2))
+            {
+                Music musicIndex = Main.music[soundSlot2];
+                if (musicIndex != null && musicIndex.IsPlaying)
+                {
+                    Main.music[soundSlot2].Stop(AudioStopOptions.Immediate);
+                }
+            }
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
             base.Close();
         }
@@ -212,18 +265,6 @@ namespace SpookyTerraria
                         Filters.Scene["Darkness"].GetShader().UseIntensity(player.Distance(npc.Center) / 8);
                     }
                 }
-            }
-            if (!Main.gameMenu && ModLoader.GetMod("SpookyTerraria") != null)
-            {
-                Main.mapEnabled = false;
-                Main.mapStyle = 1;
-                player.controlMap = false;
-                player.mapFullScreen = false;
-                player.releaseMapFullscreen = false;
-                player.releaseMapStyle = false;
-                player.mapAlphaDown = false;
-                player.mapAlphaUp = false;
-                player.mapStyle = false;
             }
             int oldManIndex = NPC.FindFirstNPC(NPCID.OldMan);
             if (oldManIndex > -1)
@@ -268,11 +309,34 @@ namespace SpookyTerraria
         }
         public override void UpdateMusic(ref int music, ref MusicPriority priority)
         {
+            if (stopTitleMusic || (!Main.gameMenu && customTitleMusicSlot != 6 && Main.ActivePlayerFileData != null && Main.ActiveWorldFileData != null))
+            {
+                music = 6;
+                stopTitleMusic = true;
+                customTitleMusicSlot = 6;
+                Music music2 = GetMusic("Sounds/Music/MainMenu/Spooky");
+                if (music2.IsPlaying)
+                {
+                    music2.Stop(AudioStopOptions.Immediate);
+                }
+                Music music1 = GetMusic("Sounds/Music/MainMenu/SpookRemix");
+                if (music2.IsPlaying)
+                {
+                    music2.Stop(AudioStopOptions.Immediate);
+                }
+                if (music1.IsPlaying)
+                {
+                    music1.Stop(AudioStopOptions.Immediate);
+                }
+                titleMusicStopped?.Set();
+                stopTitleMusic = false;
+            }
             Player player = Main.player[Main.myPlayer];
-            bool pageReqMetTier1 = player.CountItem(ModContent.ItemType<Paper>()) >= 75 && player.CountItem(ModContent.ItemType<Paper>()) < 150;
-            bool pageReqMetTier2 = player.CountItem(ModContent.ItemType<Paper>()) >= 150 && player.CountItem(ModContent.ItemType<Paper>()) < 200;
-            bool pageReqMetTier3 = player.CountItem(ModContent.ItemType<Paper>()) >= 200 && player.CountItem(ModContent.ItemType<Paper>()) < 250;
-            bool pageReqMetTier4 = player.CountItem(ModContent.ItemType<Paper>()) >= 250 && player.CountItem(ModContent.ItemType<Paper>()) < 300;
+            bool pageReqMetTier1 = player.CountItem(ModContent.ItemType<Paper>()) >= 1 && player.CountItem(ModContent.ItemType<Paper>()) < 3;
+            bool pageReqMetTier2 = player.CountItem(ModContent.ItemType<Paper>()) >= 3 && player.CountItem(ModContent.ItemType<Paper>()) < 5;
+            bool pageReqMetTier3 = player.CountItem(ModContent.ItemType<Paper>()) >= 5 && player.CountItem(ModContent.ItemType<Paper>()) < 7;
+            bool pageReqMetTier4 = player.CountItem(ModContent.ItemType<Paper>()) >= 7 && player.CountItem(ModContent.ItemType<Paper>()) < 8;
+
             if (pageReqMetTier1)
             {
                 music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage1");

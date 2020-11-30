@@ -11,6 +11,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using SpookyTerraria.ModIntances;
+using SpookyTerraria.Utilities;
 
 namespace SpookyTerraria
 {

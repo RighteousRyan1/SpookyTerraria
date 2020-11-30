@@ -17,13 +17,14 @@ namespace SpookyTerraria.Tiles
             drop = ModContent.ItemType<Paper>();
             AddMapEntry(new Color(255, 255, 255));
             soundType = SoundID.Tink;
-            minPick = 50;
+            minPick = 20;
+            mineResist = 2f;
         }
         public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b) // Modify the light that this tile produces, if any at all
 		{
-			r = 0.01f;
-			g = 0.01f;
-			b = 0.01f;
+			r = 0.02f;
+			g = 0.02f;
+			b = 0.02f;
 		}
 	}
 }

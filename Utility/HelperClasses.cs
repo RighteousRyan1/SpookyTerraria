@@ -1,14 +1,17 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpookyTerraria.ModIntances;
 using SpookyTerraria.NPCs;
+using SpookyTerraria.OtherItems;
 using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using static SpookyTerraria.SoundPlayer;
+using ReLogic.Graphics;
 
-namespace SpookyTerraria.ModIntances
+namespace SpookyTerraria.Utilities
 {
     public class Lists_SpookyNPCs
     {
@@ -26,14 +29,180 @@ namespace SpookyTerraria.ModIntances
         /// Completely zeroes the velocity of the projectile.
         /// </summary>
         /// <param name="projectile"></param>
-        public static void HaltVelocity(this Projectile projectile)
+        public static void HaltVelocity(this Entity entity)
         {
-            projectile.velocity.X = 0;
-            projectile.velocity.Y = 0;
+            entity.velocity.X = 0;
+            entity.velocity.Y = 0;
+        }
+        public static bool CheckGround(this Entity entity, bool checkOnGround = true)
+        {
+            if (checkOnGround)
+            {
+                if (entity.velocity.Y == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static bool CheckGround(this Player player, bool checkOnGround = true)
+        {
+            if (checkOnGround)
+            {
+                if (player.velocity.Y == 0 && !player.mount.Active)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
     public class SpookyTerrariaUtils
     {
+        /// <summary>
+        /// No real use; Don't use unless fucking around
+        /// </summary>
+        /// <param name="toAdd"></param>
+        /// <param name="toSubtract"></param>
+        public static void Square(int toAdd, int toSubtract)
+        {
+
+            WorldGen.KillTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16), ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16));
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16) - toSubtract);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16));
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16), ((int)Main.MouseWorld.Y / 16) - toSubtract);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillTile(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) - toSubtract);
+
+
+
+            WorldGen.KillWall((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16), ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16));
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16) - toSubtract);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16));
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16), ((int)Main.MouseWorld.Y / 16) - toSubtract);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16) + toAdd);
+
+            WorldGen.KillWall(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) - toSubtract);
+        }
+        /// <summary>
+        /// Cap a value at a max or a min.
+        /// </summary>
+        /// <param name="valueToBeCapped"></param>
+        /// <param name="capValue"></param>
+        /// <param name="checkLessThan"></param>
+        public static void CapValue(int valueToBeCapped, int capValue, bool checkLessThan = false)
+        {
+            if (checkLessThan)
+            {
+                if (valueToBeCapped > capValue)
+                {
+                    valueToBeCapped = capValue;
+                }
+            }
+            else if (!checkLessThan)
+            {
+                if (valueToBeCapped < capValue)
+                {
+                    valueToBeCapped = -capValue;
+                }
+            }
+        }
+        public static void CapValue(float valueToBeCapped, float capValue, bool checkLessThan = false)
+        {
+            if (checkLessThan)
+            {
+                if (valueToBeCapped > capValue)
+                {
+                    valueToBeCapped = capValue;
+                }
+            }
+            else if (!checkLessThan)
+            {
+                if (valueToBeCapped < capValue)
+                {
+                    valueToBeCapped = -capValue;
+                }
+            }
+        }
+        public static void CapValue(double valueToBeCapped, double capValue, bool checkLessThan = false)
+        {
+            if (checkLessThan)
+            {
+                if (valueToBeCapped > capValue)
+                {
+                    valueToBeCapped = capValue;
+                }
+            }
+            else if (!checkLessThan)
+            {
+                if (valueToBeCapped < capValue)
+                {
+                    valueToBeCapped = -capValue;
+                }
+            }
+        }
+        public static void CapValue(decimal valueToBeCapped, decimal capValue, bool checkLessThan = false)
+        {
+            if (checkLessThan)
+            {
+                if (valueToBeCapped > capValue)
+                {
+                    valueToBeCapped = capValue;
+                }
+            }
+            else if (!checkLessThan)
+            {
+                if (valueToBeCapped < capValue)
+                {
+                    valueToBeCapped = -capValue;
+                }
+            }
+        }
+        public static void CapValue(long valueToBeCapped, long capValue, bool checkLessThan = false)
+        {
+            if (checkLessThan)
+            {
+                if (valueToBeCapped > capValue)
+                {
+                    valueToBeCapped = capValue;
+                }
+            }
+            else if (!checkLessThan)
+            {
+                if (valueToBeCapped < capValue)
+                {
+                    valueToBeCapped = -capValue;
+                }
+            }
+        }
+        /// <summary>
+        /// Hardcoded value capping
+        /// </summary>
+        public static void DoCapping()
+        {
+            Player player = Main.player[Main.myPlayer];
+        }
         public enum BodyFrames
         {
             stand,
@@ -255,37 +424,37 @@ namespace SpookyTerraria.ModIntances
 
             // TODO: Friendly Reminder; Finish the shits
 
-            Main.heartTexture = mod.GetTexture("Assets/Heart_Purple");
-            Main.heart2Texture = mod.GetTexture("Assets/Heart_Blue");
-            Main.manaTexture = mod.GetTexture("Assets/ManaStar_Green");
+            Main.heartTexture = mod.GetTexture("Assets/UI/Heart_Purple");
+            Main.heart2Texture = mod.GetTexture("Assets/UI/Heart_Blue");
+            Main.manaTexture = mod.GetTexture("Assets/UI/ManaStar_Green");
 
-            Main.inventoryBack2Texture = mod.GetTexture("Assets/Box"); // Good
-            Main.inventoryBack3Texture = mod.GetTexture("Assets/ArmorSlotUI");
+            Main.inventoryBack2Texture = mod.GetTexture("Assets/UI/Box"); // Good
+            Main.inventoryBack3Texture = mod.GetTexture("Assets/UI/ArmorSlotUI");
 
             // Main.inventoryBack4Texture = mod.GetTexture("Assets/Box");
-            Main.inventoryBack5Texture = mod.GetTexture("Assets/ChestUI");
+            Main.inventoryBack5Texture = mod.GetTexture("Assets/UI/ChestUI");
 
-            Main.inventoryBack6Texture = mod.GetTexture("Assets/ShopUI");
-            Main.inventoryBack7Texture = mod.GetTexture("Assets/TrashSlot");
-            Main.inventoryBack8Texture = mod.GetTexture("Assets/VanitySlotUI");
-            Main.inventoryBack9Texture = mod.GetTexture("Assets/BoxBrighter");
-            Main.inventoryBack10Texture = mod.GetTexture("Assets/BoxFavorite");
+            Main.inventoryBack6Texture = mod.GetTexture("Assets/UI/ShopUI");
+            Main.inventoryBack7Texture = mod.GetTexture("Assets/UI/TrashSlot");
+            Main.inventoryBack8Texture = mod.GetTexture("Assets/UI/VanitySlotUI");
+            Main.inventoryBack9Texture = mod.GetTexture("Assets/UI/BoxBrighter");
+            Main.inventoryBack10Texture = mod.GetTexture("Assets/UI/BoxFavorite");
             // Main.inventoryBack11Texture = mod.GetTexture(unfinishedAssetPath);
-            Main.inventoryBack12Texture = mod.GetTexture("Assets/DyeSlotUI");
+            Main.inventoryBack12Texture = mod.GetTexture("Assets/UI/DyeSlotUI");
 
-            // Main.inventoryBack13Texture = mod.GetTexture("Assets/Box");
-            Main.inventoryBack14Texture = mod.GetTexture("Assets/BoxSel");
+            // Main.inventoryBack13Texture = mod.GetTexture("Assets/UI/Box");
+            Main.inventoryBack14Texture = mod.GetTexture("Assets/UI/BoxSel");
 
-            Main.inventoryBack15Texture = mod.GetTexture("Assets/BoxSel");
+            Main.inventoryBack15Texture = mod.GetTexture("Assets/UI/BoxSel");
 
-            // Main.inventoryBack16Texture = mod.GetTexture("Assets/Box");
-            // Main.inventoryTickOffTexture = mod.GetTexture("Assets/Box");
-            // Main.inventoryTickOffTexture = mod.GetTexture("Assets/Box");
+            // Main.inventoryBack16Texture = mod.GetTexture("Assets/UI/Box");
+            // Main.inventoryTickOffTexture = mod.GetTexture("Assets/UI/Box");
+            // Main.inventoryTickOffTexture = mod.GetTexture("Assets/UI/Box");
 
-            Main.inventoryBackTexture = mod.GetTexture("Assets/Box");
+            Main.inventoryBackTexture = mod.GetTexture("Assets/UI/Box");
 
             // Main.craft... texture
-            Main.chatBackTexture = mod.GetTexture("Assets/ChatBox");
+            Main.chatBackTexture = mod.GetTexture("Assets/UI/ChatBox");
         }
         /// <summary>
         /// Caps run speeds at <paramref name="maxRunSpeed"/>'s value
@@ -301,6 +470,150 @@ namespace SpookyTerraria.ModIntances
             if (player.velocity.X < -maxRunSpeed && player.velocity.Y == 0 && !player.mount.Active && !player.wet)
             {
                 player.velocity.X = -maxRunSpeed;
+            }
+        }
+        public static float blend;
+        /// <summary>
+        /// Draw UI for pages. Count is the number of pages to be displayed, with the remainder to 8 being leftover as "missing"
+        /// </summary>
+        /// <param name="numPages"></param>
+        /// <param name="position"></param>
+        public static void DrawPageUI(int numPages, float posX, float posY, bool condition = true)
+        {
+            Player player = Main.player[Main.myPlayer];
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            if (condition)
+            {
+                Color alphaBlendColor = Color.White * blend;
+
+                int count = player.CountItem(ModContent.ItemType<Paper>(), 8);
+                string pageUIDisplayString = $"{count} out of 8 pages";
+                Rectangle pageUIPos = new Rectangle((int)posX, (int)posY, 175, 36);
+
+                if (pageUIPos.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    blend += 0.05f;
+                    if (blend > 1f)
+                    {
+                        blend = 1f;
+                    }
+                    // For drawing a border, i guess
+                    // Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(22, 23), Color.Black, 0f, new Vector2(0, 0), 1.1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(25, 25), Color.White, 0f, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
+                }
+                if (!pageUIPos.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    blend -= 0.05f;
+                    if (blend < 0.2f)
+                    {
+                        blend = 0.2f;
+                    }
+                }
+                if (numPages == 0)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 1)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 2)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 3)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 4)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 5)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 6)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 7)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages == 8)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 120, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 140, posY), alphaBlendColor);
+                }
+                if (numPages > 8 || numPages < 0)
+                {
+                    throw new Exception($"value numPages ({numPages}) was not within the bounds of expected values!");
+                }
+                Main.spriteBatch.End();
             }
         }
     }

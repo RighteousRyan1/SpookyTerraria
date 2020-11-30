@@ -40,14 +40,26 @@ namespace SpookyTerraria.Fists
         }
         public override bool AltFunctionUse(Player player)
         {
-            return true;
+            SpookyPlayer p = new SpookyPlayer();
+            return !p.hoveringBuff;
         }
         public override bool UseItem(Player player)
         {
+            if (player.itemAnimation == (int)(player.itemAnimationMax * 0.4f))
+            {
+                if (player.altFunctionUse == 2)
+                {
+                    player.GetModPlayer<StaminaPlayer>().Stamina -= 10;
+                }
+                else
+                {
+                    player.GetModPlayer<StaminaPlayer>().Stamina -= 3;
+                }
+            }
             if (player.altFunctionUse == 2)
             {
-                item.pick = 12;
-                item.axe = 3;
+                item.pick = 25;
+                item.axe = 5;
             }
             else if (player.altFunctionUse != 2)
             {
@@ -102,6 +114,21 @@ namespace SpookyTerraria.Fists
         }
         public override void HoldItem(Player player)
         {
+			if (player.itemAnimation == 0)
+			{
+				item.pick = 8;
+				item.axe = 2;
+			}
+			if (player.GetModPlayer<SpookyPlayer>().punchingCharged)
+			{
+				item.pick = 25;
+                item.axe = 5;
+			}
+            if (!player.GetModPlayer<SpookyPlayer>().punchingCharged && !player.GetModPlayer<SpookyPlayer>().punchingLight)
+            {
+                item.pick = 8;
+                item.axe = 2;
+            }
         }
         public override bool UseItemFrame(Player player)
         {

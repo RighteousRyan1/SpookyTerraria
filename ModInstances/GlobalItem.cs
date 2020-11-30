@@ -7,6 +7,7 @@ using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using System.Collections.Generic;
 using System.Linq;
+using SpookyTerraria.Utilities;
 
 namespace SpookyTerraria.ModIntances
 {
@@ -37,16 +38,31 @@ namespace SpookyTerraria.ModIntances
             item.useTurn = false;
             if (item.type == ItemID.CarriageLantern)
             {
-                item.holdStyle = ItemHoldStyleID.HoldingUp; // TODO: Fix moonwalking bug
+                item.holdStyle = ItemHoldStyleID.HoldingUp;
             }
+        }
+        public override bool UseItem(Item item, Player player)
+        {
+            if (item.type == ItemID.FallenStar)
+            {
+                Lighting.AddLight(player.itemLocation, Color.Yellow.ToVector3());
+            }
+            return base.UseItem(item, player);
         }
         public override void HoldItem(Item item, Player player)
         {
             if (item.type == ItemID.CarriageLantern)
             {
-                Main.placementPreview = false;
                 Lighting.AddLight(player.itemLocation, Color.Goldenrod.ToVector3() * Main.essScale);
             }
+            /*if (item.type == ItemID.FallenStar)
+            {
+                Lighting.AddLight(player.itemLocation, Color.Yellow.ToVector3());
+            }
+            if (item.type == ItemID.ManaCrystal)
+            {
+                Lighting.AddLight(player.itemLocation, Color.BlueViolet.ToVector3());
+            }*/
         }
         public override void PostUpdate(Item item)
         {
@@ -54,14 +70,28 @@ namespace SpookyTerraria.ModIntances
             { 
                 Lighting.AddLight(item.Center, Color.Goldenrod.ToVector3() * Main.essScale);
             }
+            if (item.type == ItemID.ManaCrystal)
+            {
+                Lighting.AddLight(item.Center, Color.BlueViolet.ToVector3());
+            }
         }
         public override bool HoldItemFrame(Item item, Player player)
         {
             if (item.type == ItemID.CarriageLantern)
             {
-                player.bodyFrame.Y = player.bodyFrame.Height * 2;
+                SpookyTerrariaUtils.SetBodyFrame((int)SpookyTerrariaUtils.BodyFrames.armDiagonalUp);
                 return true;
             }
+            /*if (item.type == ItemID.FallenStar)
+            {
+                SpookyTerrariaUtils.SetBodyFrame((int)SpookyTerrariaUtils.BodyFrames.armDiagonalDown);
+                return true;
+            }
+            if (item.type == ItemID.ManaCrystal)
+            {
+                SpookyTerrariaUtils.SetBodyFrame((int)SpookyTerrariaUtils.BodyFrames.armDiagonalDown);
+                return true;
+            }*/
             return base.HoldItemFrame(item, player);
         }
         public override void HoldStyle(Item item, Player player)
@@ -81,11 +111,20 @@ namespace SpookyTerraria.ModIntances
                 {
                     player.itemRotation += MathHelper.PiOver4;
                     Vector2 origin = new Vector2(0, -18);
-                    // player.itemRotation = MathHelper.PiOver4 + player.velocity.X - (new Vector2(10, 0).RotatedBy(player.itemRotation).X);
                     player.itemLocation.Y = player.Center.Y - origin.RotatedBy(player.itemRotation).Y * player.direction;
                     player.itemLocation.X = player.Center.X - origin.RotatedBy(player.itemRotation).X * player.direction;
                 }
             }
+            /*if (item.type == ItemID.FallenStar)
+            {
+                player.itemLocation = player.direction == 1 ? player.Center + new Vector2(10, 50) : player.Center - new Vector2(10, -15);
+            }
+            if (item.type == ItemID.ManaCrystal)
+            {
+                player.itemLocation = player.direction == 1 ? player.Center + new Vector2(10, 50) : player.Center - new Vector2(10, -15);
+            }*/
+
+            // Maybe later? ^
         }
     }
 }
