@@ -10,6 +10,10 @@ using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using static SpookyTerraria.SoundPlayer;
 using ReLogic.Graphics;
+using Terraria.Utilities;
+using System.Runtime.Caching;
+using Microsoft.Xna.Framework.Audio;
+using SpookyTerraria.Tiles;
 
 namespace SpookyTerraria.Utilities
 {
@@ -45,6 +49,35 @@ namespace SpookyTerraria.Utilities
             }
             return false;
         }
+        /// <summary>
+        /// This is just a meme method, pls no use
+        /// </summary>
+        /// <param name="pdi"></param>
+        /// <returns></returns>
+        public static PlayerDrawInfo ToDrawInfo(this PlayerDrawInfo pdi)
+        {
+            return pdi;
+        }
+        public static Vector2 ToVector2(this Tile tile, int x, int y)
+        {
+            return new Vector2(x / 16, y / 16);
+        }
+        public static float GetRandomPoint(this Rectangle @this, bool forX, bool forY)
+        {
+            if (forX)
+            {
+                return Main.rand.NextFloat(0, @this.Height);
+            }
+            else if (forX)
+            {
+                return Main.rand.NextFloat(0, @this.Width);
+            }
+            if ((!forX && !forY) || (forX && forY))
+            {
+                throw new FormatException("Both forX and forY were set. Please set one of them to true.");
+            }
+            return 0f;
+        }
         public static bool CheckGround(this Player player, bool checkOnGround = true)
         {
             if (checkOnGround)
@@ -59,6 +92,210 @@ namespace SpookyTerraria.Utilities
     }
     public class SpookyTerrariaUtils
     {
+        public static string ChooseRandomDeathText(int choice)
+        {
+            switch (choice)
+            {
+                case 0:
+                    return "You were slaughtered...";
+                case 1:
+                    return "You have met your end...";
+                case 2:
+                    return "Your book has closed...";
+                case 3:
+                    return "An unfortunate end...";
+                case 4:
+                    return "A life that came to a close...";
+                case 5:
+                    return "You were slain...";
+                case 6:
+                    return "You are dead...";
+                case 7:
+                    return "Game over...";
+                case 8:
+                    return "You have died...";
+                case 9:
+                    return "Not again!";
+                case 10:
+                    return "Life is only temporary...";
+                default:
+                    return "Death is eternal.";
+            }
+        }
+        public static Color ColorSwitcher(Color firstColor, Color secondColor, float transitionTime)
+        {
+            return Color.Lerp(firstColor, secondColor, (float)(Math.Sin(Main.GameUpdateCount / transitionTime) + 1f) / 2f);
+        }
+        public const int tileScaling = 16;
+        public const int BGStyleID_DefaultStyle = -1;
+        public enum BGStyleID
+        {
+            DefaultForest,
+            Corruption,
+            Desert, 
+            Jungle,
+            Beach,
+            EvilDesert,
+            HallowTrees,
+            SnowTrees,
+        }
+        public const string slenderWorldName = "Slender: The 8 Pages";
+        /// <summary>
+        /// Removes all harcoded spawns
+        /// </summary>
+        public static void RemoveAllPossiblePagePositions()
+        {
+            float givenFloat = Main.rand.NextFloat();
+
+            Tile treeRandPosTile1 = Framing.GetTileSafely(1161, 344); // Main.tile[1161,344]
+            Tile treeRandPosTile2 = Framing.GetTileSafely(1137, 345); // Main.tile[1137,345]
+            treeRandPosTile1.active(false);
+            treeRandPosTile2.active(false);
+            Tile xWallsPos1 = Framing.GetTileSafely(929, 323); // Main.tile[929,323]
+            Tile xWallsPos2 = Framing.GetTileSafely(898, 317); // Main.tile[898,317]
+            xWallsPos1.active(false);
+            xWallsPos2.active(false);
+            Tile tunnsPos1 = Framing.GetTileSafely(658, 302); // Main.tile[658,302]
+            Tile tunnsPos2 = Framing.GetTileSafely(754, 302); // Main.tile[754,302]
+            tunnsPos1.active(false);
+            tunnsPos2.active(false);
+            Tile tankersPos1 = Framing.GetTileSafely(179, 354); // Main.tile[179,354]
+            Tile tankersPos2 = Framing.GetTileSafely(157, 353); // Main.tile[157,353]
+            tankersPos1.active(false);
+            tankersPos2.active(false);
+            Tile siloPos1 = Framing.GetTileSafely(1507, 301); // Main.tile[1507, 301]
+            Tile siloPos2 = Framing.GetTileSafely(1491, 300); // Main.tile[1491,300]
+            siloPos1.active(false);
+            siloPos2.active(false);
+            Tile underGroundPos = Framing.GetTileSafely(1770, 298); // Main.tile[1770,298]
+            Tile truckPos = Framing.GetTileSafely(1761, 273); // Main.tile[1761,273]
+            underGroundPos.active(false);
+            truckPos.active(false);
+            Tile bRoomsPos1 = Framing.GetTileSafely(2133, 389); // Main.tile[2133,389]
+            Tile bRoomsPos2 = Framing.GetTileSafely(2133, 379); // Main.tile[2133,379]
+            Tile bRoomsPos3 = Framing.GetTileSafely(2133, 369); // Main.tile[2133,369]
+            bRoomsPos1.active(false);
+            bRoomsPos2.active(false);
+            bRoomsPos3.active(false);
+            Tile rocksPos = Framing.GetTileSafely(296, 340); // Main.tile[296,340]
+            rocksPos.active(false);
+        }
+        /// <summary>
+        /// Extremely hardcoded page generation spots, but still cool.
+        /// </summary>
+        public static void GenerateRandomPagePositions()
+        {
+            float givenFloat = Main.rand.NextFloat();
+            if (SpookyPlayer.pages == 0)
+            {
+                Tile treeRandPosTile1 = Framing.GetTileSafely(1161, 344); // Main.tile[1161,344]
+                Tile treeRandPosTile2 = Framing.GetTileSafely(1137, 345); // Main.tile[1137,345]
+                if (!treeRandPosTile1.active() && !treeRandPosTile2.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(1161, 344, ModContent.TileType<PageTileLeft>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(1137, 345, ModContent.TileType<PageTileRight>());
+                    }
+                }
+                Tile xWallsPos1 = Framing.GetTileSafely(929, 323); // Main.tile[929,323]
+                Tile xWallsPos2 = Framing.GetTileSafely(898, 317); // Main.tile[898,317]
+                if (!xWallsPos1.active() && !xWallsPos2.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(929, 323, ModContent.TileType<PageTileLeft>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(898, 317, ModContent.TileType<PageTileRight>());
+                    }
+                    // Good
+                }
+                Tile tunnsPos1 = Framing.GetTileSafely(658, 302); // Main.tile[658,302]
+                Tile tunnsPos2 = Framing.GetTileSafely(754, 302); // Main.tile[754,302]
+                if (!tunnsPos1.active() && !tunnsPos2.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(658, 302, ModContent.TileType<PageTileWall>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(754, 302, ModContent.TileType<PageTileWall>());
+                    }
+                    // Good
+                }
+                Tile tankersPos1 = Framing.GetTileSafely(179, 354); // Main.tile[179,354]
+                Tile tankersPos2 = Framing.GetTileSafely(157, 353); // Main.tile[157,353]
+                if (!tankersPos1.active() && !tankersPos2.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(179, 354, ModContent.TileType<PageTileRight>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(157, 353, ModContent.TileType<PageTileRight>());
+                    }
+                    // Good
+                }
+                Tile siloPos1 = Framing.GetTileSafely(1507, 301); // Main.tile[1507, 301]
+                Tile siloPos2 = Framing.GetTileSafely(1491, 300); // Main.tile[1491,300]
+                if (!siloPos1.active() && !siloPos2.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(1507, 301, ModContent.TileType<PageTileLeft>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(1491, 300, ModContent.TileType<PageTileRight>());
+                    }
+                    // Good
+                }
+                Tile underGroundPos = Framing.GetTileSafely(1770, 298); // Main.tile[1770,298]
+                Tile truckPos = Framing.GetTileSafely(1761, 273); // Main.tile[1761,273]
+                if (!underGroundPos.active() && !truckPos.active())
+                {
+                    if (Main.rand.NextFloat() <= 0.5f)
+                    {
+                        WorldGen.PlaceTile(1770, 298, ModContent.TileType<PageTileWall>());
+                    }
+                    else
+                    {
+                        WorldGen.PlaceTile(1761, 273, ModContent.TileType<PageTileWall>());
+                    }
+                    // Good
+                }
+                Tile bRoomsPos1 = Framing.GetTileSafely(2133, 389); // Main.tile[2133,389]
+                Tile bRoomsPos2 = Framing.GetTileSafely(2133, 379); // Main.tile[2133,379]
+                Tile bRoomsPos3 = Framing.GetTileSafely(2133, 369); // Main.tile[2133,369]
+                if (!bRoomsPos1.active() && !bRoomsPos2.active() && !bRoomsPos3.active())
+                {
+                    if (givenFloat < 0.33f)
+                    {
+                        WorldGen.PlaceTile(2133, 389, ModContent.TileType<PageTileWall>());
+                    }
+                    else if (givenFloat >= 0.33f && givenFloat < 0.66f)
+                    {
+                        WorldGen.PlaceTile(2133, 379, ModContent.TileType<PageTileWall>());
+                    }
+                    else if (givenFloat >= 0.66f && givenFloat <= 1f)
+                    {
+                        WorldGen.PlaceTile(2133, 369, ModContent.TileType<PageTileWall>());
+                    }
+                }
+                Tile rocksPos = Framing.GetTileSafely(296, 340); // Main.tile[296,340]
+                if (!rocksPos.active())
+                {
+                    WorldGen.PlaceTile(296, 340, ModContent.TileType<PageTileWall>());
+                }
+            }
+        }
         /// <summary>
         /// No real use; Don't use unless fucking around
         /// </summary>
@@ -66,7 +303,6 @@ namespace SpookyTerraria.Utilities
         /// <param name="toSubtract"></param>
         public static void Square(int toAdd, int toSubtract)
         {
-
             WorldGen.KillTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16);
 
             WorldGen.KillTile(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) + toAdd);
@@ -113,14 +349,14 @@ namespace SpookyTerraria.Utilities
         /// <param name="checkLessThan"></param>
         public static void CapValue(int valueToBeCapped, int capValue, bool checkLessThan = false)
         {
-            if (checkLessThan)
+            if (!checkLessThan)
             {
                 if (valueToBeCapped > capValue)
                 {
                     valueToBeCapped = capValue;
                 }
             }
-            else if (!checkLessThan)
+            else if (checkLessThan)
             {
                 if (valueToBeCapped < capValue)
                 {
@@ -299,7 +535,7 @@ namespace SpookyTerraria.Utilities
         /// <summary>
         /// To be worked on...
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Fucc</typeparam>
         public struct GiveInstance<T> where T : class
         {
             // Work later nerd
@@ -415,6 +651,7 @@ namespace SpookyTerraria.Utilities
         /// The directory to the 'Unfinished' UI Element
         /// </summary>
         public static string unfinishedAssetPath = "Assets/Unfinished";
+        public static string blackSquare = "Assets/BlackSquare";
         /// <summary>
         /// Changes all vanilla textures to different ones
         /// </summary>
@@ -478,38 +715,142 @@ namespace SpookyTerraria.Utilities
         /// </summary>
         /// <param name="numPages"></param>
         /// <param name="position"></param>
-        public static void DrawPageUI(int numPages, float posX, float posY, bool condition = true)
+        public static void DrawPageUI(int numPages, float posX, float posY)
         {
             Player player = Main.player[Main.myPlayer];
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             Mod mod = ModLoader.GetMod("SpookyTerraria");
-            if (condition)
+            Color alphaBlendColor = Color.White * blend;
+
+            int count = SpookyPlayer.pages;
+            string pageUIDisplayString = $"{count} out of 8 pages";
+            Rectangle pageUIPos = new Rectangle((int)posX, (int)posY, 176, 36);
+
+            if (pageUIPos.Contains(Main.MouseScreen.ToPoint()))
             {
-                Color alphaBlendColor = Color.White * blend;
-
-                int count = player.CountItem(ModContent.ItemType<Paper>(), 8);
-                string pageUIDisplayString = $"{count} out of 8 pages";
-                Rectangle pageUIPos = new Rectangle((int)posX, (int)posY, 175, 36);
-
-                if (pageUIPos.Contains(Main.MouseScreen.ToPoint()))
+                blend += 0.05f;
+                if (blend > 1f)
                 {
-                    blend += 0.05f;
-                    if (blend > 1f)
-                    {
-                        blend = 1f;
-                    }
-                    // For drawing a border, i guess
-                    // Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(22, 23), Color.Black, 0f, new Vector2(0, 0), 1.1f, SpriteEffects.None, 0f);
-                    Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(25, 25), Color.White, 0f, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
+                    blend = 1f;
                 }
-                if (!pageUIPos.Contains(Main.MouseScreen.ToPoint()))
+                Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(25, 25), Color.White, 0f, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
+            }
+
+            int unfoundPages = MathHelpers.FindRemainder(SpookyPlayer.pages, 8);
+
+            if (!pageUIPos.Contains(Main.MouseScreen.ToPoint()))
+            {
+                blend -= 0.05f;
+                if (blend < 0.2f)
                 {
-                    blend -= 0.05f;
-                    if (blend < 0.2f)
-                    {
-                        blend = 0.2f;
-                    }
+                    blend = 0.2f;
                 }
+            }
+            if (player.dead)
+            {
+                if (numPages == 0)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 1)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 2)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 3)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 4)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 5)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 6)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 7)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                }
+                if (numPages == 8)
+                {
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 20, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 40, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 60, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 120, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 140, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 140, posY), Color.White);
+                }
+            }
+            else if (!player.dead)
+            {
                 if (numPages == 0)
                 {
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX, posY), alphaBlendColor);
@@ -585,7 +926,7 @@ namespace SpookyTerraria.Utilities
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 80, posY), alphaBlendColor);
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), alphaBlendColor);
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 120, posY), alphaBlendColor);
-                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), Color.White);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Missing"), new Vector2(posX + 140, posY), alphaBlendColor);
                 }
                 if (numPages == 7)
                 {
@@ -608,101 +949,46 @@ namespace SpookyTerraria.Utilities
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 100, posY), alphaBlendColor);
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 120, posY), alphaBlendColor);
                     Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 140, posY), alphaBlendColor);
+                    Main.spriteBatch.Draw(ModContent.GetTexture("SpookyTerraria/Assets/UniqueUI/PageUI_Collected"), new Vector2(posX + 140, posY), alphaBlendColor);
                 }
-                if (numPages > 8 || numPages < 0)
-                {
-                    throw new Exception($"value numPages ({numPages}) was not within the bounds of expected values!");
-                }
-                Main.spriteBatch.End();
             }
+            Main.spriteBatch.End();
+        }
+        public const int maxDisplayTimes = 2;
+
+        public static void DrawPageInterface(int pageIndex)
+        {
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+
+            Player player = Main.player[Main.myPlayer];
+
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+
+            Vector2 middleOfScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
+            Main.spriteBatch.Draw(mod.GetTexture($"Assets/UniqueUI/PageInterface_{pageIndex}"), middleOfScreen - new Vector2(250, 500), Color.White * (player.GetModPlayer<SpookyPlayer>().pageDisplayTimer / 100f));
+            Main.spriteBatch.End();
+        }
+        public static void DrawPageInterface_PostCallEnd(int pageIndex)
+        {
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+
+            Player player = Main.player[Main.myPlayer];
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+
+            Vector2 middleOfScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
+            Main.spriteBatch.Draw(mod.GetTexture($"Assets/UniqueUI/PageInterface_{pageIndex}"), middleOfScreen - new Vector2(250, 250), Color.White * (player.GetModPlayer<SpookyPlayer>().pageDisplayTimer / 100f));
+            Main.spriteBatch.End();
         }
     }
     public class SoundEngine
     {
-        /// <summary>
-        /// Pretty hardcoded as of now, but plays all needed ambience
-        /// </summary>
-        public static void Play()
+        public static void ReplayAt2Container()
         {
             Mod mod = ModLoader.GetMod("SpookyTerraria");
             Player player = Main.player[Main.myPlayer];
-            /*SoundEffectInstance breezeSounds;
-            breezeSounds = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Breezes"));
-            SoundEffectInstance crickets;
-            crickets = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/ForestAmbience"));
-            SoundEffectInstance waves;
-            waves = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/OceanAmbience"));
-            SoundEffectInstance blizz;
-            blizz = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/SnowAmbience"));
-            SoundEffectInstance cavesSound;
-            cavesSound = Main.PlaySound(SoundLoader.customSoundType, -1, -1, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambience/Biome/CaveRumble"));*/
-            // Use SoundEffectInstance Eventually
 
-            caveRumbleTimer++;
-            cricketsTimer++;
-            blizzTimer++;
-            oceanWavesTimer++;
-
-            // Main.NewText($"CaveRumble: {caveRumbleTimer}, OceanWaves: {oceanWavesTimer}, Crickets: {cricketsTimer}, Blizzard: {blizzTimer}");
-            /*if (Main.gameMenu)
-            {
-                cavesSound.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();
-                waves.Stop();
-            }*/
-
-            if (player.ZoneRockLayerHeight) // Rock Layer
-            {
-                /*waves.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();*/
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                // Checked
-            }
-            if (player.ZoneBeach && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Beach
-            {
-                /*crickets.Stop();
-                breezeSounds.Stop();
-                blizz.Stop();
-                cavesSound.Stop();*/
-                cricketsTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                // Checked
-            }
-            if (player.ZoneDirtLayerHeight)
-            {
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-            }
-            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Snow
-            {
-                /*waves.Stop();
-                crickets.Stop();
-                breezeSounds.Stop();
-                cavesSound.Stop();*/
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                cricketsTimer = 0;
-                // checked
-            }
-            if (PlayerIsInForest(player)) // Forest
-            {
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                /// checked
-            }
-            if (caveRumbleTimer == 1680 && player.ZoneRockLayerHeight)
-            {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
-                caveRumbleTimer = 0;
-            }
             if (caveRumbleTimer == 2 && (player.ZoneRockLayerHeight))
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
@@ -719,11 +1005,40 @@ namespace SpookyTerraria.Utilities
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
             }
-            if (player.ZoneBeach && oceanWavesTimer == 9060 && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight)
+            if (dayAmbienceTimer == 2 && Main.dayTime && PlayerIsInForest(player))
             {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
-                oceanWavesTimer = 0;
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
             }
+            if (jungleAmbTimer == 2 && player.ZoneJungle && (player.ZoneDirtLayerHeight || player.ZoneOverworldHeight))
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/JungleAmbience"));
+            }
+        }
+        /// <summary>
+        /// Pretty hardcoded as of now, but plays all needed ambience
+        /// </summary>
+        public static void Play()
+        {
+            ReplayAt2Container();
+
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Player player = Main.player[Main.myPlayer];
+
+            if (caveRumbleTimer == 1680 && player.ZoneRockLayerHeight)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
+                caveRumbleTimer = 0;
+            }
+            string unwantedWorldName = "Slender: The 8 Pages";
+            if (Main.worldName != unwantedWorldName || Main.worldName != unwantedWorldName.ToUpper() || Main.worldName != unwantedWorldName.ToLower())
+            {
+                if (player.ZoneBeach && oceanWavesTimer == 9060 && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight)
+                {
+                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
+                    oceanWavesTimer = 0;
+                }
+            }
+
             if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight && blizzTimer == 6060)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
@@ -734,6 +1049,318 @@ namespace SpookyTerraria.Utilities
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
                 cricketsTimer = 0;
             }
+            if (jungleAmbTimer == 9780 && player.ZoneJungle && player.ZoneOverworldHeight)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/JungleAmbience"));
+                jungleAmbTimer = 0;
+            }
+            if (dayAmbienceTimer == 4620 && PlayerIsInForest(player) && Main.dayTime && SpookyPlayer.pages >= 8)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
+                dayAmbienceTimer = 0;
+            }
+        }
+        /// <summary>
+        /// Stop the SoundEffectInstance of <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path"></param>
+        public static void StopAmbientSound(string path)
+        {
+            Player p = Main.player[Main.myPlayer];
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            SoundEffectInstance pathInstance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
+            pathInstance?.Stop();
+        }
+        /// <summary>
+        /// Modify the <paramref name="pan"/>, <paramref name="pitch"/>, and <paramref name="volume"/> of <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="volume"></param>
+        /// <param name="pitch"></param>
+        /// <param name="pan"></param>
+        public static void ModifyAmbientAttribute(string path, float volume = 1f, float pitch = 1f, float pan = 1f)
+        {
+            Player p = Main.player[Main.myPlayer];
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            SoundEffectInstance pathInstance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
+            if (pathInstance != null)
+            {
+                pathInstance.Pan = pan;
+                pathInstance.Pitch = pitch;
+                pathInstance.Volume = volume;
+            }
+        }
+        /// <summary>
+        /// Use instance of SoundEffectInstance instead of indirectly. Automatically clamps the SoundEffectInstance's Pitch and Volume values between 0 and 1.
+        /// </summary>
+        /// <param name="path">The path to the sound effect.</param>
+        public static SoundEffectInstance GetSoundEffect(string path)
+        {
+            Player p = Main.player[Main.myPlayer];
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            SoundEffectInstance instance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
+
+            if (instance.Volume > 1f)
+            {
+                instance.Volume = 1f;
+            }
+            if (instance.Volume < 0f)
+            {
+                instance.Volume = 0f;
+            }
+
+            if (instance.Pitch > 1f)
+            {
+                instance.Pitch = 1f;
+            }
+            if (instance.Pitch < 0f)
+            {
+                instance.Pitch = 0f;
+            }
+            return instance;
+        }
+        /// <summary>
+        /// Stops ALL active ambient sounds.
+        /// </summary>
+        public static void StopAllAmbientSounds()
+        {
+            Player p = Main.player[Main.myPlayer];
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            SoundEffectInstance a = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/ForestAmbience"));
+            SoundEffectInstance b = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/OceanAmbience"));
+            SoundEffectInstance c = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/SnowAmbience"));
+            SoundEffectInstance d = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/CaveRumble"));
+            SoundEffectInstance e = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Breezes"));
+            SoundEffectInstance f = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
+            SoundEffectInstance g = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/JungleAmbience"));
+            a?.Stop();
+            b?.Stop();
+            c?.Stop();
+            d?.Stop();
+            e?.Stop();
+            f?.Stop();
+            g?.Stop();
+        }
+        /// <summary>
+        /// Stops all directory 
+        /// </summary>
+        /// <param name="paths"></param>
+        public static void StopSoundList(string[] paths)
+        {
+            Player p = Main.player[Main.myPlayer];
+            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            foreach (string path in paths)
+            {
+                SoundEffectInstance instances = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
+                instances?.Stop();
+            }
+        }
+
+        public const string cricketsSoundDir = "Sounds/Custom/Ambient/Biome/ForestAmbience";
+        public const string blizzardSoundDir = "Sounds/Custom/Ambient/Biome/SnowAmbience";
+        public const string wavesSoundDir = "Sounds/Custom/Ambient/Biome/OceanAmbience";
+        public const string rumblesSoundDir = "Sounds/Custom/Ambient/Biome/CaveRumble";
+        public const string breezeSoundDir = "Sounds/Custom/Ambient/Breezes";
+        public const string dayAmbienceDir = "Sounds/Custom/Ambient/Biome/ForestAmbience_Day";
+        public const string jungleAmbienceDir = "Sounds/Custom/Ambient/Biome/JungleAmbience";
+
+        /// <summary>
+        /// Handle sound instancing, such as stopping sounds, etc.
+        /// </summary>
+        public static void HandleSoundInstancing()
+        {
+            Player player = Main.player[Main.myPlayer];
+
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                oceanWavesTimer = 0;
+                StopAmbientSound(wavesSoundDir);
+            }
+
+            caveRumbleTimer++;
+            cricketsTimer++;
+            blizzTimer++;
+            oceanWavesTimer++;
+            jungleAmbTimer++;
+            dayAmbienceTimer++;
+
+            if (player.ZoneSkyHeight || player.ZoneUnderworldHeight)
+            {
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(dayAmbienceDir);
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(cricketsSoundDir);
+                cricketsTimer = 0;
+                caveRumbleTimer = 0;
+                oceanWavesTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                oceanWavesTimer = 0;
+                jungleAmbTimer = 0;
+                dayAmbienceTimer = 0;
+            }
+            if (Main.gameMenu)
+            {
+                StopAllAmbientSounds();
+            }
+            if (player.ZoneCorrupt || player.ZoneCrimson)
+            {
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                oceanWavesTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                oceanWavesTimer = 0;
+                if (Main.dayTime)
+                {
+                    StopAmbientSound(cricketsSoundDir);
+                    cricketsTimer = 0;
+                }
+                else
+                {
+                    StopAmbientSound(dayAmbienceDir);
+                    dayAmbienceTimer = 0;
+                }
+                if (!player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight)
+                {
+                    StopAmbientSound(wavesSoundDir);
+                    caveRumbleTimer = 0;
+                }
+            }
+            if (player.ZoneDesert && !player.ZoneBeach)
+            {
+                StopAmbientSound(cricketsSoundDir);
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                oceanWavesTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                caveRumbleTimer = 0;
+                if (Main.dayTime)
+                {
+                    cricketsTimer = 0;
+                }
+                else
+                {
+                    dayAmbienceTimer = 0;
+                }
+            }
+            if (player.ZoneJungle && (player.ZoneOverworldHeight || player.ZoneDirtLayerHeight))
+            {
+                StopAmbientSound(cricketsSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                caveRumbleTimer = 0;
+                oceanWavesTimer = 0;
+                cricketsTimer = 0;
+                blizzTimer = 0;
+                dayAmbienceTimer = 0;
+            }
+            else if (player.ZoneJungle && player.ZoneRockLayerHeight)
+            {
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(dayAmbienceDir);
+                StopAmbientSound(cricketsSoundDir);
+                oceanWavesTimer = 0;
+                cricketsTimer = 0;
+                blizzTimer = 0;
+                dayAmbienceTimer = 0;
+                jungleAmbTimer = 0;
+            }
+            if (player.ZoneRockLayerHeight) // Rock Layer
+            {
+                StopAmbientSound(cricketsSoundDir);
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(breezeSoundDir);
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(dayAmbienceDir);
+                // ModifyAmbientAttribute(breezeSoundDir, 0.4f, 1f, 0.9f);
+                oceanWavesTimer = 0;
+                cricketsTimer = 0;
+                blizzTimer = 0;
+                dayAmbienceTimer = 0;
+                jungleAmbTimer = 0;
+            }
+            if (player.ZoneDirtLayerHeight)
+            {
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                // GetSoundEffect(breezeSoundDir).Volume--;
+            }
+            string unwantedWorldName = "Slender: The 8 Pages";
+            if (player.ZoneBeach && !player.ZoneDesert && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Beach
+            {
+                if (Main.worldName != unwantedWorldName || Main.worldName != unwantedWorldName.ToUpper() || Main.worldName != unwantedWorldName.ToLower())
+                {
+                    StopAmbientSound(cricketsSoundDir);
+                    cricketsTimer = 0;
+                }
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(dayAmbienceDir);
+                // ModifyAmbientAttribute(breezeSoundDir, 0.4f, 1f, 0.9f);
+                caveRumbleTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                dayAmbienceTimer = 0;
+                // Checked
+            }
+            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Snow
+            {
+                StopAmbientSound(cricketsSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(jungleAmbienceDir);
+                StopAmbientSound(dayAmbienceDir);
+                ModifyAmbientAttribute(breezeSoundDir, 0.4f, 0.2f, 0.98f);
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                cricketsTimer = 0;
+                jungleAmbTimer = 0;
+                dayAmbienceTimer = 0;
+                // checked
+            }
+            if (PlayerIsInForest(player) && !Main.dayTime && !player.ZoneRockLayerHeight) // Forest
+            {
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(dayAmbienceDir);
+                StopAmbientSound(jungleAmbienceDir);
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                dayAmbienceTimer = 0;
+            }
+            if (PlayerIsInForest(player) && Main.dayTime && !player.ZoneRockLayerHeight) // Forest
+            {
+                StopAmbientSound(blizzardSoundDir);
+                StopAmbientSound(wavesSoundDir);
+                StopAmbientSound(rumblesSoundDir);
+                StopAmbientSound(cricketsSoundDir);
+                StopAmbientSound(jungleAmbienceDir);
+                oceanWavesTimer = 0;
+                caveRumbleTimer = 0;
+                blizzTimer = 0;
+                jungleAmbTimer = 0;
+                cricketsTimer = 0;
+            }
+            // Main.NewText($"CaveRumble: {caveRumbleTimer}, OceanWaves: {oceanWavesTimer}, Crickets: {cricketsTimer}, Blizzard: {blizzTimer}, DayAmb: {dayAmbienceTimer}, JungleAmb: {jungleAmbTimer}");
         }
     }
 }

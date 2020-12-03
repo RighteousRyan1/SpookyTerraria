@@ -43,7 +43,7 @@ namespace SpookyTerraria
             {
                 return;
             }
-            if (ModContent.GetInstance<SpookyConfigServer>().excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool)
+            if (ModContent.GetInstance<SpookyConfigServer>().excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool && !ModContent.GetInstance<SpookyTerraria>().beatGame)
             {
                 pool.Clear();
                 if (!player.GetModPlayer<SpookyPlayer>().stalkerConditionMet)

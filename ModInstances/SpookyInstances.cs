@@ -34,16 +34,15 @@ namespace SpookyTerraria
         [Range(0f, 1f)]
         public float lightingScale;
 
-        /*
-        [Label("Toggle Note Collecting")]
-        [DefaultValue(false)]
-        [Tooltip("The objective of the game normally is to collect 300 notes from the form of blocks. If this is on, then your objective is to beat the Moon Lord")]
-        public bool normalProgression;
-        */
-
         [Label("Modify Spawn Pool")]
         [DefaultValue(false)]
         [Tooltip("Removes all spawns besides Spooky Terraria NPCs. For when you want to feel isolated.")]
         public bool excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool;
+
+        [Header("Debug Mode")]
+        [Label("Debug Mode")]
+        [DefaultValue(false)]
+        [Tooltip("If on, enables debug mode. Please do not use this to abuse your playthroughs.")]
+        public bool debugMode;
     }
 }

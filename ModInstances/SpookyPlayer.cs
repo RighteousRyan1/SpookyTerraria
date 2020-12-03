@@ -17,16 +17,69 @@ using SpookyTerraria.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 using System;
+using Terraria.ModLoader.IO;
+using SpookyTerraria.Tiles;
+using ReLogic.Graphics;
+using System.IO;
+using Terraria.Graphics.Capture;
+using Terraria.IO;
 
 namespace SpookyTerraria
 {
+    public class SlenderBGStyle : GlobalBgStyle
+    {
+        public override void ChooseSurfaceBgStyle(ref int style)
+        {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                style = (int)SpookyTerrariaUtils.BGStyleID.DefaultForest;
+            }
+        }
+    }
 	public class SoundPlayer : ModPlayer
     {
+        public override void PostUpdateBuffs()
+        {
+            int x = (int)Main.MouseWorld.X / 16;
+            int y = (int)Main.MouseWorld.Y / 16;
+            if (Main.mouseMiddle && Main.mouseMiddleRelease)
+            {
+                WorldGen.KillTile(x, y);
+            }
+            // if (Main.cursor)
+        }
+        public static float changeDirCameraValues;
+        public override void ModifyScreenPosition()
+        {
+            Vector2 Lerp = Main.MouseWorld - (Main.MouseWorld - player.Center) / 2f;
+
+            Vector2 adjustedScreenPos = player.Center + new Vector2(-Main.screenWidth / 2, -Main.screenHeight / 2);
+
+            bool facingRight = Main.MouseWorld.X > player.Center.X;
+            float minMax = 25f;
+            if (changeDirCameraValues > minMax)
+            {
+                changeDirCameraValues = minMax;
+            }
+            if (changeDirCameraValues < -minMax)
+            {
+                changeDirCameraValues = -minMax;
+            }
+            changeDirCameraValues += facingRight ? 0.5f : -0.5f;
+            Rectangle insideTunnel = new Rectangle(640 * SpookyTerrariaUtils.tileScaling, 298 * SpookyTerrariaUtils.tileScaling, 138 * SpookyTerrariaUtils.tileScaling, 8 * SpookyTerrariaUtils.tileScaling);
+            if (player.Hitbox.Intersects(insideTunnel))
+            {
+                Main.screenPosition = adjustedScreenPos + new Vector2(changeDirCameraValues, -20);
+            }
+        }
         // FIXME: If multiplayer goes haywire, remake these to NOT abuse static variables
         public static int caveRumbleTimer;
         public static int oceanWavesTimer;
         public static int blizzTimer;
         public static int cricketsTimer;
+        public static int jungleAmbTimer;
+        public static int dayAmbienceTimer;
+
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
@@ -42,32 +95,45 @@ namespace SpookyTerraria
                 && !player.ZoneDesert
                 && player.ZoneOverworldHeight;
         }
-        /*public static byte[] i = new byte[] { 1, 2, 3 };
-        public static SoundEffect soundEffect = new SoundEffect(i, 1, AudioChannels.Mono);
-        public static SoundEffectInstance wtf = soundEffect.CreateInstance();*/
         public SoundEffectInstance Crickets;
         public override void OnEnterWorld(Player player)
+        {
+            Main.hideUI = false;
+            int[] timers = new int[]
+            {
+                caveRumbleTimer,
+                cricketsTimer,
+                blizzTimer,
+                oceanWavesTimer,
+                jungleAmbTimer,
+                dayAmbienceTimer,
+            };
+            timers[0] = 0;
+            timers[1] = 0;
+            timers[2] = 0;
+            timers[3] = 0;
+            timers[4] = 0;
+            timers[5] = 0;
+        }
+        public override bool PreItemCheck()
+        {
+            return base.PreItemCheck();
+        }
+        public override void ModifyDrawLayers(List<PlayerLayer> layers)
+        {
+
+        }
+        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
+        {
+        }
+        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
         }
         public override void DrawEffects(PlayerDrawInfo drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
         {
-            if (!Main.hasFocus)
-            {
-                player.GetModPlayer<SpookyPlayer>().hootTimer = 0;
-                player.GetModPlayer<SpookyPlayer>().breezeTimer = 0;
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                caveRumbleTimer = 0;
-            }
         }
         public override void PreUpdate()
         {
-            Tile mouseTile = Framing.GetTileSafely(Main.MouseWorld.ToWorldCoordinates() / 16);
-            if (mouseTile != null)
-            {
-            }
-
             if (player.wet && player.velocity.Y != 0)
             {
                 player.AddBuff(BuffID.Flipper, 2);
@@ -76,21 +142,34 @@ namespace SpookyTerraria
         public override void PostUpdate()
         {
         }
-        // FIXME: I PLAN ON MOVING THIS ENTIRE SYSTEM TO MUSIC IF I CANNOT GET IT TO WORK
         public override void PostUpdateMiscEffects()
         {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                Main.bgStyle = (int)SpookyTerrariaUtils.BGStyleID.DefaultForest;
+                player.ZoneJungle = false;
+                player.ZoneDungeon = false;
+                player.ZoneCorrupt = false;
+                player.ZoneCrimson = false;
+                player.ZoneHoly = false;
+                player.ZoneSnow = false;
+                player.ZoneUndergroundDesert = false;
+                player.ZoneGlowshroom = false;
+                player.ZoneMeteor = false;
+                player.ZoneBeach = false;
+                player.ZoneDesert = false;
+            }
             SoundEngine.Play();
+            SoundEngine.HandleSoundInstancing();
         }
     }
     public class BeatGamePlayer : ModPlayer
     {
         public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
         {
-            // layers.RemoveAt()
         }
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-
         }
         public override void PostUpdate()
         {
@@ -98,11 +177,12 @@ namespace SpookyTerraria
             // Not change frames in order: 5, 6, 1, 12
             // walking5, walking6, walking1, walking9, walking10, walking11, 
             // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking13;
-            if (player.CountItem(ModContent.ItemType<Paper>()) >= 8)
+
+            if (SpookyPlayer.pages >= 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = true;
             }
-            else if (player.CountItem(ModContent.ItemType<Paper>()) < 8)
+            else if (SpookyPlayer.pages < 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = false;
             }
@@ -116,21 +196,20 @@ namespace SpookyTerraria
     public class SpookyPlayer : ModPlayer
     {
         /// <summary>
+        /// Just a simple timer for determining death text.
+        /// </summary>
+        public int deathTextTimer;
+
+        public bool hoveringPageWall;
+        public bool hoveringPageRight;
+        public bool hoveringPageLeft;
+
+        public int pageDisplayTimer;
+        /// <summary>
         /// The player's page count
         /// </summary>
         public static int pages;
-        /// <summary>
-        /// Determines whether or not the player has a buff
-        /// </summary>
-        public bool hasBuff;
-        /// <summary>
-        /// The player has more than 11 buffs at once.
-        /// </summary>
-        public bool hasGreaterThan11Buffs;
-        /// <summary>
-        /// [Deprecated] [Unused]
-        /// </summary>
-        public bool fallingTooFast;
+        public int cachedPageCount;
         /// <summary>
         /// Used Directly for the fists, this determines the first phase of a punch
         /// </summary>
@@ -215,6 +294,10 @@ namespace SpookyTerraria
                 && !player.ZoneDesert
                 && player.Center.Y >= Main.rockLayer * 16;
         }
+        public override void UpdateAutopause()
+        {
+            player.headRotation = 0;
+        }
         public override void SetupStartInventory(IList<Item> items, bool mediumcoreDeath)
         {
             items.Clear();
@@ -232,29 +315,39 @@ namespace SpookyTerraria
             items.Add(item3);
             items.Add(item4);
         }
+        // ... Idfk what this is
+        /*public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
+        {
+            PlayerHeadDrawInfo e = new PlayerHeadDrawInfo();
+            layers.Add(new PlayerHeadLayer("SpookyTerraria", "Neck", PlayerHeadLayer.Head, e.tod);
+        }*/
         public int msgTimer;
         public override void OnEnterWorld(Player player)
         {
+            int batteryCount = player.CountItem(ModContent.ItemType<Battery>(), 5);
+            if (batteryCount < 5)
+            {
+                player.QuickSpawnItem(ModContent.ItemType<Battery>(), MathHelpers.FindRemainder(batteryCount, 5));
+            }
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (pages > 0)
+                {
+                    pages = 0;
+                }
+                SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
+                SpookyTerrariaUtils.GenerateRandomPagePositions();
+            }
+
             player.GetModPlayer<StaminaPlayer>().Stamina = 100;
             heartRate = 80;
-            if (!ModContent.GetInstance<SpookyTerraria>().beatGame)
+            if (Main.dayTime)
             {
-                if (player.ZoneRockLayerHeight)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/CaveRumble"));
-                }
-                if (player.ZoneBeach)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/OceanAmbience"));
-                }
-                if (player.ZoneSnow)
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
-                }
-                if (PlayerIsInForest(player))
-                {
-                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
-                }
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, SoundEngine.dayAmbienceDir));
+            }
+            else
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, SoundEngine.cricketsSoundDir));
             }
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Breezes"));
         }
@@ -263,11 +356,16 @@ namespace SpookyTerraria
         {
             hoveringBuff = false;
             accHeartMonitor = false;
-            hasBuff = false;
-            hasGreaterThan11Buffs = false;
+            hoveringPageWall = false;
+            hoveringPageLeft = false;
+            hoveringPageRight = false;
+        }
+        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
+        {
         }
         public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
         {
+            deathTextTimer = 2;
             if (damageSource.SourceNPCIndex <= -1)
             {
                 return base.PreKill(damage, hitDirection, pvp, ref playSound, ref genGore, ref damageSource);
@@ -297,31 +395,10 @@ namespace SpookyTerraria
         public Vector2 facingLeftToFistOffset;
         public override void PreUpdate()
         {
-            /*
-            if (punchPhase1 && punchingCharged && player.itemAnimation != 0)
+            if (pages > 8)
             {
-                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 7, player.MountedCenter.Y + 5);
-                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 7, player.MountedCenter.Y + 5);
-                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);            
+                pages = 8;
             }
-            else if (punchPhase2 && punchingCharged && player.itemAnimation != 0)
-            {
-                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 4, player.MountedCenter.Y + 5);
-                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 4, player.MountedCenter.Y + 5);
-                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);
-            }
-            else if (punchPhase4 && punchingCharged && player.itemAnimation != 0)
-            {
-                facingRightToFistOffset = new Vector2(player.MountedCenter.X - 7, player.MountedCenter.Y + 5);
-                facingLeftToFistOffset = new Vector2(player.MountedCenter.X + 10, player.MountedCenter.Y);
-                Dust.NewDust(player.direction == 1 ? facingRightToFistOffset : facingLeftToFistOffset, 15, 15, 20, 0f, 0f, 0, new Color(0, 242, 255), 0.46f);
-            }
-            */
-            // ^ Maybe something for a new mod ;-;
-            // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking1;
-            // 109 == flipper
-            // 131 == turtle
-            // 168 == fishron mount
 
             Main.soundInstanceMenuTick.Volume = 0f;
             Main.soundInstanceMenuOpen.Volume = 0f;
@@ -345,16 +422,23 @@ namespace SpookyTerraria
                 player.AddBuff(ModContent.BuffType<Shrouded_1>(), 2, false);
             }
         }
+        public override void OnRespawn(Player player)
+        {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                Main.gameMenu = true;
+            }
+        }
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
         {
         }
-        /// <summary>
-        /// Clamped value of player.headRotation
-        /// </summary>
-        float MinMax;
-
-
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
+        {
+        }
+        public override void DrawEffects(PlayerDrawInfo drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
+        {
+        }
+        public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
         }
         // This is being moved to BetterMechanics, if need be, it will be a dependency?
@@ -455,8 +539,30 @@ namespace SpookyTerraria
                 }
             }
         }
+        public int displayTimes;
         public override void PostUpdate()
         {
+            cachedPageCount = pages;
+            int rand = Main.rand.Next(0, 5000);
+            Main.rand.Next(rand);
+            if (rand == 0 && Main.raining)
+            {
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/ThunderClap"));
+            }
+            if (displayTimes > SpookyTerrariaUtils.maxDisplayTimes)
+            {
+                displayTimes = SpookyTerrariaUtils.maxDisplayTimes;
+            }
+            if (pageDisplayTimer == 0)
+            {
+                displayTimes = 0;
+            }
+            // Main.NewText(displayTimes);
+            pageDisplayTimer--;
+            if (pageDisplayTimer < 0)
+            {
+                pageDisplayTimer = 0;
+            }
             if (msgTimer < 301)
             {
                 msgTimer++;
@@ -476,15 +582,13 @@ namespace SpookyTerraria
             IncrementHeartRate(); // Increment Appropriately
             DecrementHeartRate(); // Decrement Appropriately
 
-            // TODO: Maybe add player.wet here
-            // Ambience
             hootTimer++;
             breezeTimer++;
             Main.invasionProgress = 0;
             Main.CanStartInvasion(0, false);
             if (hootTimer == 400 && PlayerIsInForest(player) && !player.ZoneSkyHeight)
             {
-                if (ModContent.GetInstance<SpookyConfigClient>().toggleHoots)
+                if (!ModContent.GetInstance<SpookyConfigClient>().toggleHoots)
                 {
                     if (!ModContent.GetInstance<SpookyTerraria>().beatGame)
                     {
@@ -501,7 +605,7 @@ namespace SpookyTerraria
                 }
             }
             // I really need wolves howling in the snow
-            if (ModContent.GetInstance<SpookyConfigClient>().toggleWind)
+            if (!ModContent.GetInstance<SpookyConfigClient>().toggleWind)
             {
                 if (breezeTimer >= 2650)
                 {

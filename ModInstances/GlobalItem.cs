@@ -13,6 +13,39 @@ namespace SpookyTerraria.ModIntances
 {
     public class SpookyGlobalItem : GlobalItem
     {
+        public override void UseItemHitbox(Item item, Player player, ref Rectangle hitbox, ref bool noHitbox)
+        {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                noHitbox = true;
+                hitbox.Width = 0;
+                hitbox.Height = 0;
+            }
+        }
+        public override bool CanUseItem(Item item, Player player)
+        {
+            Tile mouseTile = Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16];
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (mouseTile.active() && mouseTile != null && (item.pick > 0 || item.type == ModContent.ItemType<Fists.Fists>()))
+                {
+                    return false;
+                }
+            }
+            return base.CanUseItem(item, player);
+        }
+        public override bool AltFunctionUse(Item item, Player player)
+        {
+            Tile mouseTile = Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16];
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (mouseTile.active() && mouseTile != null && (item.pick > 0 || item.type == ModContent.ItemType<Fists.Fists>()))
+                {
+                    return false;
+                }
+            }
+            return base.AltFunctionUse(item, player);
+        }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             if (item.type == ItemID.CarriageLantern)
@@ -55,19 +88,26 @@ namespace SpookyTerraria.ModIntances
             {
                 Lighting.AddLight(player.itemLocation, Color.Goldenrod.ToVector3() * Main.essScale);
             }
-            /*if (item.type == ItemID.FallenStar)
+            if (item.type == ItemID.FallenStar)
             {
                 Lighting.AddLight(player.itemLocation, Color.Yellow.ToVector3());
             }
             if (item.type == ItemID.ManaCrystal)
             {
                 Lighting.AddLight(player.itemLocation, Color.BlueViolet.ToVector3());
-            }*/
+            }
         }
         public override void PostUpdate(Item item)
         {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (item.type == ItemID.FallenStar)
+                {
+                    item.TurnToAir();
+                }
+            }
             if (item.type == ItemID.CarriageLantern)
-            { 
+            {
                 Lighting.AddLight(item.Center, Color.Goldenrod.ToVector3() * Main.essScale);
             }
             if (item.type == ItemID.ManaCrystal)

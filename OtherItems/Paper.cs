@@ -1,4 +1,6 @@
+using Microsoft.Xna.Framework;
 using SpookyTerraria.Tiles;
+using SpookyTerraria.Utilities;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -37,7 +39,10 @@ namespace SpookyTerraria.OtherItems
         }
         public override bool OnPickup(Player player)
         {
+            player.GetModPlayer<SpookyPlayer>().pageDisplayTimer = 100;
+            SpookyPlayer.pages += item.stack;
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"), player.Center);
+            item.TurnToAir();
             return true;
         }
     }

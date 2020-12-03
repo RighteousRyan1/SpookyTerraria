@@ -15,7 +15,6 @@ namespace SpookyTerraria.ModIntances
         public int staminaDecrementTimer;
         public int staminaIncrementTimer;
 
-        bool isSwimming;
         public const int maxArmor = 9; // Max armor slots (up to 9, the max)
         public void HandleSprinting()
         {

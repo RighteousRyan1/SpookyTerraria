@@ -35,37 +35,13 @@ namespace SpookyTerraria.Fists
             item.noUseGraphic = true;
             item.useStyle = CustomUseStyle.Punching;
             item.useTurn = true;
-            item.pick = 8;
-            item.axe = 2;
         }
         public override bool AltFunctionUse(Player player)
         {
-            SpookyPlayer p = new SpookyPlayer();
-            return !p.hoveringBuff;
+            return player.GetModPlayer<StaminaPlayer>().Stamina >= 25;
         }
         public override bool UseItem(Player player)
         {
-            if (player.itemAnimation == (int)(player.itemAnimationMax * 0.4f))
-            {
-                if (player.altFunctionUse == 2)
-                {
-                    player.GetModPlayer<StaminaPlayer>().Stamina -= 10;
-                }
-                else
-                {
-                    player.GetModPlayer<StaminaPlayer>().Stamina -= 3;
-                }
-            }
-            if (player.altFunctionUse == 2)
-            {
-                item.pick = 25;
-                item.axe = 5;
-            }
-            else if (player.altFunctionUse != 2)
-            {
-                item.pick = 8;
-                item.axe = 2;
-            }
             return true;
         }
         public override void ModifyWeaponDamage(Player player, ref float add, ref float mult, ref float flat)
@@ -86,6 +62,10 @@ namespace SpookyTerraria.Fists
         public override float MeleeSpeedMultiplier(Player player)
         {
             return player.altFunctionUse == 2 ? 0.5f : 1f;
+        }
+        public override bool CanUseItem(Player player)
+        {
+            return player.GetModPlayer<StaminaPlayer>().Stamina >= 10;
         }
         public override void GetWeaponKnockback(Player player, ref float knockback)
         {
@@ -114,21 +94,6 @@ namespace SpookyTerraria.Fists
         }
         public override void HoldItem(Player player)
         {
-			if (player.itemAnimation == 0)
-			{
-				item.pick = 8;
-				item.axe = 2;
-			}
-			if (player.GetModPlayer<SpookyPlayer>().punchingCharged)
-			{
-				item.pick = 25;
-                item.axe = 5;
-			}
-            if (!player.GetModPlayer<SpookyPlayer>().punchingCharged && !player.GetModPlayer<SpookyPlayer>().punchingLight)
-            {
-                item.pick = 8;
-                item.axe = 2;
-            }
         }
         public override bool UseItemFrame(Player player)
         {
@@ -204,10 +169,34 @@ namespace SpookyTerraria.Fists
             {
                 if (player.altFunctionUse == 2)
                 {
+                    if (player.GetModPlayer<StaminaPlayer>().Stamina >= 25)
+                    {
+                        player.GetModPlayer<StaminaPlayer>().Stamina -= 25;
+                    }
+                    if (player.GetModPlayer<StaminaPlayer>().Stamina < 25)
+                    {
+                        player.GetModPlayer<StaminaPlayer>().Stamina = 0;
+                    }
+                    if (player.Distance(Main.MouseWorld) <= 50f)
+                    {
+                        player.PickTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, 25);
+                    }
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, $"Sounds/Custom/Fists/WhiffSlow{indexInRange2}"));
                 }
                 if (player.altFunctionUse == 0)
                 {
+                    if (player.GetModPlayer<StaminaPlayer>().Stamina >= 10)
+                    {
+                        player.GetModPlayer<StaminaPlayer>().Stamina -= 10;
+                    }
+                    if (player.GetModPlayer<StaminaPlayer>().Stamina < 10)
+                    {
+                        player.GetModPlayer<StaminaPlayer>().Stamina = 0;
+                    }
+                    if (player.Distance(Main.MouseWorld) <= 50f)
+                    {
+                        player.PickTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, 8);
+                    }
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, $"Sounds/Custom/Fists/Whiff{indexInRange}"));
                 }
             }

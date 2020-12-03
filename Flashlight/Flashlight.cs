@@ -5,7 +5,8 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Localization;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpookyTerraria.Flashlight
 {
@@ -15,6 +16,26 @@ namespace SpookyTerraria.Flashlight
     }
     public class Flashlight : ModItem
     {
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            if (!Main.keyState.IsKeyDown(Keys.LeftAlt))
+            {
+                tooltips.Add(new TooltipLine(mod, "SpookyTerraria", "DisplayMoreInfo_Flashlight")
+                {
+                    overrideColor = Color.Gray,
+                    text = "Hold down LeftAlt for more information."
+                });
+            }
+            if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+            {
+                string addedTT = "If shined directly into solid tiles, lighting will be reduced\nConsumes batteries\nBatteries often last about a minute";
+                tooltips.Add(new TooltipLine(mod, "SpookyTerraria", "FlashlightMoreInfo")
+                {
+                    overrideColor = Color.Gray,
+                    text = addedTT
+                });
+            }
+        }
         public bool isActive = true;
         // TODO: Fix HoldStyle
         public float itemRotation = 0;
@@ -141,7 +162,7 @@ namespace SpookyTerraria.Flashlight
         public int consumeBatteryTimer;
         public override void HoldItem(Player player)
         {
-            Light(player);
+            CastLight(player);
             // Main.NewTextMultiline($"Light Percent: {lightPercent * 100}%\nLight Range: {lightRange} tiles");
             consumeBatteryTimer++;
             // ... Not too sure whether or not the timer should be 45 seconds or a minute, or even 30. Will keep at 60 for now.
@@ -159,7 +180,7 @@ namespace SpookyTerraria.Flashlight
         /// The power of the light
         /// </summary>
         public float lightPercent;
-        public void Light(Player player, bool notHoldingItem = false)
+        public void CastLight(Player player, bool notHoldingItem = false)
         {
             // TODO: Maybe later calculate lighting as a constant instead of changing light directly
             float numBatteries = player.CountItem(ModContent.ItemType<Battery>(), 5);
@@ -194,12 +215,13 @@ namespace SpookyTerraria.Flashlight
                 {
                     playerToCursor = (lightItemRotation - (player.direction == -1 ? (float)Math.PI / 2.0f : 0) - (float)Math.PI / 4.0f).ToRotationVector2();
                 }
-                Vector2 position = player.itemLocation + playerToCursor * 16 * x;
+                bool minLightCast = x > 3 ? true : false;
+                Vector2 position = minLightCast ? player.itemLocation + playerToCursor * 16 * x : new Vector2(0, 0);
                 if (Collision.SolidCollision(position, 10, 10))
                 {
                     lightPercent *= 0.8f;
                 }
-                Lighting.AddLight(position, new Vector3(1, 1, 1) / (x * 0.1f + 1) * 0.8f * lightPercent);
+                Lighting.AddLight(position, new Vector3(1, 1, 1) / (x * 0.1f + 1) * 1.5f * lightPercent);
             }
         }
     }

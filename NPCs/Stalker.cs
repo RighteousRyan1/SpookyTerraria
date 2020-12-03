@@ -2,21 +2,22 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using SpookyTerraria.Utilities;
 
 namespace SpookyTerraria.NPCs
 {
     // TODO: Multiple stalker spawns
     // TODO: Heartrate fix when near stalker
-	public class Stalker : ModNPC
-	{
+    public class Stalker : ModNPC
+    {
         /// <summary>
         /// Is there 1 stalker alive?
         /// </summary>
 		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("");
-			Main.npcFrameCount[npc.type] = 1;
-		}
+        {
+            DisplayName.SetDefault("");
+            Main.npcFrameCount[npc.type] = 1;
+        }
         public override void SetDefaults()
         {
             npc.width = 42;
@@ -45,7 +46,7 @@ namespace SpookyTerraria.NPCs
         }
         public override float SpawnChance(NPCSpawnInfo spawnInfo)
         {
-            return !Main.player[Main.myPlayer].GetModPlayer<SpookyPlayer>().stalkerConditionMet && !ModContent.GetInstance<SpookyTerraria>().beatGame && Main.player[Main.myPlayer].townNPCs < 4 ? .25f : 0f;
+            return Main.worldName != SpookyTerrariaUtils.slenderWorldName && !Main.player[Main.myPlayer].GetModPlayer<SpookyPlayer>().stalkerConditionMet && !ModContent.GetInstance<SpookyTerraria>().beatGame && Main.player[Main.myPlayer].townNPCs < 4 ? .25f : 0f;
         }
         public override void PostAI()
         {
