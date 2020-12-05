@@ -28,7 +28,7 @@ namespace SpookyTerraria.Flashlight
             }
             if (Main.keyState.IsKeyDown(Keys.LeftAlt))
             {
-                string addedTT = "If shined directly into solid tiles, lighting will be reduced\nConsumes batteries\nBatteries often last about a minute";
+                string addedTT = "If shined directly into solid tiles, lighting will be reduced\nConsumes batteries\nBatteries deplete faster depending on whether or not you have the flashlight equipped";
                 tooltips.Add(new TooltipLine(mod, "SpookyTerraria", "FlashlightMoreInfo")
                 {
                     overrideColor = Color.Gray,
@@ -55,6 +55,7 @@ namespace SpookyTerraria.Flashlight
             item.useTime = 10;
             item.knockBack = 2.5f;
             item.useTurn = true;
+            item.accessory = true;
         }
         public override void UpdateInventory(Player player)
         {
@@ -159,17 +160,50 @@ namespace SpookyTerraria.Flashlight
         /// <summary>
         /// Time until a battery is removed from the player's inventory
         /// </summary>
-        public int consumeBatteryTimer;
+        public float consumeBatteryTimer;
+        public override void UpdateAccessory(Player player, bool hideVisual)
+        {
+            CastLight(Main.player[Main.myPlayer], true);
+            // Main.NewTextMultiline($"Light Percent: {lightPercent * 100}%\nLight Range: {lightRange} tiles");
+            consumeBatteryTimer += 1.1666666666f;
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (consumeBatteryTimer >= 7200 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+                {
+                    player.ConsumeItem(ModContent.ItemType<Battery>());
+                    consumeBatteryTimer = 0;
+                }
+            }
+            else
+            {
+                if (consumeBatteryTimer >= 3600 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+                {
+                    player.ConsumeItem(ModContent.ItemType<Battery>());
+                    consumeBatteryTimer = 0;
+                }
+            }
+        }
         public override void HoldItem(Player player)
         {
-            CastLight(player);
+            CastLight(Main.player[Main.myPlayer]);
             // Main.NewTextMultiline($"Light Percent: {lightPercent * 100}%\nLight Range: {lightRange} tiles");
             consumeBatteryTimer++;
             // ... Not too sure whether or not the timer should be 45 seconds or a minute, or even 30. Will keep at 60 for now.
-            if (consumeBatteryTimer >= 3600 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
-                player.ConsumeItem(ModContent.ItemType<Battery>());
-                consumeBatteryTimer = 0;
+                if (consumeBatteryTimer >= 7200 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+                {
+                    player.ConsumeItem(ModContent.ItemType<Battery>());
+                    consumeBatteryTimer = 0;
+                }
+            }
+            else
+            {
+                if (consumeBatteryTimer >= 3600 || player.CountItem(ModContent.ItemType<Battery>()) == 0)
+                {
+                    player.ConsumeItem(ModContent.ItemType<Battery>());
+                    consumeBatteryTimer = 0;
+                }
             }
         }
         /// <summary>
@@ -182,6 +216,7 @@ namespace SpookyTerraria.Flashlight
         public float lightPercent;
         public void CastLight(Player player, bool notHoldingItem = false)
         {
+            // Main.NewText(consumeBatteryTimer);
             // TODO: Maybe later calculate lighting as a constant instead of changing light directly
             float numBatteries = player.CountItem(ModContent.ItemType<Battery>(), 5);
             lightPercent = numBatteries / 5;
@@ -216,7 +251,15 @@ namespace SpookyTerraria.Flashlight
                     playerToCursor = (lightItemRotation - (player.direction == -1 ? (float)Math.PI / 2.0f : 0) - (float)Math.PI / 4.0f).ToRotationVector2();
                 }
                 bool minLightCast = x > 3 ? true : false;
-                Vector2 position = minLightCast ? player.itemLocation + playerToCursor * 16 * x : new Vector2(0, 0);
+                Vector2 position;
+                if (!notHoldingItem)
+                {
+                    position = minLightCast ? player.itemLocation + playerToCursor * 16 * x : new Vector2(0, 0);
+                }
+                else
+                {
+                    position = minLightCast ? player.Center + playerToCursor * 16 * x : new Vector2(0, 0);
+                }
                 if (Collision.SolidCollision(position, 10, 10))
                 {
                     lightPercent *= 0.8f;

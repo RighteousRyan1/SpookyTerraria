@@ -736,7 +736,7 @@ namespace SpookyTerraria.Utilities
                 Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(25, 25), Color.White, 0f, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
             }
 
-            int unfoundPages = MathHelpers.FindRemainder(SpookyPlayer.pages, 8);
+            int unfoundPages = MathUtils.FindRemainder(SpookyPlayer.pages, 8);
 
             if (!pageUIPos.Contains(Main.MouseScreen.ToPoint()))
             {

@@ -243,7 +243,7 @@ namespace SpookyTerraria
                 return customTitleMusicSlot;
             });
         }
-        private void MenuMusicSet_Slender()
+        public void MenuMusicSet_Slender()
         {
             customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
             IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
@@ -274,6 +274,9 @@ namespace SpookyTerraria
         }
         public override void Load()
         {
+            Main.soundMenuTick = GetSound("Sounds/Custom/Other/Nothingness");
+            Main.soundMenuOpen = GetSound("Sounds/Custom/Other/Nothingness");
+            Main.soundMenuClose = GetSound("Sounds/Custom/Other/Nothingness");
             Mod spooky = ModLoader.GetMod("SpookyTerraria");
             Main.versionNumber = $"Terraria {Main.versionNumber}\n{spooky.Name} v{spooky.Version}";
 

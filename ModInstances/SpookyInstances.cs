@@ -18,6 +18,11 @@ namespace SpookyTerraria
         [Tooltip("Owls no longer hoot.")]
         public bool toggleHoots;
 
+        [Label("Enable Experimental Features")]
+        [DefaultValue(false)]
+        [Tooltip("Enables experimental features that may or may not work properly. Use at your own risk.")]
+        public bool expFeatures;
+
         [Label("UI Revamp")]
         [DefaultValue(true)]
         [Tooltip("Completely overhauls Terraria UI to look a little better")]

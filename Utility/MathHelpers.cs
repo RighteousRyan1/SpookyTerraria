@@ -9,7 +9,7 @@ using System;
 
 namespace SpookyTerraria.Utilities
 {
-    public class MathHelpers
+    public class MathUtils
     {
         /// <summary>
         /// Finds the remanider of <paramref name="i"/> and <paramref name="j"/>, (j - i)

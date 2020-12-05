@@ -23,6 +23,7 @@ using ReLogic.Graphics;
 using System.IO;
 using Terraria.Graphics.Capture;
 using Terraria.IO;
+using System.Linq;
 
 namespace SpookyTerraria
 {
@@ -49,14 +50,44 @@ namespace SpookyTerraria
             // if (Main.cursor)
         }
         public static float changeDirCameraValues;
+        public static float changeDirCameraValues1;
+        public float minMax;
+        public bool isFacingRight;
+        public float newPos;
         public override void ModifyScreenPosition()
         {
+            Rectangle insideTunnel = new Rectangle(640 * SpookyTerrariaUtils.tileScaling, 298 * SpookyTerrariaUtils.tileScaling, 138 * SpookyTerrariaUtils.tileScaling, 8 * SpookyTerrariaUtils.tileScaling);
+            Rectangle insideBathrooms = new Rectangle(2091 * SpookyTerrariaUtils.tileScaling, 367 * SpookyTerrariaUtils.tileScaling, 85 * SpookyTerrariaUtils.tileScaling, 26 * SpookyTerrariaUtils.tileScaling);
+
+            bool inTunnel = player.Hitbox.Intersects(insideTunnel);
+
+            bool inBRooms = player.Hitbox.Intersects(insideBathrooms);
+
             Vector2 Lerp = Main.MouseWorld - (Main.MouseWorld - player.Center) / 2f;
 
             Vector2 adjustedScreenPos = player.Center + new Vector2(-Main.screenWidth / 2, -Main.screenHeight / 2);
 
-            bool facingRight = Main.MouseWorld.X > player.Center.X;
-            float minMax = 25f;
+            int amtOfFlip = 600;
+
+            changeDirCameraValues += isFacingRight ? 0.5f : -0.5f;
+            // changeDirCameraValues1 += isFacingRight && !inBRooms && !inTunnel ? 10f : -10f;
+            if (inTunnel || inBRooms)
+            {
+                Main.screenPosition.X = adjustedScreenPos.X + changeDirCameraValues;
+            }
+            if (ModContent.GetInstance<SpookyConfigClient>().expFeatures)
+            {
+                if (!inTunnel && !inBRooms)
+                {
+                    Main.screenPosition.X += isFacingRight ? amtOfFlip : -amtOfFlip;
+                    Main.screenPosition.Y += (Main.MouseWorld.Y / 16) - (Main.screenHeight / 3);
+                }
+            }
+            isFacingRight = player.direction == 1;
+            if (inTunnel || inBRooms)
+            {
+                minMax = 25;
+            }
             if (changeDirCameraValues > minMax)
             {
                 changeDirCameraValues = minMax;
@@ -64,12 +95,6 @@ namespace SpookyTerraria
             if (changeDirCameraValues < -minMax)
             {
                 changeDirCameraValues = -minMax;
-            }
-            changeDirCameraValues += facingRight ? 0.5f : -0.5f;
-            Rectangle insideTunnel = new Rectangle(640 * SpookyTerrariaUtils.tileScaling, 298 * SpookyTerrariaUtils.tileScaling, 138 * SpookyTerrariaUtils.tileScaling, 8 * SpookyTerrariaUtils.tileScaling);
-            if (player.Hitbox.Intersects(insideTunnel))
-            {
-                Main.screenPosition = adjustedScreenPos + new Vector2(changeDirCameraValues, -20);
             }
         }
         // FIXME: If multiplayer goes haywire, remake these to NOT abuse static variables
@@ -121,7 +146,15 @@ namespace SpookyTerraria
         }
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
+            Action<PlayerDrawInfo> @static = DrawStatic;
+            layers.Insert(layers.IndexOf(layers.FirstOrDefault(n => n.Name == "Head")) + 1, new PlayerLayer("SpookyTerraria", "Static", @static));
+            void DrawStatic(PlayerDrawInfo info)
+            {
+                if (!info.drawPlayer.dead)
+                {
 
+                }
+            }
         }
         public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
         {
@@ -327,7 +360,11 @@ namespace SpookyTerraria
             int batteryCount = player.CountItem(ModContent.ItemType<Battery>(), 5);
             if (batteryCount < 5)
             {
-                player.QuickSpawnItem(ModContent.ItemType<Battery>(), MathHelpers.FindRemainder(batteryCount, 5));
+                player.QuickSpawnItem(ModContent.ItemType<Battery>(), MathUtils.FindRemainder(batteryCount, 5));
+            }
+            if (!player.HasItem(ModContent.ItemType<OtherItems.Consumables.BetaBlocker>()))
+            {
+                player.QuickSpawnItem(ModContent.ItemType<OtherItems.Consumables.BetaBlocker>(), 1);
             }
             if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
@@ -399,11 +436,6 @@ namespace SpookyTerraria
             {
                 pages = 8;
             }
-
-            Main.soundInstanceMenuTick.Volume = 0f;
-            Main.soundInstanceMenuOpen.Volume = 0f;
-            Main.soundInstanceMenuClose.Volume = 0f;
-            // TODO: Do something with this shit bro
             bool hasShroudedIIIRequirement = Lighting.GetSubLight(player.Top).X == 0f;
             bool hasShroudedIIRequirement = Lighting.GetSubLight(player.Top).X > 0f
                 && Lighting.GetSubLight(player.Top).X < 0.05f;
@@ -424,9 +456,11 @@ namespace SpookyTerraria
         }
         public override void OnRespawn(Player player)
         {
+            Main.hideUI = false;
             if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
                 Main.gameMenu = true;
+                ModContent.GetInstance<SpookyTerraria>().MenuMusicSet_Slender();
             }
         }
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
