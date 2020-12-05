@@ -337,30 +337,56 @@ namespace SpookyTerraria.ModIntances
         }
 		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref float totalWeight)
 		{
-			int shiniesIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Shinies"));
+			int shiniesIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Planting Trees"));
 
 			if (shiniesIndex != -1)
 			{
-				tasks.Insert(shiniesIndex + 1, new PassLegacy("SpookyTerraria PageGen", PagesOnTrees));
+				tasks.Insert(shiniesIndex + 1, new PassLegacy("Planting Pages", PagesOnTrees));
 			}
 		}
 		private void PagesOnTrees(GenerationProgress progress)
 		{
+            int numOfPages = 8; // Change this ;)
 			progress.Message = "Randomly slapping pages on trees...";
 
-            int x = WorldGen.genRand.Next(0, Main.maxTilesX);
-            int y = WorldGen.genRand.Next(0, Main.maxTilesY);
-            Tile tile = Framing.GetTileSafely(x, y);
+            List<Point> rightSideSpots = new List<Point>();
+            List<Point> leftSideSpots = new List<Point>();
 
-
-            int betterRand = Main.rand.Next(-1, 2) == 0 ? -1 : 1;
-			for (int j = 0; j < 10000; j++) // 8
+            for (int i = 2; i < Main.maxTilesX - 2; i++)
 			{
-                /*if (tile.active() && tile.type == TileID.Trees && Main.tile[x + 2, y + 2].type == TileID.Dirt && Main.tile[x + 2, y + 2].type == TileID.Grass)
+                for (int j = 2; j < Main.maxTilesY - 2; j++)
                 {
-                    WorldGen.PlaceTile(x + betterRand, y - 2, ModContent.TileType<PageTile>(), false, true);
-                }*/
-			}
+                    Tile leftTile = Main.tile[i - 1, j];
+                    Tile leftMostTile = Main.tile[i - 2, j];
+                    Tile rightTile = Main.tile[i + 1, j];
+                    Tile rightMostTile = Main.tile[i + 2, j];
+
+                    if (leftTile.type == TileID.Trees && !leftMostTile.active() && leftTile.frameX == 0 && leftTile.frameY < 66)
+					{
+                        leftSideSpots.Add(new Point(i, j));
+					}
+                    else if (rightTile.type == TileID.Trees && !rightMostTile.active() && rightTile.frameX == 0 && rightTile.frameY < 66)
+					{
+                        rightSideSpots.Add(new Point(i, j));
+					}
+                }
+            }
+            for (int pages = 0; pages < numOfPages; pages++)
+			{
+                bool left = WorldGen._genRand.NextBool();
+                if (left)
+				{
+                    int pointIndex = (int)(leftSideSpots.Count * WorldGen._genRand.NextFloat());
+                    Point selectedPoint = leftSideSpots[pointIndex];
+                    WorldGen.PlaceTile(selectedPoint.X, selectedPoint.Y, ModContent.TileType<PageTileLeft>()); 
+                }
+                else
+				{
+                    int pointIndex = (int)(rightSideSpots.Count * WorldGen._genRand.NextFloat());
+                    Point selectedPoint = rightSideSpots[pointIndex];
+                    WorldGen.PlaceTile(selectedPoint.X, selectedPoint.Y, ModContent.TileType<PageTileRight>());
+                }
+			} 
 		}
 	}
 }
