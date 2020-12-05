@@ -152,9 +152,8 @@ namespace SpookyTerraria.ModIntances
                                     timerToSevereStatic = 0;
                                 }
                             }
-                            // Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
                             // MAJOR TODO: MAKE STATIC
-                            if (!Collision.SolidCollision(npc.position, npc.width, 20))
+                            if (!Collision.SolidCollision(npc.position, npc.width, 20) && distance <= 1000 && Collision.CanHitLine(player.Top, player.width, 10, npc.Top, npc.width, 20))
                             {
                                 if (Main.GameUpdateCount % 3 == 0)
                                 {
@@ -189,22 +188,29 @@ namespace SpookyTerraria.ModIntances
                         }
                         if (fadeScale >= 1f)
                         {
-                            // player.KillMe(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{player.name} stared at death for too long."), player.statLife + 50, 0, false);
+                            player.KillMe(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{player.name} stared at death for too long."), player.statLife + 50, 0, false);
+                        }
+                        if (fadeScale == 0f)
+                        {
+                            if (Main.hasFocus)
+                            {
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                            }
                         }
                     }
                     if (npc.type == ModContent.NPCType<Slenderman>() && !npc.active)
                     {
+                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
                         timerToLightStatic = 0;
                         timerToMediumStatic = 0;
                         timerToSevereStatic = 0;
                         fadeScale -= 0.005f;
                     }
                 }
-                if (npc.type == ModContent.NPCType<Stalker>() && !npc.active)
-                {
-                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                }
+                Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
             }
 
             if (player.GetModPlayer<SpookyPlayer>().deathTextTimer == 1)

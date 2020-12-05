@@ -41,12 +41,12 @@ namespace SpookyTerraria
     {
         public override void PostUpdateBuffs()
         {
-            int x = (int)Main.MouseWorld.X / 16;
+            /*int x = (int)Main.MouseWorld.X / 16;
             int y = (int)Main.MouseWorld.Y / 16;
             if (Main.mouseMiddle && Main.mouseMiddleRelease)
             {
                 WorldGen.KillTile(x, y);
-            }
+            }*/
             // if (Main.cursor)
         }
         public static float changeDirCameraValues;

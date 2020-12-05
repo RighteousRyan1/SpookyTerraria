@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpookyTerraria.NPCs;
 using SpookyTerraria.Tiles;
 using SpookyTerraria.Utilities;
 using Terraria;
@@ -41,6 +42,8 @@ namespace SpookyTerraria.OtherItems
         {
             player.GetModPlayer<SpookyPlayer>().pageDisplayTimer = 100;
             SpookyPlayer.pages += item.stack;
+            int randChoice = Main.rand.Next(0, 2);
+            NPC.NewNPC(randChoice == 0 ? (int)player.Center.X + -2500 : 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"), player.Center);
             item.TurnToAir();
             return true;

@@ -45,24 +45,16 @@ namespace SpookyTerraria.NPCs
         {
             return !ModContent.GetInstance<SpookyTerraria>().beatGame && Main.player[Main.myPlayer].townNPCs < 4 ? .25f : 0f;
         }
-        public override bool CanChat()
-        {
-            return true;
-        }
-        public override string GetChat()
-        {
-            return "Grrrrrng.";
-        }
         public override void PostAI()
         {
         }
-        Vector2 destination;
+        public Vector2 destination;
+        public int timerUntilteleportation;
         public override void AI()
         {
             npc.TargetClosest(true);
             Player player = Main.player[npc.target];
             npc.spriteDirection = -npc.direction;
-            // Collision.SolidCollision(npc.position, npc.width, 20)
             if (npc.Center.Y > player.Top.Y - 40)
             {
                 destination = player.Top - new Vector2(0, 150);
@@ -118,9 +110,18 @@ namespace SpookyTerraria.NPCs
             {
                 npc.frame.Y = 0;
             }
-
             float distance = npc.Distance(player.Center);
-            if (distance > 1500f)
+            if (distance < 500f)
+            {
+                timerUntilteleportation++;
+                if (timerUntilteleportation >= 1800)
+                {
+                    int rand = Main.rand.Next(-1800, 1800);
+                    npc.Center -= new Vector2(rand, rand);
+                    timerUntilteleportation = 0;
+                }
+            }
+            if (distance > 2000f)
             {
                 bool isRightOfPlayer = npc.Center.X > player.Center.X;
                 npc.Center += isRightOfPlayer ? new Vector2(Main.rand.Next(-1500, -500), 0) : new Vector2(Main.rand.Next(500, 1500), 0);

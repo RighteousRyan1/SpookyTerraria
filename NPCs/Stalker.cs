@@ -48,6 +48,10 @@ namespace SpookyTerraria.NPCs
         }
         public override void PostAI()
         {
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                npc.active = false;
+            }
         }
         public override void PostDraw(SpriteBatch spriteBatch, Color drawColor)
         {

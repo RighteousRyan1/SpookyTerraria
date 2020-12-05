@@ -35,7 +35,7 @@ namespace SpookyTerraria
         public override void EditSpawnPool(IDictionary<int, float> pool, NPCSpawnInfo spawnInfo)
         {
             Player player = Main.player[Main.myPlayer];
-            if (ModContent.GetInstance<SpookyTerraria>().beatGame)
+            if (ModContent.GetInstance<SpookyTerraria>().beatGame || Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
                 pool.Clear(); // No more enemy spawns!.. Because you beat the game, numnut
             }
@@ -46,7 +46,7 @@ namespace SpookyTerraria
             if (ModContent.GetInstance<SpookyConfigServer>().excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool && !ModContent.GetInstance<SpookyTerraria>().beatGame)
             {
                 pool.Clear();
-                if (!player.GetModPlayer<SpookyPlayer>().stalkerConditionMet)
+                if (!player.GetModPlayer<SpookyPlayer>().stalkerConditionMet && Main.worldName != SpookyTerrariaUtils.slenderWorldName)
                 {
                     foreach (var SpookyNPCs in Lists_SpookyNPCs.SpookyNPCs)
                     {
