@@ -82,7 +82,7 @@ namespace SpookyTerraria.NPCs
             }
             if (distance > 500f)
             {
-                npc.frame.Y = defaultFrame - defaultFrame;
+                npc.frame.Y = 0;
             }
             if (npc.ai[0] >= 120)
             {

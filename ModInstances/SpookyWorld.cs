@@ -210,7 +210,7 @@ namespace SpookyTerraria.ModIntances
                         fadeScale -= 0.005f;
                     }
                 }
-                Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
+                // Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
             }
 
             if (player.GetModPlayer<SpookyPlayer>().deathTextTimer == 1)

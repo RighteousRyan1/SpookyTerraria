@@ -55,13 +55,13 @@ namespace SpookyTerraria.NPCs
             npc.TargetClosest(true);
             Player player = Main.player[npc.target];
             npc.spriteDirection = -npc.direction;
-            if (npc.Center.Y > player.Top.Y - 40)
+            if (npc.Center.Y >= player.Center.Y)
             {
-                destination = player.Top - new Vector2(0, 150);
+                destination = player.Center - new Vector2(0, 150);
             }
-            else if (npc.Center.Y <= player.Top.Y - 40)
+            else if (npc.Center.Y < player.Center.Y)
             {
-                destination = player.Top - new Vector2(0, 5);
+                destination = player.Center - new Vector2(0, 0);
             }
             if (SpookyPlayer.pages == 0)
             {

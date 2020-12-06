@@ -375,6 +375,11 @@ namespace SpookyTerraria
                 SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
                 SpookyTerrariaUtils.GenerateRandomPagePositions();
             }
+            else if (pages > 0)
+            {
+                int randChoice = Main.rand.Next(0, 2);
+                NPC.NewNPC(randChoice == 0 ? (int)player.Center.X + -2500 : 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
+            }
 
             player.GetModPlayer<StaminaPlayer>().Stamina = 100;
             heartRate = 80;
@@ -402,6 +407,14 @@ namespace SpookyTerraria
         }
         public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
         {
+            for (int j = 0; j < Main.maxNPCs; j++)
+            {
+                NPC npc = Main.npc[j];
+                if (npc.type == ModContent.NPCType<Slenderman>() && npc.active)
+                {
+                    npc.active = false;
+                }
+            }
             deathTextTimer = 2;
             if (damageSource.SourceNPCIndex <= -1)
             {
@@ -461,6 +474,14 @@ namespace SpookyTerraria
             {
                 Main.gameMenu = true;
                 ModContent.GetInstance<SpookyTerraria>().MenuMusicSet_Slender();
+            }
+            else if (Main.worldName != SpookyTerrariaUtils.slenderWorldName)
+            {
+                if (pages > 0)
+                {
+                    int randChoice = Main.rand.Next(0, 2);
+                    NPC.NewNPC(randChoice == 0 ? (int)player.Center.X + -2500 : 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
+                }
             }
         }
         public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)

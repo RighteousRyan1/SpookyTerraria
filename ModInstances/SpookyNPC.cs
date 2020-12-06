@@ -27,7 +27,17 @@ namespace SpookyTerraria
             {
                 case NPCID.Merchant:
                     shop.item[nextSlot].SetDefaults(ModContent.ItemType<Battery>());
-                    shop.item[nextSlot].shopCustomPrice = Item.buyPrice(platinum: 0, gold: 0, silver: 20, copper: 0);
+                    shop.item[nextSlot].shopCustomPrice = Item.buyPrice(platinum: 0, gold: 0, silver: 10, copper: 0);
+                    nextSlot++;
+                    break;
+                case NPCID.TravellingMerchant:
+                    shop.item[nextSlot].SetDefaults(ModContent.ItemType<Battery>());
+                    shop.item[nextSlot].shopCustomPrice = Item.buyPrice(platinum: 0, gold: 0, silver: 10, copper: 0);
+                    nextSlot++;
+                    break;
+                case NPCID.Demolitionist:
+                    shop.item[nextSlot].SetDefaults(ModContent.ItemType<Battery>());
+                    shop.item[nextSlot].shopCustomPrice = Item.buyPrice(platinum: 0, gold: 0, silver: 10, copper: 0);
                     nextSlot++;
                     break;
             }

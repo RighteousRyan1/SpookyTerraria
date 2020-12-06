@@ -47,8 +47,6 @@ namespace SpookyTerraria
         public override void Action(CommandCaller caller, string input, string[] args)
         {
             Main.NewText("Opened a link to the map! From there, click the 'Download' button.", Color.Green);
-            Process.Start("http://www.mediafire.com/file/yzdqeips85ppk1a/Slender_The_8_Pages.twld/file");
-            Process.Start("http://www.mediafire.com/file/1hq8vc6h55hsqjw/Slender_The_8_Pages.twld.bak/file");
             Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
         }
     }
