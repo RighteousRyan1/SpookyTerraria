@@ -628,11 +628,11 @@ namespace SpookyTerraria
             Mod ST = ModLoader.GetMod("SpookyTerraria");
             if (msgTimer == 120)
             {
-                Main.NewText($"Spooky Terraria is on Alpha version {ST.Version}.", Color.DarkGray);
+                Main.NewText($"Spooky Terraria is on Beta {ST.Version}.", Color.DarkGray);
             }
             if (msgTimer == 300)
             {
-                Main.NewText($"Also, in participation in the alpha version of this mod, I kindly ask you to report any bugs to my discord server (https://discord.gg/pT2BzSG).", Color.DarkGray);
+                Main.NewText($"Also, if you manage to find any bugs, please go to the Main Menu and click the Discord Logo and report the issue to my server.", Color.DarkGray);
             }
             IncrementHeartRate(); // Increment Appropriately
             DecrementHeartRate(); // Decrement Appropriately

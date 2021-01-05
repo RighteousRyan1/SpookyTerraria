@@ -27,49 +27,10 @@ using System.Net.NetworkInformation;
 using Terraria.IO;
 using Terraria.Graphics.Capture;
 using System.Reflection;
+using Terraria.Localization;
 
 namespace SpookyTerraria
 {
-    public class SlenderMapDownloadMF : ModCommand
-    {
-        public override CommandType Type
-            => CommandType.Chat;
-
-        public override string Command
-            => "slenderMapMF";
-
-        public override string Usage
-            => "/slenderMapMF";
-
-        public override string Description
-            => "download the official terraria slender map, made by Ryan (RighteousRyan) from Mediafire. Download all files from all pages.";
-
-        public override void Action(CommandCaller caller, string input, string[] args)
-        {
-            Main.NewText("Opened a link to the map! From there, click the 'Download' button.", Color.Green);
-            Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
-        }
-    }
-    public class SlenderMapDownloadDiscord : ModCommand
-    {
-        public override CommandType Type
-            => CommandType.Chat;
-
-        public override string Command
-            => "slenderMapDiscord";
-
-        public override string Usage
-            => "/slenderMapDiscord";
-
-        public override string Description
-            => "download the official terraria slender map, made by Ryan (RighteousRyan) from discord. Download all files.";
-
-        public override void Action(CommandCaller caller, string input, string[] args)
-        {
-            Main.NewText("Opened discord.", Color.MediumPurple);
-            Process.Start("https://discord.gg/pT2BzSG");
-        }
-    }
     public class ModifyPagesCount_Debug : ModCommand
     {
         public override CommandType Type
@@ -121,7 +82,7 @@ namespace SpookyTerraria
                     }
                 }
                 SpookyPlayer.pages = type2;
-                CombatText.NewText(player.getRect(), Color.White, $"Pages was set to {type2}.");
+                CombatText.NewText(player.getRect(), Color.White, $"Page count was set to {type2}.");
             }
         }
     }
@@ -246,16 +207,6 @@ namespace SpookyTerraria
             customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
             IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
         }
-        /*private void MenuMusicSet_Spooky()
-        {
-            customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Spooky");
-            IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
-        }*/
-        /*private void MenuMusicSet_SpookyRemix()
-        {
-            customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/SpookRemix");
-            IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
-        }*/
         public bool beatGame;
         public static ModHotKey Sprint;
         public override void PostSetupContent()
@@ -270,8 +221,11 @@ namespace SpookyTerraria
                 SpookyTerrariaUtils.ModifyUITextures();
             }
         }
+        int rand;
         public override void Load()
         {
+            rand = Main.rand.Next(0, 20);
+            msgOfTheDay = ChooseRandomMessage(rand);
             Main.soundMenuTick = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuOpen = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuClose = GetSound("Sounds/Custom/Other/Nothingness");
@@ -280,7 +234,15 @@ namespace SpookyTerraria
 
             Sprint = RegisterHotKey("Sprint", "LeftShift");
 
-            IL.Terraria.Main.DrawMenu += NewDrawMenu;
+            Hooks.On_AddMenuButtons += Hooks_On_AddMenuButtons;
+            if (!Main.dedServ)
+            {
+                On.Terraria.Lang.GetRandomGameTitle += Lang_GetRandomGameTitle;
+                Main.chTitle = true;
+            }
+            
+            On.Terraria.Main.DrawBG += Main_DrawBG;
+            On.Terraria.Main.DrawMenu += Main_DrawMenu;
             On.Terraria.Main.DrawInterface_35_YouDied += Main_DrawInterface_35_YouDied;
             // Shader initialization
 
@@ -294,75 +256,192 @@ namespace SpookyTerraria
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
         }
-
-        private void NewDrawMenu(ILContext il)
+        private string Lang_GetRandomGameTitle(On.Terraria.Lang.orig_GetRandomGameTitle orig)
         {
-            ILCursor c = new ILCursor(il).Goto(0, 0, false);
-            ILCursor ilcursor = c;
-            Func<Instruction, bool>[] array = new Func<Instruction, bool>[1];
-            array[0] = ((Instruction i) => ILPatternMatchingExt.MatchLdsfld(i, typeof(Main).GetField("dayTime")));
-            bool flag = !ilcursor.TryGotoNext(array);
-            if (flag)
+            return $"Spooky Terraria: {msgOfTheDay}";
+        }
+
+        private void Hooks_On_AddMenuButtons(Hooks.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
+        {
+            orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
+            MenuHelper.AddButton("Download Slender Map",
+            delegate
             {
-                Logger.Info("Failed to change main menu.");
-            }
-            else
+                Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
+            },
+            selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
+        }
+
+        public virtual string ChooseRandomMessage(int type)
+        {
+            var steamID = Steamworks.SteamUser.GetSteamID();
+            switch (type)
             {
-                c.Emit(OpCodes.Call, typeof(SpookyTerraria).GetMethod("DrawMenuNew", BindingFlags.NonPublic | BindingFlags.Static));
+                default:
+                    return "Beware the man himself!";
+                case 1:
+                    return "Are you spooked yet?";
+                case 2:
+                    return $"Enjoy the mod, {Steamworks.SteamFriends.GetFriendPersonaName(steamID)}.";
+                case 3:
+                    return "What awaits will not be pleasant.";
+                case 4:
+                    return "Have a nice ride!";
+                case 5:
+                    return "Is the main menu spooking you?";
+                case 6:
+                    return "Too spooky 5 u";
+                case 7:
+                    return "I await your return to this screen.";
+                case 8:
+                    return "I know where you live...";
+                case 9:
+                    return "Everything is nothing, I think.";
+                case 10:
+                    return "This is not a copied game!";
+                case 11:
+                    return "Press 'Single Player' to get started. I am waiting.";
+                case 12:
+                    return "This is your final breath.";
+                case 13:
+                    return "He stalks you, but which one of them am I talking about?";
+                case 14:
+                    return "Nothing is worse than death by tentacles.";
+                case 15:
+                    return "Only the most diligent will win.";
+                case 16:
+                    return "Kill.";
+                case 17:
+                    return "Hell.";
+                case 18:
+                    return "Fear is the only emotion you should know.";
+                case 19:
+                    return "No pain, no gain.";
             }
         }
-        private static void DrawMenuNew()
+        internal static string ChooseRandomSubString(int type)
         {
-            Texture2D frame = ModContent.GetTexture("SpookyTerraria/Assets/Slender8Pages");
-            Rectangle originalFrameRect = Utils.Frame(frame, 1, 1, 0, 0);
-            Rectangle targetRect = originalFrameRect;
-            bool flag3 = Main.screenWidth > Main.screenHeight;
-            if (flag3)
+            switch (type)
             {
-                targetRect.Height = (int)((float)targetRect.Height * Main.screenWidth / (float)targetRect.Width);
-                targetRect.Width = Main.screenWidth;
+                case 1:
+                    return "ERRRRR";
+                case 2:
+                    return "SUFFERING";
+                case 3:
+                    return "IMMINENT DEATH";
+                case 4:
+                    return "DEATH";
+                default:
+                    return "PAIN";
+            }
+        }
+
+        private static float rotationTimer_BasedOnSineWave;
+        private static float scaleTimer_BasedOnSineWave;
+        private void Main_DrawBG(On.Terraria.Main.orig_DrawBG orig, Main self)
+        {
+            scaleTimer_BasedOnSineWave += 0.1f;
+            rotationTimer_BasedOnSineWave += 0.01f;
+            Mod mod = this;
+            Texture2D slendeyBG = mod.GetTexture("Assets/Slender8Pages");
+            Texture2D blackPixel = mod.GetTexture("Assets/BlackPixel");
+            Texture2D slender = mod.GetTexture("Assets/Slender");
+
+            float sinValueRot = (float)Math.Sin(rotationTimer_BasedOnSineWave);
+            float sinValueScale = (float)Math.Sin(scaleTimer_BasedOnSineWave / 2);
+            if (Main.gameMenu)
+            {
+                Main.spriteBatch.Draw(blackPixel, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(slender, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), null, Color.White, sinValueRot / 50, new Vector2(slender.Width / 2, slender.Height / 2),  2f + (sinValueScale / 80), SpriteEffects.None, 1f);
             }
             else
             {
-                targetRect.Width = (int)(targetRect.Width * (Main.screenHeight / targetRect.Height));
-                targetRect.Height = Main.screenHeight;
+                orig(self);
             }
+        }
+        public static string msgOfTheDay;
+        private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
+        {
+            Mod mod = this;
+
+            SpriteEffects none = SpriteEffects.None;
+
+            int y = 40;
+            int y2 = 80;
+
+            float txtScale = 0.25f;
+
+            string myMedia = "My Media:";
+            string display4Twitch = "<- My Twitch Channel!";
+            string display4YT = "<- My YouTube Channel!";
+            string display4Discord = "<- My Discord Server!";
+
+            Texture2D Twitch = mod.GetTexture("Assets/OtherAssets/TwitchLogo");
+            Texture2D YouTube = mod.GetTexture("Assets/OtherAssets/YouTubeLogo");
+            Texture2D Discord = mod.GetTexture("Assets/OtherAssets/DiscordLogo");
+
+            Vector2 drawPosition = new Vector2(20, 40);
+            Vector2 TwitchHalf = Main.fontDeathText.MeasureString(display4Twitch) / 2;
+            Vector2 YTHalf = Main.fontDeathText.MeasureString(display4YT) / 2;
+            Vector2 DiscordHalf = Main.fontDeathText.MeasureString(display4Discord) / 2;
+
+            Rectangle TwitchRect = new Rectangle((int)drawPosition.X, (int)drawPosition.Y, 30, 30);
+            Rectangle YTRect = new Rectangle((int)drawPosition.X, (int)drawPosition.Y + y, 40, 25);
+            Rectangle DiscordRect = new Rectangle((int)drawPosition.X, (int)drawPosition.Y + y2, 30, 35);
+
+            Point mouse = Main.MouseScreen.ToPoint();
+
+            bool mouseContainedTwitch = TwitchRect.Contains(mouse);
+            bool mouseContainedYT = YTRect.Contains(mouse);
+            bool mouseContainedDiscord = DiscordRect.Contains(mouse);
+
+            // Strings to pics, proper drawpos, etc
+            try
+            {
+                Main.spriteBatch.Draw(Twitch, drawPosition, null, mouseContainedTwitch ? Color.Yellow : Color.White, 0f, Vector2.Zero, 0.1f, none, 1f);
+                Main.spriteBatch.Draw(YouTube, drawPosition + new Vector2(0, y), null, mouseContainedYT ? Color.Yellow : Color.White, 0f, Vector2.Zero, 0.15f, none, 1f);
+                Main.spriteBatch.Draw(Discord, drawPosition + new Vector2(0, y2), null, mouseContainedDiscord ? Color.Yellow : Color.White, 0f, Vector2.Zero, 0.075f, none, 1f);
+
+                Main.spriteBatch.DrawString(Main.fontDeathText, myMedia, drawPosition - new Vector2(0, 20), Color.White, 0f, Vector2.Zero, txtScale, none, 1f);
+                if (Main.menuMode == 0)
+                {
+                    Main.spriteBatch.DrawString(Main.fontDeathText, msgOfTheDay, new Vector2(Main.screenWidth / 2, Main.screenHeight - 20), Color.White, 0f, Main.fontDeathText.MeasureString(msgOfTheDay) / 2, 1f, none, 1f);
+                }
+
+                if (mouseContainedTwitch)
+                {
+                    Main.spriteBatch.DrawString(Main.fontDeathText, display4Twitch, new Vector2(60, 45), Color.White, 0f, Vector2.Zero, txtScale, none, 1f);
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://twitch.tv/righteousryan_");
+                    }
+                }
+                if (mouseContainedYT)
+                {
+                    Main.spriteBatch.DrawString(Main.fontDeathText, display4YT, new Vector2(55, 85), Color.White, 0f, Vector2.Zero, txtScale, none, 1f);
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://www.youtube.com/channel/UCnz-trf-dF7j8mDVOuoy4Ig");
+                    }
+                }
+                if (mouseContainedDiscord)
+                {
+                    Main.spriteBatch.DrawString(Main.fontDeathText, display4Discord, new Vector2(50, 130), Color.White, 0f, Vector2.Zero, txtScale, none, 1f);
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://discord.gg/pT2BzSG");
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                mod.Logger.Warn($"{0} was not able to draw correctly!\nException caught! {e.Message} {e.StackTrace}");
+            }
+            orig(self, gameTime);
         }
         private void Main_DrawInterface_35_YouDied(On.Terraria.Main.orig_DrawInterface_35_YouDied orig)
         {
         }
-        /*internal static void HookMenuSplash(ILContext il)
-        {
-            var c = new ILCursor(il).Goto(0);
-            if (!c.TryGotoNext(i => i.MatchLdsfld(typeof(Main).GetField("dayTime"))))
-                return;
-            c.Emit(OpCodes.Call, typeof(SpookyTerraria).GetMethod("Draw_GetWorldFileText"));
-        }
-        public static void Draw_GetWorldFileText()
-        {
-            Vector2 origin2;
-            origin2.X = 0.5f;
-            origin2.Y = 0.5f;
-            Rectangle IClickable = new Rectangle(Main.screenHeight - 25, Main.screenWidth - (Main.screenWidth + 100), 1000, 1000);
-            bool isHovering = IClickable.Contains(Main.MouseScreen.ToPoint());
-            Main.spriteBatch.DrawString(Main.fontMouseText, "fdsafdiuf duf gadsu fads bfdsf d bfhs bfdgfb yafdsf fbgasduf uf bdasydfbsuf", new Vector2(Main.screenWidth - origin2.X - 390f, origin2.Y + 40f), isHovering ? Color.Yellow : Color.White);
-            string toFile = $"C://Users//" + Path.Combine($"{Environment.UserName}") + "//Documents//My Games//Terraria//ModLoader//Worlds//Slender_The_8_Pages.twld";
-            if (isHovering)
-            {
-                if (Main.mouseRight && Main.mouseRightRelease)
-                {
-                    if (!File.Exists(toFile))
-                    {
-                        Main.WorldPath = "C://Documents//My Games//Terraria//ModLoader//Mod Sources//SpookyTerraria//SlenderWorld//Slender_The_8_Pages.twld";
-                    }
-                }
-            }
-            // Creating file for the slendy world
-            // Me: Tries to sound smart
-            // Her: Poop
-
-            // IL == bad
-        }*/
         public override void Unload()
         {
             IL.Terraria.Main.UpdateAudio -= new ILContext.Manipulator(ChangeMenuMusic);

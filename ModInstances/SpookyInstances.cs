@@ -10,12 +10,12 @@ namespace SpookyTerraria
         [Header("Ambience Settings")]
         [Label("Toggle Winds")]
         [DefaultValue(true)]
-        [Tooltip("Winds no longer blow...")]
+        [Tooltip("Toggle Winds blowing.")]
         public bool toggleWind;
 
         [Label("Toggle Owl Hoots")]
         [DefaultValue(true)]
-        [Tooltip("Owls no longer hoot.")]
+        [Tooltip("Toggle owl hooting.")]
         public bool toggleHoots;
 
         [Label("Enable Experimental Features")]
@@ -40,7 +40,7 @@ namespace SpookyTerraria
         public float lightingScale;
 
         [Label("Modify Spawn Pool")]
-        [DefaultValue(false)]
+        [DefaultValue(true)]
         [Tooltip("Removes all spawns besides Spooky Terraria NPCs. For when you want to feel isolated.")]
         public bool excludeAllNPCsBesideCreepyTerrariaOnesFromSpawnPool;
 

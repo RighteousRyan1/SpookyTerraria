@@ -1,14 +1,20 @@
 Hello and welcome to Spooky Terraria!
 
-[c/00FF00:IT IS HIGHLY RECOMMENDED YOU USE THIS MOD WITH BETTERMECHANICS, A MOD ON THE MOD BROWSER THAT I MADE]!
+[c/00FF00:IT IS HIGHLY RECOMMENDED YOU]
+[c/00FF00:USE THIS MOD WITH BETTERMECHANICS,]
+[c/00FF00:A MOD ON THE MOD BROWSER THAT I MADE!]
 
-THIS IS AN ALPHA RELEASE. EVERYTHING IS DUE TO ISSUE.
+This release may be final, but if there are any bugs, please let me know.
 PLEASE LET ME KNOW ON DISCORD BY CLICKING ON THE HOMEPAGE LINK.
 
-First of all, this was inspired by both Fundy on YouTube and Slenderman: the 8 pages.
-This mod is still a work in progress, so nothing is final.
+First of all, this was inspired by Slenderman: the 8 pages.
 
 BE SURE TO CREATE A NEW CHARACTER WITH THIS MOD ENABLED FIRST.
+
+[c/FF0000:WHEN ENTERING GAMES, YOU]
+[c/FF0000:CAN TYPE IN /slendermapMF or /slendermapdiscord]
+[c/FF0000:TO PLAY THE SLENDER MAP MADE FOR]
+[c/FF0000:TERRARIA!]
 
 In this mod, your world gets a whole lot darker and creepier, along with a new NPC, the Stalker.
 The stalker is a high stealth creature who can attack you when you least expect it, so be sure to use your flashlight accordingly.
@@ -24,6 +30,7 @@ At the ocean, you can hear crashing waves, which are loud.
 In the snow, you can hear faint snowfall.
 
 A NOTE TO ALL: This is intended for SINGLE PLAYER GAMEPLAY.
-Playing multiplayer can result in client sided issues like the flashlight not doing what it is supposed to,
-heads rotating incorrectly, or Stalkers not spawning properly. So if you choose to play multiplayer, this is what will happen to you.
+There are no plans to make this multiplayer compatible, and as a result, I have prevented ALL loading into MP servers.
+
+Have fun, and good luck!
 

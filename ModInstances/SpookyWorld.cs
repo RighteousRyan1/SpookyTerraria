@@ -55,9 +55,6 @@ namespace SpookyTerraria.ModIntances
         public override void PostDrawTiles()
         {
             Player player = Main.player[Main.myPlayer];
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            Main.spriteBatch.Draw(mod.GetTexture("Assets/WhiteSquare"), player.position, null, Color.White * 0.25f, 0f, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), new Vector2(player.Hitbox.Width, player.Hitbox.Height), SpriteEffects.None, 1f);
-            Main.spriteBatch.End();
             if (player.dead)
             {
                 Main.hideUI = true;
