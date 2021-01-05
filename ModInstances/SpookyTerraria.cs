@@ -224,8 +224,8 @@ namespace SpookyTerraria
         int rand;
         public override void Load()
         {
-            rand = Main.rand.Next(0, 20);
             msgOfTheDay = ChooseRandomMessage(rand);
+            rand = Main.rand.Next(0, 20);
             Main.soundMenuTick = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuOpen = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuClose = GetSound("Sounds/Custom/Other/Nothingness");
@@ -343,7 +343,6 @@ namespace SpookyTerraria
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
             Mod mod = this;
-            Texture2D slendeyBG = mod.GetTexture("Assets/Slender8Pages");
             Texture2D blackPixel = mod.GetTexture("Assets/BlackPixel");
             Texture2D slender = mod.GetTexture("Assets/Slender");
 
@@ -456,6 +455,10 @@ namespace SpookyTerraria
             Main.versionNumber = $"v1.3.5.3";
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
 
+            // Main.soundMenuTick = Main.instance.OurLoad<SoundEffect>("Main/MenuTick");
+            /*Main.soundMenuOpen = Main.soundMenuOpen;
+            Main.soundMenuClose = Main.soundMenuClose;*/
+
             Sprint = null;
         }
         public override void AddRecipes()
@@ -554,6 +557,8 @@ namespace SpookyTerraria
         }
         public override void PreSaveAndQuit()
         {
+            msgOfTheDay = ChooseRandomMessage(rand);
+            Main.chTitle = true;
             playMusicTimer_UseOnce = 0;
             SoundEngine.StopAllAmbientSounds();
             Player player = Main.player[Main.myPlayer];
