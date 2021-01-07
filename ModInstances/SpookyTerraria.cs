@@ -5,14 +5,11 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using SpookyTerraria.ModIntances;
 using SpookyTerraria.NPCs;
-using SpookyTerraria.OtherItems;
 using SpookyTerraria.Tiles;
 using SpookyTerraria.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using Terraria;
 using Terraria.Graphics;
@@ -23,11 +20,11 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Audio;
 using Terraria.UI;
 using ReLogic.Graphics;
-using System.Net.NetworkInformation;
 using Terraria.IO;
 using Terraria.Graphics.Capture;
 using System.Reflection;
-using Terraria.Localization;
+using Terraria.GameContent.UI.States;
+using static Terraria.GameContent.UI.States.UIVirtualKeyboard;
 
 namespace SpookyTerraria
 {
@@ -160,6 +157,7 @@ namespace SpookyTerraria
     }
     public class SpookyTerraria : Mod
     {
+        public SpookyTerraria() { ModContent.GetInstance<SpookyTerraria>(); }
         public override void ModifyTransformMatrix(ref SpriteViewMatrix Transform)
         {
             // 43 + 42 = 85 (width of bathrooms)
@@ -184,7 +182,6 @@ namespace SpookyTerraria
         private bool stopTitleMusic;
         private ManualResetEvent titleMusicStopped;
         private int customTitleMusicSlot;
-        public SpookyTerraria() { ModContent.GetInstance<SpookyTerraria>(); }
         private void ChangeMenuMusic(ILContext il)
         {
             ILCursor ilcursor = new ILCursor(il);
@@ -222,10 +219,25 @@ namespace SpookyTerraria
             }
         }
         int rand;
+
+        public static SoundEffect tick;
+        public static SoundEffect open;
+        public static SoundEffect close;
+        public static Texture2D storedLogo;
+        public static Texture2D storedLogo2;
         public override void Load()
         {
+            storedLogo = Main.logoTexture;
+            storedLogo2 = Main.logo2Texture;
+            Main.logoTexture = GetTexture("Assets/Invisible");
+            Main.logo2Texture = GetTexture("Assets/Invisible");
+
             msgOfTheDay = ChooseRandomMessage(rand);
             rand = Main.rand.Next(0, 20);
+            tick = Main.soundMenuTick;
+            open = Main.soundMenuOpen;
+            close = Main.soundMenuClose;
+
             Main.soundMenuTick = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuOpen = GetSound("Sounds/Custom/Other/Nothingness");
             Main.soundMenuClose = GetSound("Sounds/Custom/Other/Nothingness");
@@ -240,10 +252,14 @@ namespace SpookyTerraria
                 On.Terraria.Lang.GetRandomGameTitle += Lang_GetRandomGameTitle;
                 Main.chTitle = true;
             }
-            
+            // MaxMenuItems = 16
+            On.Terraria.Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
+            On.Terraria.Main.DrawPlayers += Main_DrawPlayers;
             On.Terraria.Main.DrawBG += Main_DrawBG;
             On.Terraria.Main.DrawMenu += Main_DrawMenu;
             On.Terraria.Main.DrawInterface_35_YouDied += Main_DrawInterface_35_YouDied;
+
+            // IL.Terraria.Main.DrawMenu += MoveOptionUI;
             // Shader initialization
 
             if (!Main.dedServ)
@@ -255,6 +271,341 @@ namespace SpookyTerraria
                 Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
+            fart = GetSound("Sounds/Custom/Other/wtf");
+            fartInstance = fart.CreateInstance();
+            AmbienceHelper x = new AmbienceHelper();
+            x.InitializeSoundInstances();
+        }
+
+        /*private void MoveOptionUI(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            c.TryGotoNext(i => i.MatchLdfld(typeof(Main).GetField("selectedMenu")));
+            c.Emit(OpCodes.Call, typeof(SpookyTerraria).GetMethod("MoveOptions"));
+        }
+        internal static void MoveOptions()
+        {
+            typeof(Main).Assembly.GetType("Terraria.Main").GetMethod("DrawMenu");
+        }*/
+        private void Main_DrawInterface_30_Hotbar(On.Terraria.Main.orig_DrawInterface_30_Hotbar orig, Main self)
+        {
+            orig(self);
+            // maybe later
+        }
+
+        public override void Unload()
+        {
+            Main.logoTexture = storedLogo;
+            Main.logo2Texture = storedLogo2;
+            Main.soundMenuTick = tick;
+            Main.soundMenuClose = close;
+            Main.soundMenuOpen = open;
+            Main.logoTexture = storedLogo;
+            IL.Terraria.Main.UpdateAudio -= new ILContext.Manipulator(ChangeMenuMusic);
+            customTitleMusicSlot = 6;
+            ManualResetEvent evt = titleMusicStopped;
+            if (evt != null)
+            {
+                evt.Set();
+            }
+            titleMusicStopped = null;
+            // Wtf...
+            Main.versionNumber = $"v1.3.5.3";
+            SpookyTerrariaUtils.ReturnTexturesToDefaults();
+
+            // Main.soundMenuTick = Main.instance.OurLoad<SoundEffect>("Main/MenuTick");
+            /*Main.soundMenuOpen = Main.soundMenuOpen;
+            Main.soundMenuClose = Main.soundMenuClose;*/
+
+            Sprint = null;
+        }
+        public SoundEffect fart;
+        public SoundEffectInstance fartInstance;
+        public override void PostUpdateEverything()
+        {
+            AmbienceHelper.Instance.HandleAmbiences();
+            Main.raining = false;
+            Main.rainTime = 0;
+            Main.maxRain = 0;
+            musicType = ModContent.GetInstance<SpookyConfigClient>().musicType;
+            playMusicTimer_UseOnce++;
+            // Main.NewText($"X: {(int)Main.MouseWorld.X / 16} | Y: {(int)Main.MouseWorld.Y / 16}");
+            updateGameZoomTargetValue = Main.GameZoomTarget;
+            Player player = Main.player[Main.myPlayer];
+            if (Main.hasFocus)
+            {
+                player.GetModPlayer<SpookyPlayer>().deathTextTimer--;
+                if (player.GetModPlayer<SpookyPlayer>().deathTextTimer < 0)
+                {
+                    player.GetModPlayer<SpookyPlayer>().deathTextTimer = 0;
+                }
+            }
+            if (player.respawnTimer == 25)
+            {
+                if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+                {
+                    SpookyPlayer.pages = 0;
+                    SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
+                    Main.SaveSettings();
+
+                    if (Main.netMode == NetmodeID.SinglePlayer)
+                    {
+                        WorldFile.CacheSaveTime();
+                    }
+                    Main.invasionProgress = 0;
+                    Main.invasionProgressDisplayLeft = 0;
+                    Main.invasionProgressAlpha = 0f;
+                    Main.menuMode = 10;
+                    Main.StopTrackedSounds();
+                    CaptureInterface.ResetFocus();
+                    Main.ActivePlayerFileData.StopPlayTimer();
+
+                    Player.SavePlayer(Main.ActivePlayerFileData, false);
+
+                    if (Main.netMode == NetmodeID.SinglePlayer)
+                    {
+                        WorldFile.saveWorld();
+                    }
+                    else
+                    {
+                        Netplay.disconnect = true;
+                        Main.netMode = NetmodeID.SinglePlayer;
+                    }
+
+                    Main.fastForwardTime = false;
+                    Main.UpdateSundial();
+                    Main.menuMode = 0;
+                }
+            }
+            /*
+            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            {
+                Rectangle insideBathrooms = new Rectangle(2091 * SpookyTerrariaUtils.tileScaling, 367 * SpookyTerrariaUtils.tileScaling, 85 * SpookyTerrariaUtils.tileScaling, 26 * SpookyTerrariaUtils.tileScaling);
+                if (player.Hitbox.Intersects(insideBathrooms))
+                {
+                    Main.NewText(updateGameZoomTargetValue + ", " + Main.GameZoomTarget);
+                    updateGameZoomTargetValue += 0.05f;
+                    if (updateGameZoomTargetValue > 8.75f)
+                    {
+                        updateGameZoomTargetValue = 8.75f;
+                    }
+                }
+            }
+            */
+            // Fix for lerping
+            Main.soundInstanceMenuTick.Volume = 0f;
+            Main.soundInstanceMenuOpen.Volume = 0f;
+            Main.soundInstanceMenuClose.Volume = 0f;
+            if (Main.netMode != NetmodeID.Server)
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC npc = Main.npc[i];
+                    if (npc.type == ModContent.NPCType<Stalker>())
+                    {
+                        Filters.Scene["Darkness"].GetShader().UseIntensity(player.Distance(npc.Center) / 8);
+                    }
+                }
+            }
+            Main.slimeRain = false;
+            Main.invasionSize = 0;
+            Main.invasionProgress = 0;
+            if (!beatGame)
+            {
+                Main.dayTime = false;
+                Main.time = 1800;
+            }
+            else
+            {
+                Main.dayTime = true;
+                Main.time = 18000;
+            }
+        }
+        public Rectangle staticFrame = new Rectangle(0, 0, 1271, 650);
+        public int timerToLightStatic;
+        public int timerToMediumStatic;
+        public int timerToSevereStatic;
+        public float fadeScale;
+        private void Main_DrawPlayers(On.Terraria.Main.orig_DrawPlayers orig, Main self)
+        {
+            orig(self);
+            Mod mod = this;
+            Player player = Main.player[Main.myPlayer];
+            if (player.dead)
+            {
+                Main.hideUI = true;
+                fadeScale = 0f;
+            }
+            if (!Main.hasFocus)
+            {
+                timerToLightStatic = 0;
+                timerToMediumStatic = 0;
+                timerToSevereStatic = 0;
+            }
+            for (int ll = 0; ll < Main.maxNPCs; ll++)
+            {
+                NPC npc = Main.npc[ll];
+                float distance = npc.Distance(Main.player[Main.myPlayer].Center);
+                if (npc.active && distance <= 1000f)
+                {
+                    if (npc.type == ModContent.NPCType<Slenderman>())
+                    {
+                        bool noLight = Lighting.GetSubLight(npc.Top).X < 0.05f;
+                        if (Main.GameUpdateCount % 3 == 0)
+                        {
+                            staticFrame.Y += 650;
+                        }
+                        if (staticFrame.Y >= 1950)
+                        {
+                            staticFrame.Y = 0;
+                        }
+                        bool facingTowardsSlendermanLeft = npc.Center.X < player.Center.X && player.direction == -1;
+                        bool facingTowardsSlendermanRight = npc.Center.X > player.Center.X && player.direction == 1;
+                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend); // sourceRectangle: new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y
+                        Main.spriteBatch.Draw(mod.GetTexture("Assets/Static"), new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), sourceRectangle: staticFrame, Color.White * fadeScale, 0f, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), 5f, SpriteEffects.None, 1f);
+                        Main.spriteBatch.End();
+                        if (facingTowardsSlendermanLeft || facingTowardsSlendermanRight && !noLight)
+                        {
+                            if (fadeScale > 0f && fadeScale < 0.4f)
+                            {
+                                timerToMediumStatic = 0;
+                                timerToSevereStatic = 0;
+                                timerToLightStatic++;
+                                if (Main.hasFocus)
+                                {
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                                }
+                                if (timerToLightStatic == 2)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
+                                }
+                                if (timerToLightStatic >= 480)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
+                                    timerToLightStatic = 0;
+                                }
+                            }
+                            if (fadeScale >= 0.4 && fadeScale < 0.8f)
+                            {
+                                timerToLightStatic = 0;
+                                timerToSevereStatic = 0;
+                                timerToMediumStatic++;
+                                if (Main.hasFocus)
+                                {
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                                }
+                                if (timerToMediumStatic == 2)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
+                                }
+                                if (timerToMediumStatic >= 480)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
+                                    timerToMediumStatic = 0;
+                                }
+                            }
+                            if (fadeScale >= 0.8f)
+                            {
+                                timerToMediumStatic = 0;
+                                timerToLightStatic = 0;
+                                timerToSevereStatic++;
+                                if (Main.hasFocus)
+                                {
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                }
+                                if (timerToSevereStatic == 2)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
+                                }
+                                if (timerToSevereStatic >= 132)
+                                {
+                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
+                                    timerToSevereStatic = 0;
+                                }
+                            }
+                            // MAJOR TODO: MAKE STATIC
+                            if (!Collision.SolidCollision(npc.position, npc.width, 20) && distance <= 1000 && Collision.CanHitLine(player.Top, player.width, 10, npc.Top, npc.width, 20))
+                            {
+                                if (!noLight)
+                                {
+                                    if (Main.GameUpdateCount % 3 == 0)
+                                    {
+                                        fadeScale += 0.005f;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Main.GameUpdateCount % 10 == 0)
+                                    {
+                                        fadeScale += 0.005f;
+                                    }
+                                }
+                            }
+                        }
+                        else if (!facingTowardsSlendermanLeft && !facingTowardsSlendermanRight)
+                        {
+                            timerToLightStatic = 0;
+                            timerToMediumStatic = 0;
+                            timerToSevereStatic = 0;
+                            if (!noLight)
+                            {
+                                if (Main.GameUpdateCount % 3 == 0)
+                                {
+                                    fadeScale -= 0.005f;
+                                }
+                            }
+                            else
+                            {
+                                if (Main.GameUpdateCount % 10 == 0)
+                                {
+                                    fadeScale -= 0.005f;
+                                }
+                            }
+                        }
+                        else if (distance > 1000f)
+                        {
+                            if (Main.GameUpdateCount % 3 == 0)
+                            {
+                                fadeScale -= 0.005f;
+                            }
+                        }
+                        if (fadeScale > 1f)
+                        {
+                            fadeScale = 1f;
+                        }
+                        if (fadeScale < 0f)
+                        {
+                            fadeScale = 0f;
+                        }
+                        if (fadeScale >= 1f)
+                        {
+                            player.KillMe(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{player.name} stared at death for too long."), player.statLife + 50, 0, false);
+                        }
+                        if (fadeScale == 0f)
+                        {
+                            if (Main.hasFocus)
+                            {
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                            }
+                        }
+                    }
+                    if (npc.type == ModContent.NPCType<Slenderman>() && !npc.active)
+                    {
+                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                        timerToLightStatic = 0;
+                        timerToMediumStatic = 0;
+                        timerToSevereStatic = 0;
+                        fadeScale -= 0.005f;
+                    }
+                }
+                // Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
+            }
         }
         private string Lang_GetRandomGameTitle(On.Terraria.Lang.orig_GetRandomGameTitle orig)
         {
@@ -264,10 +615,13 @@ namespace SpookyTerraria
         private void Hooks_On_AddMenuButtons(Hooks.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
         {
             orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
+            offY = 450;
+            spacing = 35;
             MenuHelper.AddButton("Download Slender Map",
             delegate
             {
-                Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
+                // Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
+                Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld");
             },
             selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         }
@@ -336,28 +690,149 @@ namespace SpookyTerraria
             }
         }
 
+        private static Vector2 drawPos;
         private static float rotationTimer_BasedOnSineWave;
         private static float scaleTimer_BasedOnSineWave;
         private void Main_DrawBG(On.Terraria.Main.orig_DrawBG orig, Main self)
         {
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
-            Mod mod = this;
-            Texture2D blackPixel = mod.GetTexture("Assets/BlackPixel");
-            Texture2D slender = mod.GetTexture("Assets/Slender");
 
             float sinValueRot = (float)Math.Sin(rotationTimer_BasedOnSineWave);
             float sinValueScale = (float)Math.Sin(scaleTimer_BasedOnSineWave / 2);
+            bool inSettingsOrMPUI = Main.menuMode > 0 && Main.menuMode != 888;//Main.menuMode == 11 || Main.menuMode == 12 || Main.menuMode == 26 || Main.menuMode == 1213 || Main.menuMode == 1111 || Main.menuMode == 1213 || Main.menuMode == 1213 ||;
             if (Main.gameMenu)
             {
-                Main.spriteBatch.Draw(blackPixel, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
-                Main.spriteBatch.Draw(slender, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), null, Color.White, sinValueRot / 50, new Vector2(slender.Width / 2, slender.Height / 2),  2f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                /*if (displayCooldown <= 0 && timeToDisplay > 0)
+                {
+                    directionRand = Main.rand.Next(1, 9);
+                    fadeScale += 0.01f;
+                    switch (directionRand)
+                    {
+                        case 1:
+                            direction = SketchTravelDirections.Up;
+                            break;
+                        case 2:
+                            direction = SketchTravelDirections.Down;
+                            break;
+                        case 3:
+                            direction = SketchTravelDirections.Left;
+                            break;
+                        case 4:
+                            direction = SketchTravelDirections.Right;
+                            break;
+                        case 5:
+                            direction = SketchTravelDirections.UpRight;
+                            break;
+                        case 6:
+                            direction = SketchTravelDirections.UpLeft;
+                            break;
+                        case 7:
+                            direction = SketchTravelDirections.DownLeft;
+                            break;
+                        case 8:
+                            direction = SketchTravelDirections.DownRight;
+                            break;
+                        default:
+                            Logger.Warn($"directionRand returned {directionRand}! (Invalid)");
+                            break;
+                    }
+                }
+                else
+                {
+                    fadeScale -= 0.01f;
+                }
+                if (direction == SketchTravelDirections.Up)
+                {
+                    initialDrawPosition.Y -= 0.05f;
+                }
+                if (direction == SketchTravelDirections.Down)
+                {
+                    initialDrawPosition.Y += 0.05f;
+                }
+                if (direction == SketchTravelDirections.Left)
+                {
+                    initialDrawPosition.X -= 0.05f;
+                }
+                if (direction == SketchTravelDirections.Right)
+                {
+                    initialDrawPosition.X += 0.05f;
+                }
+                if (direction == SketchTravelDirections.UpRight)
+                {
+                    initialDrawPosition.X += 0.05f;
+                    initialDrawPosition.Y -= 0.05f;
+                }
+                if (direction == SketchTravelDirections.UpLeft)
+                {
+                    initialDrawPosition.X -= 0.05f;
+                    initialDrawPosition.Y -= 0.05f;
+                }
+                if (direction == SketchTravelDirections.DownRight)
+                {
+                    initialDrawPosition.X += 0.05f;
+                    initialDrawPosition.Y += 0.05f;
+                }
+                if (direction == SketchTravelDirections.DownLeft)
+                {
+                    initialDrawPosition.X -= 0.05f;
+                    initialDrawPosition.Y += 0.05f;
+                }
+                SpriteEffects none = SpriteEffects.None;
+                _fadeScale = Main.rand.NextFloat();
+                if (fadeScale == 0f)
+                {
+                    actualRand = Main.rand.Next(PageID.Follows, PageID.NoX12 + 1);
+                    try
+                    {
+                        int randW = Main.rand.Next(-250, Main.screenWidth + 250);
+                        int randH = Main.rand.Next(-250, Main.screenHeight + 250);
+                        initialDrawPosition = new Vector2(randW, randH);
+                        timeToDisplay = TimeCreator.AddSeconds(2);
+                    }
+                    catch (Exception thrown)
+                    {
+                        actualRand = _validSketches[Main.rand.Next(_validSketches[0], _validSketches.Length)];
+                        Logger.Warn($"Exception thrown, but draw was reverted to sketch{actualRand}, Exception: {thrown.Message}\nStackTrace: {thrown.StackTrace}");
+                    }
+                }
+                else
+                {
+                    Main.spriteBatch.Draw(GetTexture($"Assets/MenuUI/sketch{actualRand}"), initialDrawPosition, null, Color.White * fadeScale, 0f, GetTexture($"Assets/MenuUI/sketch{actualRand}").Size() / 2, 1f, none, 1f);
+                }
+                Main.spriteBatch.DrawString(Main.fontCombatText[1], $"actualRand: {actualRand}\ninitialDrawPosition: {initialDrawPosition}\nDirection: {direction}\n_fadeScale: {_fadeScale}", new Vector2(50, 50), Color.White);*/
+                Main.spriteBatch.Draw(GetTexture("Assets/BlackPixel"), Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(GetTexture("Assets/THE_CHAD"), new Vector2(150, Main.screenHeight - 30), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(GetTexture("Assets/Slender"), inSettingsOrMPUI ? new Vector2(Main.screenWidth / 2, 800) : drawPos = new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
             }
             else
             {
                 orig(self);
             }
         }
+        // Vars for drawing scribble on the main menu
+        internal enum SketchTravelDirections
+        {
+            Up,
+            Down,
+            Left,
+            Right,
+            UpRight,
+            UpLeft,
+            DownLeft,
+            DownRight
+        }
+        /*internal int actualRand = 0;
+        internal SketchTravelDirections direction;
+        internal static int directionRand;
+        internal static int timeToDisplay;
+        internal static int displayCooldown;
+        public static Vector2 initialDrawPosition;
+        private float _fadeScale = 0f;
+        private short[] _validSketches = new short[] { PageID.Follows, PageID.CantRun, PageID.Trees, PageID.LeaveMeAlone, PageID.AlwaysWatchesNoEyes, PageID.HelpMe, PageID.DontLook, PageID.NoX12 };
+        */
         public static string msgOfTheDay;
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
@@ -370,7 +845,7 @@ namespace SpookyTerraria
 
             float txtScale = 0.25f;
 
-            string myMedia = "My Media:";
+            string myMedia = $"My Socials:";
             string display4Twitch = "<- My Twitch Channel!";
             string display4YT = "<- My YouTube Channel!";
             string display4Discord = "<- My Discord Server!";
@@ -404,7 +879,7 @@ namespace SpookyTerraria
                 Main.spriteBatch.DrawString(Main.fontDeathText, myMedia, drawPosition - new Vector2(0, 20), Color.White, 0f, Vector2.Zero, txtScale, none, 1f);
                 if (Main.menuMode == 0)
                 {
-                    Main.spriteBatch.DrawString(Main.fontDeathText, msgOfTheDay, new Vector2(Main.screenWidth / 2, Main.screenHeight - 20), Color.White, 0f, Main.fontDeathText.MeasureString(msgOfTheDay) / 2, 1f, none, 1f);
+                    Main.spriteBatch.DrawString(Main.fontDeathText, msgOfTheDay, new Vector2(Main.screenWidth / 2, Main.screenHeight - 25), Color.White, 0f, Main.fontDeathText.MeasureString(msgOfTheDay) / 2, 1f, none, 1f);
                 }
 
                 if (mouseContainedTwitch)
@@ -434,32 +909,13 @@ namespace SpookyTerraria
             }
             catch(Exception e)
             {
-                mod.Logger.Warn($"{0} was not able to draw correctly!\nException caught! {e.Message} {e.StackTrace}");
+                mod.Logger.Warn($"{0} was not able to draw correctly!\nException caught! Message: {e.Message} StackTrace: {e.StackTrace}");
             }
+            // scribbleX
             orig(self, gameTime);
         }
         private void Main_DrawInterface_35_YouDied(On.Terraria.Main.orig_DrawInterface_35_YouDied orig)
         {
-        }
-        public override void Unload()
-        {
-            IL.Terraria.Main.UpdateAudio -= new ILContext.Manipulator(ChangeMenuMusic);
-            customTitleMusicSlot = 6;
-            ManualResetEvent evt = titleMusicStopped;
-            if (evt != null)
-            {
-                evt.Set();
-            }
-            titleMusicStopped = null;
-            // Wtf...
-            Main.versionNumber = $"v1.3.5.3";
-            SpookyTerrariaUtils.ReturnTexturesToDefaults();
-
-            // Main.soundMenuTick = Main.instance.OurLoad<SoundEffect>("Main/MenuTick");
-            /*Main.soundMenuOpen = Main.soundMenuOpen;
-            Main.soundMenuClose = Main.soundMenuClose;*/
-
-            Sprint = null;
         }
         public override void AddRecipes()
         {
@@ -557,10 +1013,11 @@ namespace SpookyTerraria
         }
         public override void PreSaveAndQuit()
         {
+            // Directory.CreateDirectory LUL
             msgOfTheDay = ChooseRandomMessage(rand);
             Main.chTitle = true;
             playMusicTimer_UseOnce = 0;
-            SoundEngine.StopAllAmbientSounds();
+            // SoundEngine.StopAllAmbientSounds();
             Player player = Main.player[Main.myPlayer];
             Main.mapEnabled = true;
             Main.mapStyle = 3;
@@ -610,101 +1067,6 @@ namespace SpookyTerraria
         /// Determining play values for slender music.
         /// </summary>
         public int playMusicTimer_UseOnce;
-        public override void PostUpdateEverything()
-        {
-            playMusicTimer_UseOnce++;
-            // Main.NewText($"X: {(int)Main.MouseWorld.X / 16} | Y: {(int)Main.MouseWorld.Y / 16}");
-            updateGameZoomTargetValue = Main.GameZoomTarget;
-            Player player = Main.player[Main.myPlayer];
-            if (Main.hasFocus)
-            {
-                player.GetModPlayer<SpookyPlayer>().deathTextTimer--;
-                if (player.GetModPlayer<SpookyPlayer>().deathTextTimer < 0)
-                {
-                    player.GetModPlayer<SpookyPlayer>().deathTextTimer = 0;
-                }
-            }
-            if (player.respawnTimer == 25)
-            {
-                if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
-                {
-                    SpookyPlayer.pages = 0;
-                    SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
-                    Main.SaveSettings();
-
-                    if (Main.netMode == NetmodeID.SinglePlayer)
-                    {
-                        WorldFile.CacheSaveTime();
-                    }
-                    Main.invasionProgress = 0;
-                    Main.invasionProgressDisplayLeft = 0;
-                    Main.invasionProgressAlpha = 0f;
-                    Main.menuMode = 10;
-                    Main.StopTrackedSounds();
-                    CaptureInterface.ResetFocus();
-                    Main.ActivePlayerFileData.StopPlayTimer();
-
-                    Player.SavePlayer(Main.ActivePlayerFileData, false);
-
-                    if (Main.netMode == NetmodeID.SinglePlayer)
-                    {
-                        WorldFile.saveWorld();
-                    }
-                    else
-                    {
-                        Netplay.disconnect = true;
-                        Main.netMode = NetmodeID.SinglePlayer;
-                    }
-
-                    Main.fastForwardTime = false;
-                    Main.UpdateSundial();
-                    Main.menuMode = 0;
-                }
-            }
-            /*
-            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
-            {
-                Rectangle insideBathrooms = new Rectangle(2091 * SpookyTerrariaUtils.tileScaling, 367 * SpookyTerrariaUtils.tileScaling, 85 * SpookyTerrariaUtils.tileScaling, 26 * SpookyTerrariaUtils.tileScaling);
-                if (player.Hitbox.Intersects(insideBathrooms))
-                {
-                    Main.NewText(updateGameZoomTargetValue + ", " + Main.GameZoomTarget);
-                    updateGameZoomTargetValue += 0.05f;
-                    if (updateGameZoomTargetValue > 8.75f)
-                    {
-                        updateGameZoomTargetValue = 8.75f;
-                    }
-                }
-            }
-            */
-            // Fix for lerping
-            Main.soundInstanceMenuTick.Volume = 0f;
-            Main.soundInstanceMenuOpen.Volume = 0f;
-            Main.soundInstanceMenuClose.Volume = 0f;
-            if (Main.netMode != NetmodeID.Server)
-            {
-                for (int i = 0; i < Main.maxNPCs; i++)
-                {
-                    NPC npc = Main.npc[i];
-                    if (npc.type == ModContent.NPCType<Stalker>())
-                    {
-                        Filters.Scene["Darkness"].GetShader().UseIntensity(player.Distance(npc.Center) / 8);
-                    }
-                }
-            }
-            Main.slimeRain = false;
-            Main.invasionSize = 0;
-            Main.invasionProgress = 0;
-            if (!beatGame)
-            {
-                Main.dayTime = false;
-                Main.time = 1800;
-            }
-            else
-            {
-                Main.dayTime = true;
-                Main.time = 18000;
-            }
-        }
         public override void ModifyLightingBrightness(ref float scale)
         {
             Player player = Main.player[Main.myPlayer];
@@ -717,6 +1079,8 @@ namespace SpookyTerraria
                 scale = ModContent.GetInstance<SpookyConfigServer>().lightingScale;
             }
         }
+        public static string[] MusicTypes = new string[] { "The 8 Pages", "Slender's Shadow", "7th Street" };
+        public static string musicType;
         public override void UpdateMusic(ref int music, ref MusicPriority priority)
         {
             if (stopTitleMusic || (!Main.gameMenu && customTitleMusicSlot != 6 && Main.ActivePlayerFileData != null && Main.ActiveWorldFileData != null))
@@ -744,25 +1108,59 @@ namespace SpookyTerraria
             bool pageReqMetTier3 = SpookyPlayer.pages >= 5 && SpookyPlayer.pages < 7;
             bool pageReqMetTier4 = SpookyPlayer.pages >= 7 && SpookyPlayer.pages < 8;
 
-            if (pageReqMetTier1)
+            if (musicType == MusicTypes[SlenderMusicID.TheEightPages])
             {
-                music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage1");
-                priority = MusicPriority.BossHigh;
+                if (pageReqMetTier1)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage1");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier2)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage2");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier3)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage3");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier4)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage4");
+                    priority = MusicPriority.BossHigh;
+                }
             }
-            if (pageReqMetTier2)
+            else if (musicType == MusicTypes[SlenderMusicID.SlendersShadow])
             {
-                music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage2");
-                priority = MusicPriority.BossHigh;
+                if (pageReqMetTier1)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage1");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier2)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage2");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier3)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage3");
+                    priority = MusicPriority.BossHigh;
+                }
+                if (pageReqMetTier4)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage4");
+                    priority = MusicPriority.BossHigh;
+                }
             }
-            if (pageReqMetTier3)
+            else if (musicType == MusicTypes[SlenderMusicID.SeventhStreet])
             {
-                music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage3");
-                priority = MusicPriority.BossHigh;
-            }
-            if (pageReqMetTier4)
-            {
-                music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage4");
-                priority = MusicPriority.BossHigh;
+                if (SpookyPlayer.pages > 0)
+                {
+                    music = GetSoundSlot(SoundType.Music, $"Sounds/Music/Slender/7thStreet/7thStreetStage{SpookyPlayer.pages}");
+                    priority = MusicPriority.BossHigh;
+                }
             }
             if ((PlayerIsInForest(player) || player.ZoneSnow || player.ZoneBeach || player.ZoneCorrupt || player.ZoneCrimson || PlayerUnderground(player) || player.ZoneDirtLayerHeight || player.ZoneUndergroundDesert || player.ZoneUnderworldHeight || player.ZoneSkyHeight || player.ZoneCorrupt || player.ZoneCrimson || player.ZoneHoly || player.ZoneJungle || (player.ZoneDesert && !player.ZoneBeach) || player.ZoneDungeon || player.ZoneGlowshroom || player.ZoneMeteor || player.ZoneRain || player.ZoneOldOneArmy || player.ZoneSandstorm) && !pageReqMetTier1 && !pageReqMetTier2 && !pageReqMetTier3 && !pageReqMetTier4)
             {

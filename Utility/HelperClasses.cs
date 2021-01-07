@@ -49,14 +49,20 @@ namespace SpookyTerraria.Utilities
             }
             return false;
         }
-        /// <summary>
-        /// This is just a meme method, pls no use
-        /// </summary>
-        /// <param name="pdi"></param>
-        /// <returns></returns>
-        public static PlayerDrawInfo ToDrawInfo(this PlayerDrawInfo pdi)
+        public static bool ZoneForest(this Player player)
         {
-            return pdi;
+            return !player.ZoneJungle
+                && !player.ZoneDungeon
+                && !player.ZoneCorrupt
+                && !player.ZoneCrimson
+                && !player.ZoneHoly
+                && !player.ZoneSnow
+                && !player.ZoneUndergroundDesert
+                && !player.ZoneGlowshroom
+                && !player.ZoneMeteor
+                && !player.ZoneBeach
+                && !player.ZoneDesert
+                && player.ZoneOverworldHeight;
         }
         public static Vector2 ToVector2(this Tile tile, int x, int y)
         {
@@ -301,7 +307,7 @@ namespace SpookyTerraria.Utilities
         /// </summary>
         /// <param name="toAdd"></param>
         /// <param name="toSubtract"></param>
-        public static void Square(int toAdd, int toSubtract)
+        public static void GenerateStar(int toAdd, int toSubtract)
         {
             WorldGen.KillTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16);
 
@@ -340,104 +346,6 @@ namespace SpookyTerraria.Utilities
             WorldGen.KillWall(((int)Main.MouseWorld.X / 16) - toSubtract, ((int)Main.MouseWorld.Y / 16) + toAdd);
 
             WorldGen.KillWall(((int)Main.MouseWorld.X / 16) + toAdd, ((int)Main.MouseWorld.Y / 16) - toSubtract);
-        }
-        /// <summary>
-        /// Cap a value at a max or a min.
-        /// </summary>
-        /// <param name="valueToBeCapped"></param>
-        /// <param name="capValue"></param>
-        /// <param name="checkLessThan"></param>
-        public static void CapValue(int valueToBeCapped, int capValue, bool checkLessThan = false)
-        {
-            if (!checkLessThan)
-            {
-                if (valueToBeCapped > capValue)
-                {
-                    valueToBeCapped = capValue;
-                }
-            }
-            else if (checkLessThan)
-            {
-                if (valueToBeCapped < capValue)
-                {
-                    valueToBeCapped = -capValue;
-                }
-            }
-        }
-        public static void CapValue(float valueToBeCapped, float capValue, bool checkLessThan = false)
-        {
-            if (checkLessThan)
-            {
-                if (valueToBeCapped > capValue)
-                {
-                    valueToBeCapped = capValue;
-                }
-            }
-            else if (!checkLessThan)
-            {
-                if (valueToBeCapped < capValue)
-                {
-                    valueToBeCapped = -capValue;
-                }
-            }
-        }
-        public static void CapValue(double valueToBeCapped, double capValue, bool checkLessThan = false)
-        {
-            if (checkLessThan)
-            {
-                if (valueToBeCapped > capValue)
-                {
-                    valueToBeCapped = capValue;
-                }
-            }
-            else if (!checkLessThan)
-            {
-                if (valueToBeCapped < capValue)
-                {
-                    valueToBeCapped = -capValue;
-                }
-            }
-        }
-        public static void CapValue(decimal valueToBeCapped, decimal capValue, bool checkLessThan = false)
-        {
-            if (checkLessThan)
-            {
-                if (valueToBeCapped > capValue)
-                {
-                    valueToBeCapped = capValue;
-                }
-            }
-            else if (!checkLessThan)
-            {
-                if (valueToBeCapped < capValue)
-                {
-                    valueToBeCapped = -capValue;
-                }
-            }
-        }
-        public static void CapValue(long valueToBeCapped, long capValue, bool checkLessThan = false)
-        {
-            if (checkLessThan)
-            {
-                if (valueToBeCapped > capValue)
-                {
-                    valueToBeCapped = capValue;
-                }
-            }
-            else if (!checkLessThan)
-            {
-                if (valueToBeCapped < capValue)
-                {
-                    valueToBeCapped = -capValue;
-                }
-            }
-        }
-        /// <summary>
-        /// Hardcoded value capping
-        /// </summary>
-        public static void DoCapping()
-        {
-            Player player = Main.player[Main.myPlayer];
         }
         public enum BodyFrames
         {
@@ -531,14 +439,6 @@ namespace SpookyTerraria.Utilities
                     player.bodyFrame.Y = player.bodyFrame.Height * 18;
                     break;
             }
-        }
-        /// <summary>
-        /// To be worked on...
-        /// </summary>
-        /// <typeparam name="T">Fucc</typeparam>
-        public struct GiveInstance<T> where T : class
-        {
-            // Work later nerd
         }
         /// <summary>
         /// Play step sound. Modify the directory if need be
@@ -661,8 +561,8 @@ namespace SpookyTerraria.Utilities
 
             // TODO: Friendly Reminder; Finish the shits
 
-            Main.heartTexture = mod.GetTexture("Assets/UI/Heart_Purple");
-            Main.heart2Texture = mod.GetTexture("Assets/UI/Heart_Blue");
+            Main.heartTexture = mod.GetTexture("Assets/UI/NewHeart_Red");
+            Main.heart2Texture = mod.GetTexture("Assets/UI/NewHeart_Yellow");
             Main.manaTexture = mod.GetTexture("Assets/UI/ManaStar_Green");
 
             Main.inventoryBack2Texture = mod.GetTexture("Assets/UI/Box"); // Good
@@ -986,6 +886,7 @@ namespace SpookyTerraria.Utilities
     {
         public static void ReplayAt2Container()
         {
+            /*
             Mod mod = ModLoader.GetMod("SpookyTerraria");
             Player player = Main.player[Main.myPlayer];
 
@@ -1005,7 +906,7 @@ namespace SpookyTerraria.Utilities
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
             }
-            if (dayAmbienceTimer == 2 && Main.dayTime && PlayerIsInForest(player))
+            if (dayAmbienceTimer == 2 && Main.dayTime && player.ZoneForest())
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
             }
@@ -1044,7 +945,7 @@ namespace SpookyTerraria.Utilities
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/SnowAmbience"));
                 blizzTimer = 0;
             }
-            if (PlayerIsInForest(player) && cricketsTimer == 2700)
+            if (player.ZoneForest() && cricketsTimer == 2700)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience"));
                 cricketsTimer = 0;
@@ -1054,11 +955,11 @@ namespace SpookyTerraria.Utilities
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/JungleAmbience"));
                 jungleAmbTimer = 0;
             }
-            if (dayAmbienceTimer == 4620 && PlayerIsInForest(player) && Main.dayTime && SpookyPlayer.pages >= 8)
+            if (dayAmbienceTimer == 4620 && player.ZoneForest() && Main.dayTime && SpookyPlayer.pages >= 8)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
                 dayAmbienceTimer = 0;
-            }
+            }*/
         }
         /// <summary>
         /// Stop the SoundEffectInstance of <paramref name="path"/>.
@@ -1078,47 +979,14 @@ namespace SpookyTerraria.Utilities
         /// <param name="volume"></param>
         /// <param name="pitch"></param>
         /// <param name="pan"></param>
-        public static void ModifyAmbientAttribute(string path, float volume = 1f, float pitch = 1f, float pan = 1f)
+        public static SoundEffectInstance ModifyAmbientAttribute(SoundEffectInstance instance, float volume = 1f, float pitch = 1f, float pan = 1f)
         {
-            Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
-            SoundEffectInstance pathInstance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
-            if (pathInstance != null)
-            {
-                pathInstance.Pan = pan;
-                pathInstance.Pitch = pitch;
-                pathInstance.Volume = volume;
-            }
-        }
-        /// <summary>
-        /// Use instance of SoundEffectInstance instead of indirectly. Automatically clamps the SoundEffectInstance's Pitch and Volume values between 0 and 1.
-        /// </summary>
-        /// <param name="path">The path to the sound effect.</param>
-        public static SoundEffectInstance GetSoundEffect(string path)
-        {
-            Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
-            SoundEffectInstance instance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
-
-            if (instance.Volume > 1f)
-            {
-                instance.Volume = 1f;
-            }
-            if (instance.Volume < 0f)
-            {
-                instance.Volume = 0f;
-            }
-
-            if (instance.Pitch > 1f)
-            {
-                instance.Pitch = 1f;
-            }
-            if (instance.Pitch < 0f)
-            {
-                instance.Pitch = 0f;
-            }
+            instance.Volume = volume;
+            instance.Pitch = pitch;
+            instance.Pan = pan;
             return instance;
         }
+        [Obsolete("This should not be used under any circumstance", true)]
         /// <summary>
         /// Stops ALL active ambient sounds.
         /// </summary>
@@ -1141,20 +1009,6 @@ namespace SpookyTerraria.Utilities
             f?.Stop();
             g?.Stop();
         }
-        /// <summary>
-        /// Stops all directory 
-        /// </summary>
-        /// <param name="paths"></param>
-        public static void StopSoundList(string[] paths)
-        {
-            Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
-            foreach (string path in paths)
-            {
-                SoundEffectInstance instances = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
-                instances?.Stop();
-            }
-        }
 
         public const string cricketsSoundDir = "Sounds/Custom/Ambient/Biome/ForestAmbience";
         public const string blizzardSoundDir = "Sounds/Custom/Ambient/Biome/SnowAmbience";
@@ -1167,200 +1021,5 @@ namespace SpookyTerraria.Utilities
         /// <summary>
         /// Handle sound instancing, such as stopping sounds, etc.
         /// </summary>
-        public static void HandleSoundInstancing()
-        {
-            Player player = Main.player[Main.myPlayer];
-
-            if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
-            {
-                oceanWavesTimer = 0;
-                StopAmbientSound(wavesSoundDir);
-            }
-
-            caveRumbleTimer++;
-            cricketsTimer++;
-            blizzTimer++;
-            oceanWavesTimer++;
-            jungleAmbTimer++;
-            dayAmbienceTimer++;
-
-            if (player.ZoneSkyHeight || player.ZoneUnderworldHeight)
-            {
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(dayAmbienceDir);
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(cricketsSoundDir);
-                cricketsTimer = 0;
-                caveRumbleTimer = 0;
-                oceanWavesTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                oceanWavesTimer = 0;
-                jungleAmbTimer = 0;
-                dayAmbienceTimer = 0;
-            }
-            if (Main.gameMenu)
-            {
-                StopAllAmbientSounds();
-            }
-            if (player.ZoneCorrupt || player.ZoneCrimson)
-            {
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                oceanWavesTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                oceanWavesTimer = 0;
-                if (Main.dayTime)
-                {
-                    StopAmbientSound(cricketsSoundDir);
-                    cricketsTimer = 0;
-                }
-                else
-                {
-                    StopAmbientSound(dayAmbienceDir);
-                    dayAmbienceTimer = 0;
-                }
-                if (!player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight)
-                {
-                    StopAmbientSound(wavesSoundDir);
-                    caveRumbleTimer = 0;
-                }
-            }
-            if (player.ZoneDesert && !player.ZoneBeach)
-            {
-                StopAmbientSound(cricketsSoundDir);
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                oceanWavesTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                caveRumbleTimer = 0;
-                if (Main.dayTime)
-                {
-                    cricketsTimer = 0;
-                }
-                else
-                {
-                    dayAmbienceTimer = 0;
-                }
-            }
-            if (player.ZoneJungle && (player.ZoneOverworldHeight || player.ZoneDirtLayerHeight))
-            {
-                StopAmbientSound(cricketsSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                caveRumbleTimer = 0;
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                dayAmbienceTimer = 0;
-            }
-            else if (player.ZoneJungle && player.ZoneRockLayerHeight)
-            {
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(dayAmbienceDir);
-                StopAmbientSound(cricketsSoundDir);
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                dayAmbienceTimer = 0;
-                jungleAmbTimer = 0;
-            }
-            if (player.ZoneRockLayerHeight) // Rock Layer
-            {
-                StopAmbientSound(cricketsSoundDir);
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(breezeSoundDir);
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(dayAmbienceDir);
-                // ModifyAmbientAttribute(breezeSoundDir, 0.4f, 1f, 0.9f);
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                dayAmbienceTimer = 0;
-                jungleAmbTimer = 0;
-            }
-            if (player.ZoneDirtLayerHeight)
-            {
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                // GetSoundEffect(breezeSoundDir).Volume--;
-            }
-            string unwantedWorldName = "Slender: The 8 Pages";
-            if (player.ZoneBeach && !player.ZoneDesert && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Beach
-            {
-                if (Main.worldName != unwantedWorldName || Main.worldName != unwantedWorldName.ToUpper() || Main.worldName != unwantedWorldName.ToLower())
-                {
-                    StopAmbientSound(cricketsSoundDir);
-                    cricketsTimer = 0;
-                }
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(dayAmbienceDir);
-                // ModifyAmbientAttribute(breezeSoundDir, 0.4f, 1f, 0.9f);
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                dayAmbienceTimer = 0;
-                // Checked
-            }
-            if (player.ZoneSnow && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight) // Snow
-            {
-                StopAmbientSound(cricketsSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(jungleAmbienceDir);
-                StopAmbientSound(dayAmbienceDir);
-                ModifyAmbientAttribute(breezeSoundDir, 0.4f, 0.2f, 0.98f);
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                cricketsTimer = 0;
-                jungleAmbTimer = 0;
-                dayAmbienceTimer = 0;
-                // checked
-            }
-            if (PlayerIsInForest(player) && !Main.dayTime && !player.ZoneRockLayerHeight) // Forest
-            {
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(dayAmbienceDir);
-                StopAmbientSound(jungleAmbienceDir);
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                dayAmbienceTimer = 0;
-            }
-            if (PlayerIsInForest(player) && Main.dayTime && !player.ZoneRockLayerHeight) // Forest
-            {
-                StopAmbientSound(blizzardSoundDir);
-                StopAmbientSound(wavesSoundDir);
-                StopAmbientSound(rumblesSoundDir);
-                StopAmbientSound(cricketsSoundDir);
-                StopAmbientSound(jungleAmbienceDir);
-                oceanWavesTimer = 0;
-                caveRumbleTimer = 0;
-                blizzTimer = 0;
-                jungleAmbTimer = 0;
-                cricketsTimer = 0;
-            }
-            // Main.NewText($"CaveRumble: {caveRumbleTimer}, OceanWaves: {oceanWavesTimer}, Crickets: {cricketsTimer}, Blizzard: {blizzTimer}, DayAmb: {dayAmbienceTimer}, JungleAmb: {jungleAmbTimer}");
-        }
     }
 }

@@ -48,166 +48,26 @@ namespace SpookyTerraria.ModIntances
         public int deathTextChoice;
         public float scale;
         public float fadeScale;
-        public Rectangle staticFrame = new Rectangle(0, 0, 1271, 650);
-        public int timerToLightStatic;
-        public int timerToMediumStatic;
-        public int timerToSevereStatic;
         public override void PostDrawTiles()
         {
             Player player = Main.player[Main.myPlayer];
-            if (player.dead)
+
+            int count = SpookyPlayer.pages;
+            if (!Main.playerInventory && player.CountBuffs() == 0 && !Main.hideUI && !player.dead)
             {
-                Main.hideUI = true;
-                fadeScale = 0f;
+                SpookyTerrariaUtils.DrawPageUI(count, 35f, 100f);
             }
-            if (!Main.hasFocus)
+            if (!Main.playerInventory && player.CountBuffs() <= 11 && player.CountBuffs() > 0 && !Main.hideUI && !player.dead)
             {
-                timerToLightStatic = 0;
-                timerToMediumStatic = 0;
-                timerToSevereStatic = 0;
+                SpookyTerrariaUtils.DrawPageUI(count, 35f, 150f);
             }
-            for (int ll = 0; ll < Main.maxNPCs; ll++)
+            if (!Main.playerInventory && player.CountBuffs() > 11 && !Main.hideUI && !player.dead)
             {
-                NPC npc = Main.npc[ll];
-                float distance = npc.Distance(Main.player[Main.myPlayer].Center);
-                if (npc.active && distance <= 1000f)
-                {
-                    if (npc.type == ModContent.NPCType<Slenderman>())
-                    {
-                        if (Main.GameUpdateCount % 3 == 0)
-                        {
-                            staticFrame.Y += 650;
-                        }
-                        if (staticFrame.Y >= 1950)
-                        {
-                            staticFrame.Y = 0;
-                        }
-                        bool facingTowardsSlendermanLeft = npc.Center.X < player.Center.X && player.direction == -1;
-                        bool facingTowardsSlendermanRight = npc.Center.X > player.Center.X && player.direction == 1;
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend); // sourceRectangle: new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y
-                        Main.spriteBatch.Draw(mod.GetTexture("Assets/Static"), new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), sourceRectangle: staticFrame, Color.White * fadeScale, 0f, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), 5f, SpriteEffects.None, 1f);
-                        Main.spriteBatch.End();
-                        if (facingTowardsSlendermanLeft || facingTowardsSlendermanRight)
-                        {
-                            if (fadeScale > 0f && fadeScale < 0.4f)
-                            {
-                                timerToMediumStatic = 0;
-                                timerToSevereStatic = 0;
-                                timerToLightStatic++;
-                                if (Main.hasFocus)
-                                {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
-                                }
-                                if (timerToLightStatic == 2)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
-                                }
-                                if (timerToLightStatic >= 480)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
-                                    timerToLightStatic = 0;
-                                }
-                            }
-                            if (fadeScale >= 0.4 && fadeScale < 0.8f)
-                            {
-                                timerToLightStatic = 0;
-                                timerToSevereStatic = 0;
-                                timerToMediumStatic++;
-                                if (Main.hasFocus)
-                                {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
-                                }
-                                if (timerToMediumStatic == 2)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
-                                }
-                                if (timerToMediumStatic >= 480)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
-                                    timerToMediumStatic = 0;
-                                }
-                            }
-                            if (fadeScale >= 0.8f)
-                            {
-                                timerToMediumStatic = 0;
-                                timerToLightStatic = 0;
-                                timerToSevereStatic++;
-                                if (Main.hasFocus)
-                                {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                                }
-                                if (timerToSevereStatic == 2)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
-                                }
-                                if (timerToSevereStatic >= 132)
-                                {
-                                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
-                                    timerToSevereStatic = 0;
-                                }
-                            }
-                            // MAJOR TODO: MAKE STATIC
-                            if (!Collision.SolidCollision(npc.position, npc.width, 20) && distance <= 1000 && Collision.CanHitLine(player.Top, player.width, 10, npc.Top, npc.width, 20))
-                            {
-                                if (Main.GameUpdateCount % 3 == 0)
-                                {
-                                    fadeScale += 0.005f;
-                                }
-                            }
-                        }
-                        else if (!facingTowardsSlendermanLeft && !facingTowardsSlendermanRight)
-                        {
-                            timerToLightStatic = 0;
-                            timerToMediumStatic = 0;
-                            timerToSevereStatic = 0;
-                            if (Main.GameUpdateCount % 3 == 0)
-                            {
-                                fadeScale -= 0.005f;
-                            }
-                        }
-                        else if (distance > 1000f)
-                        {
-                            if (Main.GameUpdateCount % 3 == 0)
-                            {
-                                fadeScale -= 0.005f;
-                            }
-                        }
-                        if (fadeScale > 1f)
-                        {
-                            fadeScale = 1f;
-                        }
-                        if (fadeScale < 0f)
-                        {
-                            fadeScale = 0f;
-                        }
-                        if (fadeScale >= 1f)
-                        {
-                            player.KillMe(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{player.name} stared at death for too long."), player.statLife + 50, 0, false);
-                        }
-                        if (fadeScale == 0f)
-                        {
-                            if (Main.hasFocus)
-                            {
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
-                            }
-                        }
-                    }
-                    if (npc.type == ModContent.NPCType<Slenderman>() && !npc.active)
-                    {
-                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                        timerToLightStatic = 0;
-                        timerToMediumStatic = 0;
-                        timerToSevereStatic = 0;
-                        fadeScale -= 0.005f;
-                    }
-                }
-                // Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
+                SpookyTerrariaUtils.DrawPageUI(count, 35f, 210f);
+            }
+            if (Main.playerInventory && !Main.hideUI && !player.dead)
+            {
+                SpookyTerrariaUtils.DrawPageUI(count, 35f, 325f);
             }
 
             if (player.GetModPlayer<SpookyPlayer>().deathTextTimer == 1)
@@ -282,7 +142,7 @@ namespace SpookyTerraria.ModIntances
                 }
             }
             Main.spriteBatch.End();
-            if (Main.hasFocus && Main.worldName == SpookyTerrariaUtils.slenderWorldName)
+            /*if (Main.hasFocus && Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
                 SoundEngine.StopAmbientSound(SoundEngine.wavesSoundDir);
                 oceanWavesTimer = 0;
@@ -301,26 +161,7 @@ namespace SpookyTerraria.ModIntances
                 cricketsTimer = 0;
                 blizzTimer = 0;
                 caveRumbleTimer = 0;
-            }
-
-            // TODO: FINISH DRAWN RANDOMIZATION
-            int count = SpookyPlayer.pages;
-            if (!Main.playerInventory && player.CountBuffs() == 0 && !Main.hideUI && !player.dead)
-            {
-                SpookyTerrariaUtils.DrawPageUI(count, 35f, 100f);
-            }
-            if (!Main.playerInventory && player.CountBuffs() <= 11 && player.CountBuffs() > 0 && !Main.hideUI && !player.dead)
-            {
-                SpookyTerrariaUtils.DrawPageUI(count, 35f, 150f);
-            }
-            if (!Main.playerInventory && player.CountBuffs() > 11 && !Main.hideUI && !player.dead)
-            {
-                SpookyTerrariaUtils.DrawPageUI(count, 35f, 210f);
-            }
-            if (Main.playerInventory && !Main.hideUI && !player.dead)
-            {
-                SpookyTerrariaUtils.DrawPageUI(count, 35f, 325f);
-            }
+            }*/
         }
         public override void PostUpdate()
         {

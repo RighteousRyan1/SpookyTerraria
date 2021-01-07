@@ -36,7 +36,6 @@ namespace SpookyTerraria.OtherItems
             item.height = 40;
             item.rare = ItemRarityID.White;
             item.maxStack = 8;
-            // item.createTile = ModContent.TileType<PageTile>();
         }
         public override bool OnPickup(Player player)
         {

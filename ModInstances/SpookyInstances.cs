@@ -28,6 +28,15 @@ namespace SpookyTerraria
         [Tooltip("Completely overhauls Terraria UI to look a little better")]
         [ReloadRequired]
         public bool betterUI;
+
+        [Header("Music Changes")]
+        [Label("Pages Music Change")]
+        [DrawTicks]
+        [OptionStrings(new string[] { "The 8 Pages", "Slender's Shadow", "7th Street" })]
+        [DefaultValue("The 8 Pages")]
+        public string musicType;
+
+        // TODO: 7th Street Music, Config finishing, teleportation noises
     }
     public class SpookyConfigServer : ModConfig
     {

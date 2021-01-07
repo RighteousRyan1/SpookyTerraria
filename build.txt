@@ -1,4 +1,4 @@
 displayName = Spooky Terraria (Including Slender!)
 author = Ryan
-version = 0.4.5.2
+version = 0.4.5.4
 homepage = https://forums.terraria.org/index.php?threads/spooky-terraria.101890/

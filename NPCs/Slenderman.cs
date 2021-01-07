@@ -47,6 +47,23 @@ namespace SpookyTerraria.NPCs
         }
         public override void PostAI()
         {
+            Player player = Main.LocalPlayer;
+            bool facingTowardsSlendermanLeft = npc.Center.X < player.Center.X && player.direction == -1;
+            bool facingTowardsSlendermanRight = npc.Center.X > player.Center.X && player.direction == 1;
+            bool noLight = Lighting.GetSubLight(npc.Top).X < 0.05f;
+            if (noLight)
+            {
+                npc.alpha += 3;
+            }
+            else
+            {
+                npc.alpha -= 3;
+            }
+            if (!facingTowardsSlendermanLeft && !facingTowardsSlendermanRight)
+            {
+                npc.alpha += 3;
+            }
+            npc.alpha = Utils.Clamp(npc.alpha, TransparencyHelper.Visible, TransparencyHelper.Invisible);
         }
         public Vector2 destination;
         public int timerUntilteleportation;
