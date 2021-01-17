@@ -1,26 +1,29 @@
 Hello and welcome to Spooky Terraria!
 
+This is the first ever mod to try and make Terraria spooky, if not scary
+
 [c/00FF00:IT IS HIGHLY RECOMMENDED YOU]
 [c/00FF00:USE THIS MOD WITH BETTERMECHANICS,]
 [c/00FF00:A MOD ON THE MOD BROWSER THAT I MADE!]
-
-This release may be final, but if there are any bugs, please let me know.
-PLEASE LET ME KNOW ON DISCORD BY CLICKING ON THE HOMEPAGE LINK.
 
 First of all, this was inspired by Slenderman: the 8 pages.
 
 BE SURE TO CREATE A NEW CHARACTER WITH THIS MOD ENABLED FIRST.
 
 [c/FF0000:WHEN ENTERING GAMES, YOU]
-[c/FF0000:CAN TYPE IN /slendermapMF or /slendermapdiscord]
-[c/FF0000:TO PLAY THE SLENDER MAP MADE FOR]
-[c/FF0000:TERRARIA!]
+[c/FF0000:CAN DOWNLOAD VARIOUS THINGS]
+[c/FF0000:FROM THE MAIN MENU NOW]
 
 In this mod, your world gets a whole lot darker and creepier, along with a new NPC, the Stalker.
+
+Be aware that the stalker will only appear in world-generated maps. If you are playing any slender map (One made as of now), it will not appear.
+
 The stalker is a high stealth creature who can attack you when you least expect it, so be sure to use your flashlight accordingly.
 The one way you will know the Stalker is near you is a heartbeat. Your heartbeat links to the Stalker. The faster your heartbeat gets, the closer you are.
 Another thing: Heartrate is now an important factor in the mod.
 If your heartrate goes above 240, you die.
+
+This mod adds pages and slenderman too!
 
 Some extra spooky things like ambience have been added!
 In the forest you can hear crickets, owls, and eerie winds.

@@ -142,26 +142,6 @@ namespace SpookyTerraria.ModIntances
                 }
             }
             Main.spriteBatch.End();
-            /*if (Main.hasFocus && Main.worldName == SpookyTerrariaUtils.slenderWorldName)
-            {
-                SoundEngine.StopAmbientSound(SoundEngine.wavesSoundDir);
-                oceanWavesTimer = 0;
-            }
-            if (!Main.hasFocus)
-            {
-                SoundEngine.StopAllAmbientSounds();
-                SoundEngine.StopAmbientSound(SoundEngine.wavesSoundDir);
-                player.GetModPlayer<SpookyPlayer>().hootTimer = 0;
-                player.GetModPlayer<SpookyPlayer>().breezeTimer = 0;
-
-                jungleAmbTimer = 0;
-                dayAmbienceTimer = 0;
-
-                oceanWavesTimer = 0;
-                cricketsTimer = 0;
-                blizzTimer = 0;
-                caveRumbleTimer = 0;
-            }*/
         }
         public override void PostUpdate()
         {

@@ -97,10 +97,48 @@ namespace SpookyTerraria
                 changeDirCameraValues = -minMax;
             }
         }
+        // FIXME: If multiplayer goes haywire, remake these to NOT abuse static variables
+        public static int caveRumbleTimer;
+        public static int oceanWavesTimer;
+        public static int blizzTimer;
+        public static int cricketsTimer;
+        public static int jungleAmbTimer;
+        public static int dayAmbienceTimer;
 
+        public static bool PlayerIsInForest(Player player)
+        {
+            return !player.ZoneJungle
+                && !player.ZoneDungeon
+                && !player.ZoneCorrupt
+                && !player.ZoneCrimson
+                && !player.ZoneHoly
+                && !player.ZoneSnow
+                && !player.ZoneUndergroundDesert
+                && !player.ZoneGlowshroom
+                && !player.ZoneMeteor
+                && !player.ZoneBeach
+                && !player.ZoneDesert
+                && player.ZoneOverworldHeight;
+        }
+        public SoundEffectInstance Crickets;
         public override void OnEnterWorld(Player player)
         {
             Main.hideUI = false;
+            int[] timers = new int[]
+            {
+                caveRumbleTimer,
+                cricketsTimer,
+                blizzTimer,
+                oceanWavesTimer,
+                jungleAmbTimer,
+                dayAmbienceTimer,
+            };
+            timers[0] = 0;
+            timers[1] = 0;
+            timers[2] = 0;
+            timers[3] = 0;
+            timers[4] = 0;
+            timers[5] = 0;
         }
         public override bool PreItemCheck()
         {
@@ -154,8 +192,8 @@ namespace SpookyTerraria
                 player.ZoneBeach = false;
                 player.ZoneDesert = false;
             }
-            // SoundEngine.Play();
-            // SoundEngine.HandleSoundInstancing();
+            SoundEngine.Play();
+            SoundEngine.HandleSoundInstancing();
         }
     }
     public class BeatGamePlayer : ModPlayer
@@ -590,7 +628,7 @@ namespace SpookyTerraria
             Mod ST = ModLoader.GetMod("SpookyTerraria");
             if (msgTimer == 120)
             {
-                Main.NewText($"Spooky Terraria is on Beta {ST.Version}.", Color.DarkGray);
+                Main.NewText($"Spooky Terraria is on  v{ST.Version}.", Color.DarkGray);
             }
             if (msgTimer == 300)
             {

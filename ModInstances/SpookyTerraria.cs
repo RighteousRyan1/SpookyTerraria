@@ -25,6 +25,8 @@ using Terraria.Graphics.Capture;
 using System.Reflection;
 using Terraria.GameContent.UI.States;
 using static Terraria.GameContent.UI.States.UIVirtualKeyboard;
+using Terraria.UI.Chat;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpookyTerraria
 {
@@ -273,20 +275,10 @@ namespace SpookyTerraria
             }
             fart = GetSound("Sounds/Custom/Other/wtf");
             fartInstance = fart.CreateInstance();
-            AmbienceHelper x = new AmbienceHelper();
-            x.InitializeSoundInstances();
+            /*ContentInstance.Register(new AmbienceHelper());
+            ModContent.GetInstance<AmbienceHelper>().InitializeSoundInstances();*/
         }
 
-        /*private void MoveOptionUI(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            c.TryGotoNext(i => i.MatchLdfld(typeof(Main).GetField("selectedMenu")));
-            c.Emit(OpCodes.Call, typeof(SpookyTerraria).GetMethod("MoveOptions"));
-        }
-        internal static void MoveOptions()
-        {
-            typeof(Main).Assembly.GetType("Terraria.Main").GetMethod("DrawMenu");
-        }*/
         private void Main_DrawInterface_30_Hotbar(On.Terraria.Main.orig_DrawInterface_30_Hotbar orig, Main self)
         {
             orig(self);
@@ -323,7 +315,7 @@ namespace SpookyTerraria
         public SoundEffectInstance fartInstance;
         public override void PostUpdateEverything()
         {
-            AmbienceHelper.Instance.HandleAmbiences();
+            // ModContent.GetInstance<AmbienceHelper>().HandleAmbiences();
             Main.raining = false;
             Main.rainTime = 0;
             Main.maxRain = 0;
@@ -615,13 +607,12 @@ namespace SpookyTerraria
         private void Hooks_On_AddMenuButtons(Hooks.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
         {
             orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
-            offY = 450;
+            offY = 525;
             spacing = 35;
-            MenuHelper.AddButton("Download Slender Map",
+            MenuHelper.AddButton("Slender Extras",
             delegate
             {
-                // Process.Start("http://www.mediafire.com/file/y98ss4cb2vgk4vj/Slender_The_8_Pages.wld/file");
-                Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld");
+                Main.menuMode = SlenderMenuModeID.SlenderExtras;
             },
             selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         }
@@ -698,9 +689,10 @@ namespace SpookyTerraria
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
 
+            Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
             float sinValueRot = (float)Math.Sin(rotationTimer_BasedOnSineWave);
             float sinValueScale = (float)Math.Sin(scaleTimer_BasedOnSineWave / 2);
-            bool inSettingsOrMPUI = Main.menuMode > 0 && Main.menuMode != 888;//Main.menuMode == 11 || Main.menuMode == 12 || Main.menuMode == 26 || Main.menuMode == 1213 || Main.menuMode == 1111 || Main.menuMode == 1213 || Main.menuMode == 1213 ||;
+            bool inSettingsOrMPUI = Main.menuMode > 0 && Main.menuMode != 888 && Main.menuMode != 1010;
             if (Main.gameMenu)
             {
                 Main.spriteBatch.End();
@@ -805,7 +797,15 @@ namespace SpookyTerraria
                 Main.spriteBatch.DrawString(Main.fontCombatText[1], $"actualRand: {actualRand}\ninitialDrawPosition: {initialDrawPosition}\nDirection: {direction}\n_fadeScale: {_fadeScale}", new Vector2(50, 50), Color.White);*/
                 Main.spriteBatch.Draw(GetTexture("Assets/BlackPixel"), Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
                 Main.spriteBatch.Draw(GetTexture("Assets/THE_CHAD"), new Vector2(150, Main.screenHeight - 30), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
-                Main.spriteBatch.Draw(GetTexture("Assets/Slender"), inSettingsOrMPUI ? new Vector2(Main.screenWidth / 2, 800) : drawPos = new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                if (Main.menuMode == SlenderMenuModeID.SlenderChangeLogs)
+                {
+                    drawPos = new Vector2(screenBounds.X - 300, screenBounds.Y / 2);
+                    Main.spriteBatch.Draw(GetTexture("Assets/Slender"), drawPos, null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                }
+                if (Main.menuMode != SlenderMenuModeID.SlenderChangeLogs)
+                {
+                    Main.spriteBatch.Draw(GetTexture("Assets/Slender"), inSettingsOrMPUI ? new Vector2(Main.screenWidth / 2, 725) : new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                }
             }
             else
             {
@@ -834,9 +834,218 @@ namespace SpookyTerraria
         private short[] _validSketches = new short[] { PageID.Follows, PageID.CantRun, PageID.Trees, PageID.LeaveMeAlone, PageID.AlwaysWatchesNoEyes, PageID.HelpMe, PageID.DontLook, PageID.NoX12 };
         */
         public static string msgOfTheDay;
+        internal static float buttonScaleReturn;
+        internal static float buttonScaleDownloadMap;
+        internal static float buttonScaleDownloadSlender;
+        internal static float buttonScaleMythos;
+        internal static float buttonScaleChangeLogs;
+
+        private static string changeLog;
+
+        private static int compareLogs;
+        private static int currentLogsMenu;
+
+        public static int[] possibleLogPages = new int[]
+        {
+            0,
+            1,
+            2,
+        };
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
-            Mod mod = this;
+            SoundEngine.StopAllAmbientSounds();
+
+            int yOff = 50;
+
+            buttonScaleReturn = Utils.Clamp(buttonScaleReturn, 0.7f, 1f);
+            buttonScaleDownloadMap = Utils.Clamp(buttonScaleDownloadMap, 0.7f, 1f);
+            buttonScaleDownloadSlender = Utils.Clamp(buttonScaleDownloadSlender, 0.7f, 1f);
+            buttonScaleMythos = Utils.Clamp(buttonScaleMythos, 0.7f, 1f);
+            buttonScaleChangeLogs = Utils.Clamp(buttonScaleChangeLogs, 0.7f, 1f);
+
+            string @return = "Back";
+            string downloadMap = "Download Slender Terraria Map";
+            string downloadSlender = "Download Slender: The 8 Pages";
+            string visitMythos = "Slender Mythos";
+            string changeLogs = "Spooky Terraria Changelogs";
+
+            Vector2 midScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
+            Vector2 midReturn = Main.fontDeathText.MeasureString(@return) / 2;
+            Vector2 midMythos = Main.fontDeathText.MeasureString(visitMythos) / 2;
+            Vector2 midGameDL = Main.fontDeathText.MeasureString(downloadSlender) / 2;
+            Vector2 midMapDL = Main.fontDeathText.MeasureString(downloadMap) / 2;
+            Vector2 midChangeLogs = Main.fontDeathText.MeasureString(changeLogs) / 2;
+
+            Rectangle returnButton = new Rectangle((int)midScreen.X - 65, (int)midScreen.Y - 40, 120, 50);
+            Rectangle changeLogsButton = new Rectangle((int)midScreen.X - 310, (int)midScreen.Y - 90, 600, 50);
+            Rectangle slenderMapButton = new Rectangle((int)midScreen.X - 350, (int)midScreen.Y - 240, 690, 50);
+            Rectangle slenderGameButton = new Rectangle((int)midScreen.X - 350, (int)midScreen.Y - 190, 690, 50);
+            Rectangle mythosButton = new Rectangle((int)midScreen.X - 150, (int)midScreen.Y - 140, 310, 50);
+
+            bool containReturn = returnButton.Contains(Main.MouseScreen.ToPoint());
+            bool containMapDL = slenderMapButton.Contains(Main.MouseScreen.ToPoint());
+            bool containGameDL = slenderGameButton.Contains(Main.MouseScreen.ToPoint());
+            bool containMythosPage = mythosButton.Contains(Main.MouseScreen.ToPoint());
+            bool containChangeLogs = changeLogsButton.Contains(Main.MouseScreen.ToPoint());
+
+            buttonScaleReturn += containReturn ? 0.03f : -0.03f;
+            buttonScaleDownloadSlender += containGameDL ? 0.03f : -0.03f;
+            buttonScaleDownloadMap += containMapDL ? 0.03f : -0.03f;
+            buttonScaleMythos += containMythosPage ? 0.03f : -0.03f;
+            buttonScaleChangeLogs += containChangeLogs ? 0.03f : -0.03f;
+
+            if (Main.menuMode == SlenderMenuModeID.SlenderExtras)
+            {
+                // Main.spriteBatch.Draw(GetTexture("Assets/Debug/WhitePixel"), new Vector2(returnButton.X, returnButton.Y), null, Color.White, 0f, Vector2.Zero, new Vector2(returnButton.Width, returnButton.Height), SpriteEffects.None, 1f);
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, downloadMap, midScreen - new Vector2(0, yOff * 4), containMapDL ? Color.Yellow : Color.Gray, 0f, midMapDL, new Vector2(buttonScaleDownloadMap, buttonScaleDownloadMap));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, downloadSlender, midScreen - new Vector2(0, yOff * 3), containGameDL ? Color.Yellow : Color.Gray, 0f, midGameDL, new Vector2(buttonScaleDownloadSlender, buttonScaleDownloadSlender));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, visitMythos, midScreen - new Vector2(0, yOff * 2), containMythosPage ? Color.Yellow : Color.Gray, 0f, midMythos, new Vector2(buttonScaleMythos, buttonScaleMythos));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, @return, midScreen - new Vector2(0, 0), containReturn ? Color.Yellow : Color.Gray, 0f, midReturn, new Vector2(buttonScaleReturn, buttonScaleReturn));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, changeLogs, midScreen - new Vector2(0, yOff), containChangeLogs ? Color.Yellow : Color.Gray, 0f, midChangeLogs, new Vector2(buttonScaleChangeLogs, buttonScaleChangeLogs));
+
+                if (containReturn)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Main.menuMode = 0;
+                    }
+                }
+                if (containMapDL)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld");
+                    }
+                }
+                if (containGameDL)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://cdn.discordapp.com/attachments/427893900594774026/796565609852698644/Slender_v0.9.7.rar");
+                    }
+                }
+                if (containMythosPage)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Process.Start("https://theslenderman.fandom.com/wiki/Original_Mythos");
+                    }
+                }
+                if (containChangeLogs)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Main.menuMode = SlenderMenuModeID.SlenderChangeLogs;
+                    }
+                }
+            }
+            if (Main.menuMode == SlenderMenuModeID.SlenderChangeLogs)
+            {
+                Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
+
+                var keyState = Main.keyState;
+                if (keyState.IsKeyDown(Keys.Escape))
+                {
+                    Main.menuMode = SlenderMenuModeID.SlenderExtras;
+                    // Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/JumpscareLoud"));
+                    // This is a joke...
+                }
+                string escToReturn = "Press ESC to return";
+                string reccommend = "If you wish to reccommend anything to me or let me know of a missing feature, please visit the forums post (homepage link) or join my discord server.";
+                if (SlenderMain.updateLogMode == -1)
+                {
+                    changeLog = "There is no update log before version v[c/FFFF00:0.5.5].\nI apologize for not making one sooner!";
+                }
+                if (SlenderMain.updateLogMode == 0)
+                {
+                    Rectangle bugReports = new Rectangle(Main.screenWidth / 2 - 35, 280, 125, 20);
+                    bool containBugReports = bugReports.Contains(Main.MouseScreen.ToPoint());
+                    if (containBugReports)
+                    {
+                        if (Main.mouseLeft && Main.mouseLeftRelease)
+                        {
+                            Process.Start("https://discord.com/channels/701878519923343361/738155588193878046");
+                        }
+                    }
+                    changeLog =
+                        "            Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.5]"
+                        + "\n - Added this very log!\n - Fixed some NPC chat issues where some chats\nwould not display."
+                        + "\n - Potential fix to slender not spawning on some occasions.\n - Potential fix for multiple slendermen spawning.\nIf this issue persists, please visit my [c/5440cd:Discord] server and visit [c/5440cd:#bug-reports] to let me know of the issue."
+                        + "\n - Added some new sounds.";
+                }
+                if (SlenderMain.updateLogMode == 1)
+                {
+                    changeLog = "This update does not exist yet...\nPlease check regularly on the Mod Browser for more updates!";
+                }
+                float scale = 0.45f;
+
+                Vector2 midEscText = Main.fontDeathText.MeasureString(escToReturn) / 2;
+                Vector2 recMid = Main.fontDeathText.MeasureString(reccommend) / 2;
+                Vector2 log055Dimensions = Main.fontDeathText.MeasureString(changeLog) * scale;
+
+                Texture2D buttonPlay = Main.instance.OurLoad<Texture2D>("Images/UI/ButtonPlay");
+
+                Vector2 topMid = new Vector2(screenBounds.X / 2, 50);
+                Vector2 botMid = new Vector2(screenBounds.X / 2, screenBounds.Y - 10);
+
+                Vector2 off = new Vector2(50, log055Dimensions.Y * 0.55f);
+
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, escToReturn, botMid - new Vector2(0, 15), Color.Gray, 0f, midEscText, new Vector2(0.3f, 0.3f));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, reccommend, botMid, Color.Gray, 0f, recMid, new Vector2(0.3f, 0.3f));
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, changeLog, new Vector2(screenBounds.X / 2, 50), Color.White, 0f, new Vector2(log055Dimensions.X / 2, 0), new Vector2(scale, scale));
+
+                Main.spriteBatch.Draw(buttonPlay, topMid + new Vector2(50, -15), null, Color.White, 0f, buttonPlay.Size() / 2, 1f, SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(buttonPlay, topMid - new Vector2(50, 15), null, Color.White, 0f, buttonPlay.Size() / 2, 1f, SpriteEffects.FlipHorizontally, 1f);
+
+                Rectangle pageRight = new Rectangle((int)topMid.X + 40, 23, buttonPlay.Width, buttonPlay.Height);
+                Rectangle pageLeft = new Rectangle((int)topMid.X - 60, 23, buttonPlay.Width, buttonPlay.Height);
+
+                bool containR = pageRight.Contains(Main.MouseScreen.ToPoint());
+                bool containL = pageLeft.Contains(Main.MouseScreen.ToPoint());
+
+                // Rectangle dimLogs = new Rectangle((int)topMid.X, (int)topMid.Y, (int)log055Dimensions.X, (int)log055Dimensions.Y);
+
+                /*Main.spriteBatch.Draw(GetTexture("Assets/Debug/WhitePixel"), pageLeft, Color.White);
+                Main.spriteBatch.Draw(GetTexture("Assets/Debug/WhitePixel"), pageRight, Color.Yellow);*/
+                // Main.spriteBatch.Draw(GetTexture("Assets/Debug/WhitePixel"), bugReports, Color.White);
+
+                /*compareLogs++;
+                if (compareLogs == 2)
+                {
+                    currentLogsMenu = SlenderMain.updateLogMode;
+                }
+                if (compareLogs >= 3)
+                {
+                    compareLogs = 0;
+                }
+                if (currentLogsMenu != SlenderMain.updateLogMode)
+                {
+                    Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"));
+                }*/
+                // ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"compareLogs: {compareLogs}\nMode: {SlenderMain.updateLogMode}", Main.MouseScreen + new Vector2(25, 25), Color.Gray, 0f, Vector2.Zero, new Vector2(0.3f, 0.3f));
+                if (containR)
+                {
+                    Main.spriteBatch.Draw(buttonPlay, topMid + new Vector2(50, -15), null, Color.White, 0f, buttonPlay.Size() / 2, 1.25f, SpriteEffects.None, 1f);
+
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        SlenderMain.updateLogMode++;
+                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"));
+                    }
+                }
+                if (containL)
+                {
+                    Main.spriteBatch.Draw(buttonPlay, topMid - new Vector2(50, 15), null, Color.White, 0f, buttonPlay.Size() / 2, 1.25f, SpriteEffects.FlipHorizontally, 1f);
+
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        SlenderMain.updateLogMode--;
+                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"));
+                    }
+                }
+            }
+            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 1);
+            // Completely different part of draw below, above is menu modes, under is socials
 
             SpriteEffects none = SpriteEffects.None;
 
@@ -850,14 +1059,11 @@ namespace SpookyTerraria
             string display4YT = "<- My YouTube Channel!";
             string display4Discord = "<- My Discord Server!";
 
-            Texture2D Twitch = mod.GetTexture("Assets/OtherAssets/TwitchLogo");
-            Texture2D YouTube = mod.GetTexture("Assets/OtherAssets/YouTubeLogo");
-            Texture2D Discord = mod.GetTexture("Assets/OtherAssets/DiscordLogo");
+            Texture2D Twitch = GetTexture("Assets/OtherAssets/TwitchLogo");
+            Texture2D YouTube = GetTexture("Assets/OtherAssets/YouTubeLogo");
+            Texture2D Discord = GetTexture("Assets/OtherAssets/DiscordLogo");
 
             Vector2 drawPosition = new Vector2(20, 40);
-            Vector2 TwitchHalf = Main.fontDeathText.MeasureString(display4Twitch) / 2;
-            Vector2 YTHalf = Main.fontDeathText.MeasureString(display4YT) / 2;
-            Vector2 DiscordHalf = Main.fontDeathText.MeasureString(display4Discord) / 2;
 
             Rectangle TwitchRect = new Rectangle((int)drawPosition.X, (int)drawPosition.Y, 30, 30);
             Rectangle YTRect = new Rectangle((int)drawPosition.X, (int)drawPosition.Y + y, 40, 25);
@@ -909,7 +1115,7 @@ namespace SpookyTerraria
             }
             catch(Exception e)
             {
-                mod.Logger.Warn($"{0} was not able to draw correctly!\nException caught! Message: {e.Message} StackTrace: {e.StackTrace}");
+                Logger.Warn($"{0} was not able to draw correctly!\nException caught! Message: {e.Message} StackTrace: {e.StackTrace}");
             }
             // scribbleX
             orig(self, gameTime);
