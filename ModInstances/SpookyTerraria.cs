@@ -971,7 +971,9 @@ namespace SpookyTerraria
                         "            Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.5]"
                         + "\n - Added this very log!\n - Fixed some NPC chat issues where some chats\nwould not display."
                         + "\n - Potential fix to slender not spawning on some occasions.\n - Potential fix for multiple slendermen spawning.\nIf this issue persists, please visit my [c/5440cd:Discord] server and visit [c/5440cd:#bug-reports] to let me know of the issue."
-                        + "\n - Added some new sounds.";
+                        + "\n - Added some new sounds."
+						+ "\n - Added a lot of things to the Spooky Terraria Forums Page."
+						+ "\n - A few UI revamps.";
                 }
                 if (SlenderMain.updateLogMode == 1)
                 {
