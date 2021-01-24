@@ -192,8 +192,8 @@ namespace SpookyTerraria
                 player.ZoneBeach = false;
                 player.ZoneDesert = false;
             }
-            SoundEngine.Play();
-            SoundEngine.HandleSoundInstancing();
+            AmbienceHandler.Play();
+            AmbienceHandler.HandleSoundInstancing();
         }
     }
     public class BeatGamePlayer : ModPlayer
@@ -385,11 +385,11 @@ namespace SpookyTerraria
             heartRate = 80;
             if (Main.dayTime)
             {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, SoundEngine.dayAmbienceDir));
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, AmbienceHandler.dayAmbienceDir));
             }
             else
             {
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, SoundEngine.cricketsSoundDir));
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, AmbienceHandler.cricketsSoundDir));
             }
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Breezes"));
         }

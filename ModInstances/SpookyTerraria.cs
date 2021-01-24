@@ -465,8 +465,8 @@ namespace SpookyTerraria
                                 timerToLightStatic++;
                                 if (Main.hasFocus)
                                 {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                                 }
                                 if (timerToLightStatic == 2)
                                 {
@@ -485,8 +485,8 @@ namespace SpookyTerraria
                                 timerToMediumStatic++;
                                 if (Main.hasFocus)
                                 {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                                 }
                                 if (timerToMediumStatic == 2)
                                 {
@@ -505,8 +505,8 @@ namespace SpookyTerraria
                                 timerToSevereStatic++;
                                 if (Main.hasFocus)
                                 {
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                    SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                    AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
                                 }
                                 if (timerToSevereStatic == 2)
                                 {
@@ -580,16 +580,16 @@ namespace SpookyTerraria
                         {
                             if (Main.hasFocus)
                             {
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
-                                SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
+                                AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                                AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                                AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                             }
                         }
                     }
                     if (npc.type == ModContent.NPCType<Slenderman>() && !npc.active)
                     {
-                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
-                        SoundEngine.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
+                        AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
+                        AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
                         timerToLightStatic = 0;
                         timerToMediumStatic = 0;
                         timerToSevereStatic = 0;
@@ -853,7 +853,7 @@ namespace SpookyTerraria
         };
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
-            SoundEngine.StopAllAmbientSounds();
+            AmbienceHandler.StopAllAmbientSounds();
 
             int yOff = 50;
 

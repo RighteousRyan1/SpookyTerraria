@@ -876,7 +876,7 @@ namespace SpookyTerraria.Utilities
             Main.spriteBatch.End();
         }
     }
-    public class SoundEngine
+    public class AmbienceHandler
     {
         public static void ReplayAt2Container()
         {
