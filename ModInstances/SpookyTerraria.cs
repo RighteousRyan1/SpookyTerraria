@@ -260,6 +260,7 @@ namespace SpookyTerraria
             On.Terraria.Main.DrawBG += Main_DrawBG;
             On.Terraria.Main.DrawMenu += Main_DrawMenu;
             On.Terraria.Main.DrawInterface_35_YouDied += Main_DrawInterface_35_YouDied;
+            On.Terraria.Main.Draw += Main_Draw;
 
             // IL.Terraria.Main.DrawMenu += MoveOptionUI;
             // Shader initialization
@@ -277,6 +278,14 @@ namespace SpookyTerraria
             fartInstance = fart.CreateInstance();
             /*ContentInstance.Register(new AmbienceHelper());
             ModContent.GetInstance<AmbienceHelper>().InitializeSoundInstances();*/
+        }
+
+        private void Main_Draw(On.Terraria.Main.orig_Draw orig, Main self, GameTime gameTime)
+        {
+            orig(self, gameTime);
+            SpookyTerrariaUtils.HandleKeyboardInputs();
+
+            SpookyTerrariaUtils.oldKeyboardState = SpookyTerrariaUtils.newKeyboardState;
         }
 
         private void Main_DrawInterface_30_Hotbar(On.Terraria.Main.orig_DrawInterface_30_Hotbar orig, Main self)
@@ -842,8 +851,8 @@ namespace SpookyTerraria
 
         private static string changeLog;
 
-        private static int compareLogs;
-        private static int currentLogsMenu;
+        // private static int compareLogs;
+        // private static int currentLogsMenu;
 
         public static int[] possibleLogPages = new int[]
         {
@@ -1120,6 +1129,12 @@ namespace SpookyTerraria
                 Logger.Warn($"{0} was not able to draw correctly!\nException caught! Message: {e.Message} StackTrace: {e.StackTrace}");
             }
             // scribbleX
+            /*(for (int i = 0; i < Main.keyState.GetPressedKeys().Length; i++)
+            {
+                Main.spriteBatch.DrawString(Main.fontDeathText, i.ToString(), Main.MouseScreen + new Vector2(100 + i * 30, 25), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+
+                Main.spriteBatch.DrawString(Main.fontDeathText, $"{Main.keyState.GetPressedKeys()[i]}", Main.MouseScreen + new Vector2(25, i * 45), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+            }*/
             orig(self, gameTime);
         }
         private void Main_DrawInterface_35_YouDied(On.Terraria.Main.orig_DrawInterface_35_YouDied orig)

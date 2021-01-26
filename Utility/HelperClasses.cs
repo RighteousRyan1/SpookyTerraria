@@ -14,6 +14,7 @@ using Terraria.Utilities;
 using System.Runtime.Caching;
 using Microsoft.Xna.Framework.Audio;
 using SpookyTerraria.Tiles;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpookyTerraria.Utilities
 {
@@ -49,15 +50,6 @@ namespace SpookyTerraria.Utilities
             }
             return false;
         }
-        /// <summary>
-        /// This is just a meme method, pls no use
-        /// </summary>
-        /// <param name="pdi"></param>
-        /// <returns></returns>
-        public static PlayerDrawInfo ToDrawInfo(this PlayerDrawInfo pdi)
-        {
-            return pdi;
-        }
         public static Vector2 ToVector2(this Tile tile, int x, int y)
         {
             return new Vector2(x / 16, y / 16);
@@ -92,6 +84,17 @@ namespace SpookyTerraria.Utilities
     }
     public class SpookyTerrariaUtils
     {
+        public static KeyboardState newKeyboardState;
+        public static KeyboardState oldKeyboardState;
+
+        public static void HandleKeyboardInputs()
+        {
+            newKeyboardState = Keyboard.GetState();
+        }
+        public static bool KeyJustPressed(Keys pressed)
+        {
+            return newKeyboardState.IsKeyDown(pressed) && oldKeyboardState.IsKeyUp(pressed);
+        }
         public static string ChooseRandomDeathText(int choice)
         {
             switch (choice)

@@ -1,3 +1,4 @@
+using System.Drawing;
 using Terraria;
 
 namespace SpookyTerraria.Utilities
@@ -37,29 +38,6 @@ namespace SpookyTerraria.Utilities
         public const short DontLook = 7;
         public const short NoX12 = 8;
     }
-    public static class ExtensionMethods
-    {
-        public static int AddIndexes(this int[] x, int index, int indexTo)
-        {
-            return x[index] + x[indexTo];
-        }
-        public static float AddIndexes(this float[] x, int index, int indexTo)
-        {
-            return x[index] + x[indexTo];
-        }
-        public static double AddIndexes(this double[] x, int index, int indexTo)
-        {
-            return x[index] + x[indexTo];
-        }
-        public static decimal AddIndexes(this decimal[] x, int index, int indexTo)
-        {
-            return x[index] + x[indexTo];
-        }
-        public static long AddIndexes(this long[] x, int index, int indexTo)
-        {
-            return x[index] + x[indexTo];
-        }
-    }
     public class SlenderMenuModeID
     {
         public const short SlenderExtras = 505;
@@ -78,6 +56,13 @@ namespace SpookyTerraria.Utilities
         public static int AddHours(int hours)
         {
             return hours * 60 * 60 * 60;
+        }
+    }
+    public class EaseOfAccess
+    {
+        public static bool Intersecting(Rectangle iniRect, Rectangle collidingRect)
+        {
+            return iniRect.IntersectsWith(collidingRect);
         }
     }
 }
