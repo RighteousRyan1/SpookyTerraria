@@ -1,4 +1,4 @@
-using System.Drawing;
+using Microsoft.Xna.Framework;
 using Terraria;
 
 namespace SpookyTerraria.Utilities
@@ -60,9 +60,24 @@ namespace SpookyTerraria.Utilities
     }
     public class EaseOfAccess
     {
+        /// <summary>
+        /// Detects if <code>iniRect</code> and <code>collidingRect</code> are intersecting.
+        /// </summary>
+        /// <param name="iniRect"></param>
+        /// <param name="collidingRect"></param>
+        /// <returns></returns>
         public static bool Intersecting(Rectangle iniRect, Rectangle collidingRect)
         {
-            return iniRect.IntersectsWith(collidingRect);
+            return iniRect.Intersects(collidingRect);
+        }
+        /// <summary>
+        /// checks <code>hoveringOver.Contains(Main.MouseScreen.ToPoint())</code> which results in checking if the mouse position is on top of said rectangle.
+        /// </summary>
+        /// <param name="hoveringOver"></param>
+        /// <returns></returns>
+        public static bool IsMouseOver(Rectangle hoveringOver)
+        {
+            return hoveringOver.Contains(Main.MouseScreen.ToPoint());
         }
     }
 }
