@@ -229,6 +229,9 @@ namespace SpookyTerraria
         public static Texture2D storedLogo2;
         public override void Load()
         {
+            blackPixel = GetTexture("Assets/BlackPixel");
+            slenderLogo = GetTexture("Assets/Slender");
+            chad = GetTexture("Assets/THE_CHAD");
             storedLogo = Main.logoTexture;
             storedLogo2 = Main.logo2Texture;
             Main.logoTexture = GetTexture("Assets/Invisible");
@@ -282,6 +285,7 @@ namespace SpookyTerraria
 
         private void Main_Draw(On.Terraria.Main.orig_Draw orig, Main self, GameTime gameTime)
         {
+            // Main.instance.IsFixedTimeStep = false; joke
             orig(self, gameTime);
             SpookyTerrariaUtils.HandleKeyboardInputs();
 
@@ -616,7 +620,9 @@ namespace SpookyTerraria
         private void Hooks_On_AddMenuButtons(Hooks.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
         {
             orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
-            offY = 525;
+            // spacing = (int)(Math.Sin(scaleTimer_BasedOnSineWave) * 15);
+            // offY = (int)(Math.Sin(scaleTimer_BasedOnSineWave) * 100) + 545;
+            offY = 545;
             spacing = 35;
             MenuHelper.AddButton("Slender Extras",
             delegate
@@ -804,16 +810,16 @@ namespace SpookyTerraria
                     Main.spriteBatch.Draw(GetTexture($"Assets/MenuUI/sketch{actualRand}"), initialDrawPosition, null, Color.White * fadeScale, 0f, GetTexture($"Assets/MenuUI/sketch{actualRand}").Size() / 2, 1f, none, 1f);
                 }
                 Main.spriteBatch.DrawString(Main.fontCombatText[1], $"actualRand: {actualRand}\ninitialDrawPosition: {initialDrawPosition}\nDirection: {direction}\n_fadeScale: {_fadeScale}", new Vector2(50, 50), Color.White);*/
-                Main.spriteBatch.Draw(GetTexture("Assets/BlackPixel"), Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
-                Main.spriteBatch.Draw(GetTexture("Assets/THE_CHAD"), new Vector2(150, Main.screenHeight - 30), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(blackPixel, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None, 1f);
+                Main.spriteBatch.Draw(chad, new Vector2(150, Main.screenHeight - 30), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
                 if (Main.menuMode == SlenderMenuModeID.SlenderChangeLogs)
                 {
                     drawPos = new Vector2(screenBounds.X - 300, screenBounds.Y / 2);
-                    Main.spriteBatch.Draw(GetTexture("Assets/Slender"), drawPos, null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                    Main.spriteBatch.Draw(slenderLogo, drawPos, null, Color.White, sinValueRot / 50, new Vector2(slenderLogo.Width / 2, slenderLogo.Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
                 }
                 if (Main.menuMode != SlenderMenuModeID.SlenderChangeLogs)
                 {
-                    Main.spriteBatch.Draw(GetTexture("Assets/Slender"), inSettingsOrMPUI ? new Vector2(Main.screenWidth / 2, 725) : new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(GetTexture("Assets/Slender").Width / 2, GetTexture("Assets/Slender").Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
+                    Main.spriteBatch.Draw(slenderLogo, inSettingsOrMPUI ? new Vector2(Main.screenWidth / 2, 725) : new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(slenderLogo.Width / 2, slenderLogo.Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None, 1f);
                 }
             }
             else
@@ -821,6 +827,10 @@ namespace SpookyTerraria
                 orig(self);
             }
         }
+
+        public static Texture2D blackPixel;
+        public static Texture2D chad;
+        public static Texture2D slenderLogo;
         // Vars for drawing scribble on the main menu
         internal enum SketchTravelDirections
         {
@@ -986,6 +996,11 @@ namespace SpookyTerraria
                 }
                 if (SlenderMain.updateLogMode == 1)
                 {
+                    changeLog = "     Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.6]"
+                        + "\n - Hopefully, a LONG LASTING and confirmed\nfix for unload issues on some devices.\nThis may have been an issue on devices with\nXNA disposing textures a little\ntoo early. Let me know if there are any more issues!";
+                }
+                if (SlenderMain.updateLogMode == 2)
+                {
                     changeLog = "This update does not exist yet...\nPlease check regularly on the Mod Browser for more updates!";
                 }
                 float scale = 0.45f;
@@ -1055,7 +1070,8 @@ namespace SpookyTerraria
                     }
                 }
             }
-            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 1);
+            // CLAMP FOR LOGS TO BE UPDATED PROPERLY LMAO
+            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 2);
             // Completely different part of draw below, above is menu modes, under is socials
 
             SpriteEffects none = SpriteEffects.None;
