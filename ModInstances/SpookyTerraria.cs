@@ -27,6 +27,7 @@ using Terraria.GameContent.UI.States;
 using static Terraria.GameContent.UI.States.UIVirtualKeyboard;
 using Terraria.UI.Chat;
 using Microsoft.Xna.Framework.Input;
+using System.Windows.Forms;
 
 namespace SpookyTerraria
 {
@@ -252,6 +253,7 @@ namespace SpookyTerraria
             Sprint = RegisterHotKey("Sprint", "LeftShift");
 
             Hooks.On_AddMenuButtons += Hooks_On_AddMenuButtons;
+            Hooks.On_ModLoaderMenus += Hooks_On_ModLoaderMenus; ;
             if (!Main.dedServ)
             {
                 On.Terraria.Lang.GetRandomGameTitle += Lang_GetRandomGameTitle;
@@ -265,6 +267,9 @@ namespace SpookyTerraria
             On.Terraria.Main.DrawInterface_35_YouDied += Main_DrawInterface_35_YouDied;
             On.Terraria.Main.Draw += Main_Draw;
 
+            On.Terraria.IngameOptions.DrawLeftSide += IngameOptions_DrawLeftSide;
+            On.Terraria.IngameOptions.Draw += IngameOptions_Draw;
+
             // IL.Terraria.Main.DrawMenu += MoveOptionUI;
             // Shader initialization
 
@@ -277,15 +282,69 @@ namespace SpookyTerraria
                 Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
-            fart = GetSound("Sounds/Custom/Other/wtf");
-            fartInstance = fart.CreateInstance();
             /*ContentInstance.Register(new AmbienceHelper());
             ModContent.GetInstance<AmbienceHelper>().InitializeSoundInstances();*/
         }
 
+        private void IngameOptions_Draw(On.Terraria.IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
+        {
+            int num17 = 20;
+            Vector2 value4 = new Vector2(Main.screenWidth, Main.screenHeight);
+            // Vector2 value2 = new Vector2(670f, 480f);
+            Vector2 value2 = new Vector2(670f, 250f);
+            Vector2 value3 = value4 / 2f - value2 / 2f;
+            int num21 = 1;
+            int num22 = 5 + num21 + 2 + 1;
+            var vector = new Vector2(value3.X + value2.X / 4f, value3.Y + (num17 * 5 / 2));
+            Vector2 vector2 = new Vector2(0f, value2.Y - (num17 * 5)) / (num22 + 1);
+            int index = 8;
+            bool click = Main.mouseLeft && Main.mouseLeftRelease;
+
+            orig(mainInstance, sb);
+
+            if (IngameOptions.DrawLeftSide(sb, "Slender Options", index, vector, vector2, IngameOptions.leftScale))
+            {
+                IngameOptions.leftHover = index;
+                if (click)
+                {
+                    IngameFancyUI.CoverNextFrame();
+
+                    Main.playerInventory = false;
+                    Main.editChest = false;
+                    Main.npcChatText = "";
+                    Main.inFancyUI = true;
+
+
+                    Main.InGameUI.SetState(SlenderMenuModeID.UIStates.SlenderIngameInterface);
+                }
+            }
+            if (Main.InGameUI.CurrentState == SlenderMenuModeID.UIStates.SlenderIngameInterface)
+            {
+
+            }
+        }
+
+        private bool IngameOptions_DrawLeftSide(On.Terraria.IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
+        {
+            if (i > 4 && i < 8)
+            {
+                return orig(sb, txt, i, anchor, offset + new Vector2(0, 5), scales, minscale, maxscale, scalespeed);
+            }
+            else return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
+        }
+
+        private void Hooks_On_ModLoaderMenus(Hooks.Orig_ModLoaderMenus orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown)
+        {
+            orig(main, selectedMenu, buttonNames, buttonScales, buttonVerticalSpacing, ref offY, ref spacing, ref numButtons, ref backButtonDown);
+            for (int i = 0; i < buttonVerticalSpacing.Length; i++)
+            {
+                
+            }
+            buttonNames[6] += " (PLEASE DO NOT DO)"; // idk man
+        }   
         private void Main_Draw(On.Terraria.Main.orig_Draw orig, Main self, GameTime gameTime)
         {
-            // Main.instance.IsFixedTimeStep = false; joke
+            // Main.instance.IsFixedTimeStep = false; // joke
             orig(self, gameTime);
             SpookyTerrariaUtils.HandleKeyboardInputs();
 
@@ -324,8 +383,6 @@ namespace SpookyTerraria
 
             Sprint = null;
         }
-        public SoundEffect fart;
-        public SoundEffectInstance fartInstance;
         public override void PostUpdateEverything()
         {
             // ModContent.GetInstance<AmbienceHelper>().HandleAmbiences();
@@ -963,7 +1020,7 @@ namespace SpookyTerraria
                 Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
 
                 var keyState = Main.keyState;
-                if (keyState.IsKeyDown(Keys.Escape))
+                if (keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
                 {
                     Main.menuMode = SlenderMenuModeID.SlenderExtras;
                     // Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/JumpscareLoud"));
@@ -996,6 +1053,7 @@ namespace SpookyTerraria
                 }
                 if (SlenderMain.updateLogMode == 1)
                 {
+                    // ItemSlot.Draw // wtf
                     changeLog = "     Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.6]"
                         + "\n - Hopefully, a LONG LASTING and confirmed\nfix for unload issues on some devices.\nThis may have been an issue on devices with\nXNA disposing textures a little\ntoo early. Let me know if there are any more issues!";
                 }

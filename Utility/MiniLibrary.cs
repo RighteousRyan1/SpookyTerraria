@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.UI;
 
 namespace SpookyTerraria.Utilities
 {
@@ -42,6 +43,11 @@ namespace SpookyTerraria.Utilities
     {
         public const short SlenderExtras = 505;
         public const short SlenderChangeLogs = 1010;
+
+        public struct UIStates
+        {
+            public static UIState SlenderIngameInterface { get; set; }
+        }
     }
     public class TimeCreator
     {

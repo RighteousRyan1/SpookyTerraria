@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework.Graphics;
 using MonoMod.RuntimeDetour.HookGen;
 using System;
 using System.Reflection;
@@ -25,7 +26,24 @@ namespace SpookyTerraria.Utilities
 				HookEndpointManager.Remove<Hook_AddMenuButtons>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
 			}
 		}
+		public delegate void Orig_ModLoaderMenus(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown);
+
+		public delegate void Hook_ModLoaderMenus(Orig_ModLoaderMenus orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown);
+
+		public static event Hook_ModLoaderMenus On_ModLoaderMenus
+		{
+			add
+			{
+				HookEndpointManager.Add<Hook_ModLoaderMenus>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("ModLoaderMenus", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
+			}
+			remove
+			{
+				HookEndpointManager.Remove<Hook_ModLoaderMenus>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("ModLoaderMenus", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
+			}
+		}
 	}
+
+
 	public static class MenuHelper
 	{
 		public static void AddButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons)
