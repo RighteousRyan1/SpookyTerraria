@@ -1,6 +1,12 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace SpookyTerraria.Utilities
 {
@@ -47,6 +53,39 @@ namespace SpookyTerraria.Utilities
         public struct UIStates
         {
             public static UIState SlenderIngameInterface { get; set; }
+        }
+    }
+    public class UIHelper
+    {
+        public Rectangle CreateSimpleUIButton(DynamicSpriteFont font, Vector2 position, string text, Action whatToDo, ref float scale)
+        {
+            scale = MathHelper.Clamp(scale, 0.7f, 0.9f);
+
+            var bounds = font.MeasureString(text);
+            var rectHoverable = new Rectangle((int)position.X - (int)bounds.X / 2, (int)position.Y - (int)bounds.Y / 2, (int)bounds.X, (int)bounds.Y - 15);
+
+            bool hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, font, text, position, hovering ? Color.Yellow : Color.Gray, 0f, bounds / 2, new Vector2(scale));
+            if (Main.mouseLeft && Main.mouseLeftRelease && hovering)
+            {
+                whatToDo();
+            }
+            scale += hovering ? 0.03f : -0.03f;
+            return rectHoverable;
+        }
+        public Rectangle CreateUIButton(SpriteBatch sb, Texture2D texture, Vector2 position, Action whatToDo, Color color, float scale, SpriteEffects effects, Rectangle? sourceRectangle = null)
+        {
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
+            var bounds = texture.Size();
+            var rectHoverable = new Rectangle((int)position.X - (int)bounds.X / 2, (int)position.Y - (int)bounds.Y / 2, (int)bounds.X, (int)bounds.Y);
+
+            bool hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
+            sb.Draw(texture, position, sourceRectangle, color, 0f, bounds / 2, scale, effects, 1f);            
+            if (Main.mouseLeft && Main.mouseLeftRelease && hovering)
+            {
+                whatToDo();
+            }
+            return rectHoverable;
         }
     }
     public class TimeCreator
