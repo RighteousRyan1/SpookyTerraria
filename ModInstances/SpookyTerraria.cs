@@ -210,8 +210,19 @@ namespace SpookyTerraria
         }
         public bool beatGame;
         public static ModHotKey Sprint;
+        public static int volRaisedNotifTimer;
         public override void PostSetupContent()
         {
+            if (Main.soundVolume == 0f)
+            {
+                volRaisedNotifTimer = 90;
+                Main.soundVolume = 0.5f;
+            }
+            if (Main.musicVolume == 0f)
+            {
+                volRaisedNotifTimer = 90;
+                Main.musicVolume = 0.25f;
+            }
             if (ModLoader.GetMod("TerrariaOverhaul") == null)
             {
                 MenuMusicSet_Slender();
@@ -232,9 +243,9 @@ namespace SpookyTerraria
         public override void Load()
         {
             ContentInstance.Register(new UIHelper());
-            /*blackPixel = GetTexture("Assets/BlackPixel");
+            blackPixel = GetTexture("Assets/BlackPixel");
             slenderLogo = GetTexture("Assets/Slender");
-            chad = GetTexture("Assets/THE_CHAD");*/
+            chad = GetTexture("Assets/THE_CHAD");
             storedLogo = Main.logoTexture;
             storedLogo2 = Main.logo2Texture;
             Main.logoTexture = GetTexture("Assets/Invisible");
@@ -378,11 +389,18 @@ namespace SpookyTerraria
             // Wtf...
             Main.versionNumber = $"v1.3.5.3";
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
+            lock (blackPixel)
+            {
 
-            // Main.soundMenuTick = Main.instance.OurLoad<SoundEffect>("Main/MenuTick");
-            /*Main.soundMenuOpen = Main.soundMenuOpen;
-            Main.soundMenuClose = Main.soundMenuClose;*/
+            }
+            lock (slenderLogo)
+            {
 
+            }
+            lock (chad)
+            {
+
+            }
             Sprint = null;
         }
         public override void PostUpdateEverything()
@@ -760,9 +778,6 @@ namespace SpookyTerraria
         private static float scaleTimer_BasedOnSineWave;
         private void Main_DrawBG(On.Terraria.Main.orig_DrawBG orig, Main self)
         {
-            Texture2D blackPixel = GetTexture("Assets/BlackPixel");
-            Texture2D chad = GetTexture("Assets/THE_CHAD");
-            Texture2D slenderLogo = GetTexture("Assets/Slender");
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
 
@@ -792,9 +807,9 @@ namespace SpookyTerraria
             }
         }
 
-        /*public static Texture2D blackPixel;
+        public static Texture2D blackPixel;
         public static Texture2D chad;
-        public static Texture2D slenderLogo;*/
+        public static Texture2D slenderLogo;
 
         public UIHelper UIHelper
         {
@@ -802,32 +817,22 @@ namespace SpookyTerraria
             {
                 return ModContent.GetInstance<UIHelper>();
             }
-            set
-            {
-
-            }
-        }
-        // Vars for drawing scribble on the main menu
-        internal enum SketchTravelDirections
-        {
-            Up,
-            Down,
-            Left,
-            Right,
-            UpRight,
-            UpLeft,
-            DownLeft,
-            DownRight
         }
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
             AmbienceHandler.StopAllAmbientSounds();
             MenuHelper.DrawSlenderMenuUI505();
             MenuHelper.DrawChangeLogs();
+
+            if (volRaisedNotifTimer >= 0)
+            {
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Volume Adjusted Automatically.", new Vector2(Main.screenWidth / 2, Main.screenHeight - 10), Color.Gray * volRaisedNotifTimer, 0f, Main.fontDeathText.MeasureString("Volume Adjusted Automatically.") / 2, new Vector2(0.3f, 0.3f));
+            }
             if (Main.menuMode == SlenderMenuModeID.SlenderExtras)
             {
                 MenuHelper.DrawSocials();
             }
+            volRaisedNotifTimer--;
             orig(self, gameTime);
         }
         public override void AddRecipes()
@@ -953,6 +958,9 @@ namespace SpookyTerraria
         }
         public override void Close()
         {
+            /*blackPixel. = null;
+            slenderLogo = null;
+            chad = null;*/
             int soundSlot2 = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
             if (Utils.IndexInRange(Main.music, soundSlot2))
             {

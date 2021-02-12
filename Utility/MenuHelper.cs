@@ -141,7 +141,8 @@ namespace SpookyTerraria.Utilities
                     // ItemSlot.Draw // wtf
                     changeLog = "     Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.6]"
                         + "\n - Hopefully, a LONG LASTING and confirmed\nfix for unload issues on some devices.\nThis may have been an issue on devices with\nXNA disposing textures a little\ntoo early. Let me know if there are any more issues!"
-                        + "\n - Competely re-overhauled a lot of bad code\n and opened possibility for mod-extensions.\n - Please report the issue to my discord server if this issue persists.";
+                        + "\n - Competely re-overhauled a lot of bad code\n and opened possibility for mod-extensions.\n - Please report the issue to my discord server if this issue persists.\n - My discord server is on its way to 500 members!\nConsider joining and getting us to this amazing milestone!"
+                        + "\n - Moved some UI around.";
                 }
                 if (SlenderMain.updateLogMode == 2)
                 {
