@@ -816,8 +816,6 @@ namespace SpookyTerraria
             DownLeft,
             DownRight
         }
-        float somefloat;
-        float someOtherFloat;
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
             AmbienceHandler.StopAllAmbientSounds();
@@ -827,13 +825,6 @@ namespace SpookyTerraria
             {
                 MenuHelper.DrawSocials();
             }
-
-            UIHelper.CreateSimpleUIButton(Main.fontDeathText, new Vector2(250, 100), "DINGUS",
-            delegate
-            {
-                Main.PlaySound(1);
-            }, ref somefloat);
-            UIHelper.CreateSimpleUIButton(Main.fontDeathText, new Vector2(250, 200), "THE_FARD",delegate{Main.PlaySound(5);}, ref someOtherFloat);
             orig(self, gameTime);
         }
         public override void AddRecipes()

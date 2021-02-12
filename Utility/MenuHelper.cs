@@ -87,11 +87,16 @@ namespace SpookyTerraria.Utilities
 
             if (Main.menuMode == SlenderMenuModeID.SlenderExtras)
             {
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 4), downloadMap, delegate { Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld"); }, ref buttonScaleDownloadMap);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 3), downloadSlender, delegate { Process.Start("https://cdn.discordapp.com/attachments/427893900594774026/796565609852698644/Slender_v0.9.7.rar"); }, ref buttonScaleDownloadSlender);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 2), visitMythos, delegate { Process.Start("https://theslenderman.fandom.com/wiki/Original_Mythos"); }, ref buttonScaleMythos);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen, @return, delegate { Main.menuMode = 0; }, ref buttonScaleReturn);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff), changeLogs, delegate { Main.menuMode = SlenderMenuModeID.SlenderChangeLogs; }, ref buttonScaleChangeLogs);
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 4), downloadMap, 
+                    delegate { Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld"); }, ref buttonScaleDownloadMap);
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 3), downloadSlender, 
+                    delegate { Process.Start("https://cdn.discordapp.com/attachments/427893900594774026/796565609852698644/Slender_v0.9.7.rar"); }, ref buttonScaleDownloadSlender);
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 2), visitMythos, 
+                    delegate { Process.Start("https://theslenderman.fandom.com/wiki/Original_Mythos"); }, ref buttonScaleMythos);
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen, @return, 
+                    delegate { Main.menuMode = 0; }, ref buttonScaleReturn);
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff), changeLogs, 
+                    delegate { Main.menuMode = SlenderMenuModeID.SlenderChangeLogs; }, ref buttonScaleChangeLogs);
             }
         }
         public static void DrawChangeLogs()
