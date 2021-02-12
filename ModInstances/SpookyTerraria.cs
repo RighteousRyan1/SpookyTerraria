@@ -28,6 +28,7 @@ using static Terraria.GameContent.UI.States.UIVirtualKeyboard;
 using Terraria.UI.Chat;
 using Microsoft.Xna.Framework.Input;
 using System.Windows.Forms;
+using System.IO;
 
 namespace SpookyTerraria
 {
@@ -230,11 +231,10 @@ namespace SpookyTerraria
         public static Texture2D storedLogo2;
         public override void Load()
         {
-
             ContentInstance.Register(new UIHelper());
-            blackPixel = GetTexture("Assets/BlackPixel");
+            /*blackPixel = GetTexture("Assets/BlackPixel");
             slenderLogo = GetTexture("Assets/Slender");
-            chad = GetTexture("Assets/THE_CHAD");
+            chad = GetTexture("Assets/THE_CHAD");*/
             storedLogo = Main.logoTexture;
             storedLogo2 = Main.logo2Texture;
             Main.logoTexture = GetTexture("Assets/Invisible");
@@ -760,6 +760,9 @@ namespace SpookyTerraria
         private static float scaleTimer_BasedOnSineWave;
         private void Main_DrawBG(On.Terraria.Main.orig_DrawBG orig, Main self)
         {
+            Texture2D blackPixel = GetTexture("Assets/BlackPixel");
+            Texture2D chad = GetTexture("Assets/THE_CHAD");
+            Texture2D slenderLogo = GetTexture("Assets/Slender");
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
 
@@ -789,9 +792,9 @@ namespace SpookyTerraria
             }
         }
 
-        public static Texture2D blackPixel;
+        /*public static Texture2D blackPixel;
         public static Texture2D chad;
-        public static Texture2D slenderLogo;
+        public static Texture2D slenderLogo;*/
 
         public UIHelper UIHelper
         {
