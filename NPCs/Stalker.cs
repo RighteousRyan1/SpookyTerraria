@@ -106,16 +106,5 @@ namespace SpookyTerraria.NPCs
                 npc.active = false;
             }
         }
-        public override bool CheckActive()
-        {
-            // Main.player[Main.myPlayer].GetModPlayer<SpookyPlayer>().stalkerConditionMet = true;
-            return true;
-        }
-        public override void HitEffect(int hitDirection, double damage)
-        {
-        }
-        public override void NPCLoot()
-		{
-		}
-	}
+    }
 }

@@ -69,13 +69,15 @@ namespace SpookyTerraria.Utilities
         internal static float buttonScaleDownloadSlender;
         internal static float buttonScaleMythos;
         internal static float buttonScaleChangeLogs;
+        internal static float buttonScaleModes;
 
         private static string changeLog;
         public static void DrawSlenderMenuUI505()
         {
             Mod mod = ModContent.GetInstance<SpookyTerraria>();
 
-            int yOff = 60;
+            int yOff = 42;
+            int offsetMore = 40;
 
             string @return = "Back";
             string downloadMap = "Download Slender Terraria Map";
@@ -84,19 +86,43 @@ namespace SpookyTerraria.Utilities
             string changeLogs = "Spooky Terraria Changelogs";
 
             Vector2 midScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
+            Vector2 topMid = new Vector2(Main.screenWidth / 2, 12);
 
             if (Main.menuMode == SlenderMenuModeID.SlenderExtras)
             {
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 4), downloadMap, 
+                Rectangle mapDL = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 4 + offsetMore), downloadMap, 
                     delegate { Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld"); }, ref buttonScaleDownloadMap);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 3), downloadSlender, 
+                Rectangle slenderDownload = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 3 + offsetMore), downloadSlender, 
                     delegate { Process.Start("https://cdn.discordapp.com/attachments/427893900594774026/796565609852698644/Slender_v0.9.7.rar"); }, ref buttonScaleDownloadSlender);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 2), visitMythos, 
+                Rectangle mythos = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 2 + offsetMore), visitMythos, 
                     delegate { Process.Start("https://theslenderman.fandom.com/wiki/Original_Mythos"); }, ref buttonScaleMythos);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen, @return, 
+                Rectangle returnButton = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, offsetMore), @return, 
                     delegate { Main.menuMode = 0; }, ref buttonScaleReturn);
-                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff), changeLogs, 
+                Rectangle logs = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff + offsetMore), changeLogs, 
                     delegate { Main.menuMode = SlenderMenuModeID.SlenderChangeLogs; }, ref buttonScaleChangeLogs);
+                Rectangle modes = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 5 + offsetMore), "Modes Menu (Coming Soon)",
+                    delegate { Main.PlaySound(SoundID.Unlock); }, ref buttonScaleModes);
+
+                if (mapDL.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Download the Official Slender Map for Terraria!", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("Download the Official Slender Map for Terraria!") / 2, new Vector2(0.3f, 0.3f));
+                }
+                if (slenderDownload.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Download the 'Slender: The 8 Pages' Official Game!", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("Download the 'Slender: The 8 Pages' Official Game!") / 2, new Vector2(0.3f, 0.3f));
+                }
+                if (mythos.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Check out the Slender Mythos (Mythology) that the\n             game was made based off of!", topMid + new Vector2(0, 12), Color.White, 0f, Main.fontDeathText.MeasureString("Check out the Slender Mythos (Mythology) that the\n             game was made based off of!") / 2, new Vector2(0.3f, 0.3f));
+                }
+                if (logs.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Check out the Change Logs for this Mod!", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("Check out the Change Logs for this Mod!") / 2, new Vector2(0.3f, 0.3f));
+                }
+                if (modes.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "WIP: Come back some other time.", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("WIP: Come back some other time.") / 2, new Vector2(0.3f, 0.3f));
+                }
             }
         }
         public static void DrawChangeLogs()
@@ -146,6 +172,11 @@ namespace SpookyTerraria.Utilities
                 }
                 if (SlenderMain.updateLogMode == 2)
                 {
+                    // ItemSlot.Draw // wtf
+                    changeLog = "Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.6.1]\n - Added some tooltip messages to the menu.\n - Removed an unintended feature.\n - Added a sneak peek of sorts.";
+                }
+                if (SlenderMain.updateLogMode == 3)
+                {
                     changeLog = "This update does not exist yet...\nPlease check regularly on the Mod Browser for more updates!";
                 }
                 float scale = 0.45f;
@@ -158,8 +189,6 @@ namespace SpookyTerraria.Utilities
 
                 Vector2 topMid = new Vector2(screenBounds.X / 2, 50);
                 Vector2 botMid = new Vector2(screenBounds.X / 2, screenBounds.Y - 10);
-
-                Vector2 off = new Vector2(50, log055Dimensions.Y * 0.55f);
 
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, escToReturn, botMid - new Vector2(0, 15), Color.Gray, 0f, midEscText, new Vector2(0.3f, 0.3f));
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, reccommend, botMid, Color.Gray, 0f, recMid, new Vector2(0.3f, 0.3f));
@@ -195,7 +224,7 @@ namespace SpookyTerraria.Utilities
                 }
             }
             // CLAMP FOR LOGS TO BE UPDATED PROPERLY LMAO
-            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 2);
+            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 3);
         }
         public static void DrawSocials()
         {

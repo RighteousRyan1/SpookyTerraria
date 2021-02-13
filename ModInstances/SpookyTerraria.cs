@@ -301,7 +301,7 @@ namespace SpookyTerraria
 
         private void IngameOptions_Draw(On.Terraria.IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
         {
-            int num17 = 20;
+            /*int num17 = 20;
             Vector2 value4 = new Vector2(Main.screenWidth, Main.screenHeight);
             // Vector2 value2 = new Vector2(670f, 480f);
             Vector2 value2 = new Vector2(670f, 250f);
@@ -311,10 +311,10 @@ namespace SpookyTerraria
             var vector = new Vector2(value3.X + value2.X / 4f, value3.Y + (num17 * 5 / 2));
             Vector2 vector2 = new Vector2(0f, value2.Y - (num17 * 5)) / (num22 + 1);
             int index = 8;
-            bool click = Main.mouseLeft && Main.mouseLeftRelease;
+            bool click = Main.mouseLeft && Main.mouseLeftRelease;*/
 
             orig(mainInstance, sb);
-
+            /*
             if (IngameOptions.DrawLeftSide(sb, "Slender Options", index, vector, vector2, IngameOptions.leftScale))
             {
                 IngameOptions.leftHover = index;
@@ -334,16 +334,17 @@ namespace SpookyTerraria
             if (Main.InGameUI.CurrentState == SlenderMenuModeID.UIStates.SlenderIngameInterface)
             {
 
-            }
+            }*/
         }
 
         private bool IngameOptions_DrawLeftSide(On.Terraria.IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
         {
+            /*
             if (i > 4 && i < 8)
             {
                 return orig(sb, txt, i, anchor, offset + new Vector2(0, 5), scales, minscale, maxscale, scalespeed);
-            }
-            else return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
+            }*/
+            /*else*/ return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
         }
 
         private void Hooks_On_ModLoaderMenus(Hooks.Orig_ModLoaderMenus orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown)
@@ -391,15 +392,15 @@ namespace SpookyTerraria
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
             lock (blackPixel)
             {
-
+                blackPixel = null;
             }
             lock (slenderLogo)
             {
-
+                slenderLogo = null;
             }
             lock (chad)
             {
-
+                chad = null;
             }
             Sprint = null;
         }

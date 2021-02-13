@@ -57,20 +57,38 @@ namespace SpookyTerraria.Utilities
     }
     public class UIHelper
     {
+        /// <summary>
+        /// Allows the easiest any most simple creation of a menu button ever! Font being the <paramref name="font"/> you want to use,
+        /// <paramref name="position"/> being the position of the text (centered)
+        /// <para>
+        /// <paramref name="text"/> being what texty you want to show, <paramref name="whatToDo"/> being all actions you want to happen when the button is clicked
+        /// </para>
+        /// <para>
+        /// And <paramref name="scale"/> being the scalar you want to use. Please used a once instanced float for <paramref name="scale"/>.
+        /// </para>
+        /// </summary>
+        /// <param name="font"></param>
+        /// <param name="position"></param>
+        /// <param name="text"></param>
+        /// <param name="whatToDo"></param>
+        /// <param name="scale"></param>
+        /// <returns></returns>
         public Rectangle CreateSimpleUIButton(DynamicSpriteFont font, Vector2 position, string text, Action whatToDo, ref float scale)
         {
+            // Mod mod = ModContent.GetInstance<SpookyTerraria>();
             scale = MathHelper.Clamp(scale, 0.7f, 0.9f);
 
             var bounds = font.MeasureString(text);
-            var rectHoverable = new Rectangle((int)position.X - (int)bounds.X / 2, (int)position.Y - (int)bounds.Y / 2, (int)bounds.X, (int)bounds.Y - 15);
+            var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * scale), (int)position.Y - (int)bounds.Y / 2 + 5, (int)(bounds.X * scale), (int)bounds.Y - 30);
 
             bool hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, font, text, position, hovering ? Color.Yellow : Color.Gray, 0f, bounds / 2, new Vector2(scale));
+            // Main.spriteBatch.Draw(mod.GetTexture("Assets/Debug/WhitePixel"), rectHoverable, Color.White * 0.1f);
             if (Main.mouseLeft && Main.mouseLeftRelease && hovering)
             {
                 whatToDo();
             }
-            scale += hovering ? 0.03f : -0.03f;
+            scale += hovering ? 0.015f : -0.015f;
             return rectHoverable;
         }
         public Rectangle CreateUIButton(SpriteBatch sb, Texture2D texture, Vector2 position, Action whatToDo, Color color, float scale, SpriteEffects effects, Rectangle? sourceRectangle = null)
