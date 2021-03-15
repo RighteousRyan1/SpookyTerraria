@@ -440,19 +440,19 @@ namespace SpookyTerraria.Utilities
                 {
                     HTPMenuSelected = 1;
                 },
-                ref buttonScale1);
+                ref buttonScale1, default, 0.015f, null, HTPMenuSelected == 1 ? Color.Yellow : default);
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, 0), "What to Expect",
                 delegate
                 {
                     HTPMenuSelected = 2;
                 },
-                ref buttonScale2);
+                ref buttonScale2, default, 0.015f, null, HTPMenuSelected == 2 ? Color.Yellow : default);
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, -yOff), "Main Ideas",
                 delegate
                 {
                     HTPMenuSelected = 3;
                 },
-                ref buttonScale3);
+                ref buttonScale3, default, 0.015f, null, HTPMenuSelected == 3 ? Color.Yellow : default);
             if (Main.screenHeight < 800 || Main.screenWidth < 950)
             {
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, yOff * 2), "Send Text to File",
