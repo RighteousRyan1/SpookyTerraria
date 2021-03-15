@@ -398,16 +398,19 @@ namespace SpookyTerraria.Utilities
         internal static float buttonScale3;
         internal static float buttonScale4;
 
+        internal static float defUseScale = 0.85f;
+
         /// <summary>
         /// Draw the 'How to Play' menu.
         /// </summary>
         /// <param name="condition">Optional - when to draw </param>
         public static void DrawHTP()
         {
+            defUseScale = 2f;
             string wte = "You can expect to die quite a few times before winning. The mod takes a while to master asAlso, inside of narrow places, your vision will be reduced in the official map.\nYou are supplied with a flashlight, if you don't use it diligently, you can expect it to run out, or if you don't manage your stamina\nwell enough, you might die to being too slow.";
 
             string mainIdeas = "In Spooky Terraria, the whole idea is to collect all 8 pages in a world. Of course, you can generate a new world and move on with your day, but it is\nreccommended that you download the map and play it."
-    + "You venture the world and you will (eventually!) find all 8 pages if you try hard enough.\nWhile doing this, you have to be weary, there is something chasing you!";
+                + "You venture the world and you will (eventually!) find all 8 pages if you try hard enough.\nWhile doing this, you have to be weary, there is something chasing you!";
 
             string basicUnderstanding = "Slenderman has a vendetta against you, and he wants to kill you.\n"
                    + "As you collect pages, he gets faster. Looking at him will static your screen until it is completely opaque and kills you.\nOnce you collect all 8 pages, you win!\nSlenderman can teleport, and in Spooky Terraria, can fly."
@@ -440,19 +443,19 @@ namespace SpookyTerraria.Utilities
                 {
                     HTPMenuSelected = 1;
                 },
-                ref buttonScale1, default, 0.015f, null, HTPMenuSelected == 1 ? Color.Yellow : default);
+                ref HTPMenuSelected != 1 ? ref buttonScale1 : ref defUseScale, default, 0.015f, null, HTPMenuSelected == 1 ? Color.Yellow : default);
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, 0), "What to Expect",
                 delegate
                 {
                     HTPMenuSelected = 2;
                 },
-                ref buttonScale2, default, 0.015f, null, HTPMenuSelected == 2 ? Color.Yellow : default);
+                ref HTPMenuSelected != 2 ? ref buttonScale2 : ref defUseScale, default, 0.015f, null, HTPMenuSelected == 2 ? Color.Yellow : default);
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, -yOff), "Main Ideas",
                 delegate
                 {
                     HTPMenuSelected = 3;
                 },
-                ref buttonScale3, default, 0.015f, null, HTPMenuSelected == 3 ? Color.Yellow : default);
+                ref HTPMenuSelected != 3 ? ref buttonScale3 : ref defUseScale, default, 0.015f, null, HTPMenuSelected == 3 ? Color.Yellow : default);
             if (Main.screenHeight < 800 || Main.screenWidth < 950)
             {
                 buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, yOff * 2), "Send Text to File",

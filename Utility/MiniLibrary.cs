@@ -50,7 +50,25 @@ namespace SpookyTerraria.Utilities
     }
     public class MenuModeID
     {
-        public const int MainMenu = 0;
+        public const short MainMenu = 0;
+        public const short MultiplayerMenu = 12;
+        public const short Settings = 11;
+        public const short GeneralSettings = 112;
+        public const short InterfaceSettings = 1112;
+        public const short VideoSettings = 1111;
+        public const short ResolutionSettings = 111;
+        public const short ParallaxSettings = 28;
+        public const short VolumeSettings = 26;
+        public const short CursorSettings = 1125;
+        public const short ControlsSettings = 1127;
+        public const short LanguageSettings = 2008;
+        public const short tMLSettings = 10017;
+        public const short CursorColorSettings = 25;
+        public const short HostAndPlaySettings = 889;
+        public const short CursorBoarderColorSettings = 252;
+        public const short LoadingData = 10;
+        public const short JoinIP = 13;
+        public const short JoiningIP = 14;
         /// <summary>
         /// The Extras (the menu to all the other menu modes)
         /// </summary>
