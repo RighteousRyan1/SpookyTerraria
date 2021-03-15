@@ -29,18 +29,18 @@ namespace SpookyTerraria.ModIntances
 	{
         public override void Initialize()
         {
-            SpookyPlayer.pages = 0;
+            SpookyPlayer.Pages = 0;
         }
         public override void Load(TagCompound tag)
         {
-            SpookyPlayer.pages = tag.GetInt("pages");
+            SpookyPlayer.Pages = tag.GetInt("pages");
         }
         public override TagCompound Save()
         {
             return new TagCompound
             {
                 {
-                    "pages", SpookyPlayer.pages
+                    "pages", SpookyPlayer.Pages
                 }
             };
         }
@@ -52,7 +52,7 @@ namespace SpookyTerraria.ModIntances
         {
             Player player = Main.player[Main.myPlayer];
 
-            int count = SpookyPlayer.pages;
+            int count = SpookyPlayer.Pages;
             if (!Main.playerInventory && player.CountBuffs() == 0 && !Main.hideUI && !player.dead)
             {
                 SpookyTerrariaUtils.DrawPageUI(count, 35f, 100f);

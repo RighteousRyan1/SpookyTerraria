@@ -142,7 +142,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "Painting in black isn't the best idea nowadays...";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "My paint is going to fall over! Stop this!";
                         break;
                     case 3:
@@ -160,7 +160,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "Why in the world is it so damn dark? Good thing I got guns with me.";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "What is this rumbling? I'm getting creeped out...";
                         break;
                     case 3:
@@ -179,7 +179,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "The sounds of nature are calming, but the immense darkness frightens me...";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "Is this what goes bump in the night?";
                         break;
                     case 3:
@@ -197,7 +197,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "The sun is low! My prices are not.";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "What is this feeling? It's Like I'm being watched.";
                         break;
                     case 3:
@@ -215,7 +215,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "Yeah, yeah. Let me heal you. Pay up first.";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "Oh? Baby want his milk? Is the rumbling too scary-wary for you?";
                         break;
                     case 3:
@@ -233,7 +233,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "This darkness is not for the light hearted. For what I know, I have heard things that lurk around in the darkness here.";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "When you hear rumbling, you know that you are being watched.";
                         break;
                     case 3:
@@ -251,7 +251,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "It's kinda hard to see when it is this dark. Good thing the fuses on my explosives can change that!";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "I'm pretty sure this rumbling isn't from one of my babies.";
                         break;
                     case 3:
@@ -269,7 +269,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "Wanna die? No? Ok.";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "Want me to stop this rumbling? Yes? Too bad.";
                         break;
                     case 3:
@@ -287,7 +287,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "Why is all the wifi down?";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "Engineering gets more and more depressing every day, especially when you feel like rumbles will just tear it all down.";
                         break;
                     case 3:
@@ -305,7 +305,7 @@ namespace SpookyTerraria
                     case 1:
                         chat = "These scissors can come handy in may ways...";
                         break;
-                    case 2 when SpookyPlayer.pages >= 1:
+                    case 2 when SpookyPlayer.Pages >= 1:
                         chat = "This is a very uncertain feeling...";
                         break;
                     case 3:
@@ -353,7 +353,7 @@ namespace SpookyTerraria
                     }
                 }
             }
-            if (SpookyPlayer.pages >= 1)
+            if (SpookyPlayer.Pages >= 1)
             {
                 slenderFailsafeTimer++;
 

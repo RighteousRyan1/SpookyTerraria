@@ -189,7 +189,7 @@ namespace SpookyTerraria.Utilities
         public static void GenerateRandomPagePositions()
         {
             float givenFloat = Main.rand.NextFloat();
-            if (SpookyPlayer.pages == 0)
+            if (SpookyPlayer.Pages == 0)
             {
                 Tile treeRandPosTile1 = Framing.GetTileSafely(1161, 344); // Main.tile[1161,344]
                 Tile treeRandPosTile2 = Framing.GetTileSafely(1137, 345); // Main.tile[1137,345]
@@ -451,7 +451,7 @@ namespace SpookyTerraria.Utilities
             string pathWood2 = "Sounds/Custom/Action/WoodStep1")
         {
             Player player = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             if (!player.wet)
             {
                 if (player.legFrame.Y == player.legFrame.Height * 9 && player.GetModPlayer<SpookyPlayer>().isOnGrassyTile) // Check for step timer
@@ -554,7 +554,7 @@ namespace SpookyTerraria.Utilities
         /// </summary>
         public static void ModifyUITextures()
         {
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
 
             // TODO: Friendly Reminder; Finish the shits
 
@@ -616,10 +616,10 @@ namespace SpookyTerraria.Utilities
         {
             Player player = Main.player[Main.myPlayer];
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             Color alphaBlendColor = Color.White * blend;
 
-            int count = SpookyPlayer.pages;
+            int count = SpookyPlayer.Pages;
             string pageUIDisplayString = $"{count} out of 8 pages";
             Rectangle pageUIPos = new Rectangle((int)posX, (int)posY, 176, 36);
 
@@ -633,7 +633,7 @@ namespace SpookyTerraria.Utilities
                 Main.spriteBatch.DrawString(Main.fontMouseText, pageUIDisplayString, Main.MouseScreen + new Vector2(25, 25), Color.White, 0f, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
             }
 
-            int unfoundPages = MathUtils.FindRemainder(SpookyPlayer.pages, 8);
+            int unfoundPages = MathUtils.FindRemainder(SpookyPlayer.Pages, 8);
 
             if (!pageUIPos.Contains(Main.MouseScreen.ToPoint()))
             {
@@ -855,19 +855,18 @@ namespace SpookyTerraria.Utilities
 
         public static void DrawPageInterface(int pageIndex)
         {
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
 
             Player player = Main.player[Main.myPlayer];
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-
             Vector2 middleOfScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
             Main.spriteBatch.Draw(mod.GetTexture($"Assets/UniqueUI/PageInterface_{pageIndex}"), middleOfScreen - new Vector2(250, 500), Color.White * (player.GetModPlayer<SpookyPlayer>().pageDisplayTimer / 100f));
             Main.spriteBatch.End();
         }
         public static void DrawPageInterface_PostCallEnd(int pageIndex)
         {
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
 
             Player player = Main.player[Main.myPlayer];
 
@@ -883,7 +882,7 @@ namespace SpookyTerraria.Utilities
     {
         public static void ReplayAt2Container()
         {
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             Player player = Main.player[Main.myPlayer];
 
             if (caveRumbleTimer == 2 && (player.ZoneRockLayerHeight))
@@ -918,7 +917,7 @@ namespace SpookyTerraria.Utilities
         {
             ReplayAt2Container();
 
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             Player player = Main.player[Main.myPlayer];
 
             if (caveRumbleTimer == 1680 && player.ZoneRockLayerHeight)
@@ -951,7 +950,7 @@ namespace SpookyTerraria.Utilities
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/JungleAmbience"));
                 jungleAmbTimer = 0;
             }
-            if (dayAmbienceTimer == 4620 && PlayerIsInForest(player) && Main.dayTime && SpookyPlayer.pages >= 8)
+            if (dayAmbienceTimer == 4620 && PlayerIsInForest(player) && Main.dayTime && SpookyPlayer.Pages >= 8)
             {
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Ambient/Biome/ForestAmbience_Day"));
                 dayAmbienceTimer = 0;
@@ -964,7 +963,7 @@ namespace SpookyTerraria.Utilities
         public static void StopAmbientSound(string path)
         {
             Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             SoundEffectInstance pathInstance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
             pathInstance?.Stop();
         }
@@ -978,7 +977,7 @@ namespace SpookyTerraria.Utilities
         public static void ModifyAmbientAttribute(string path, float volume = 1f, float pitch = 1f, float pan = 1f)
         {
             Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             SoundEffectInstance pathInstance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
             if (pathInstance != null)
             {
@@ -994,7 +993,7 @@ namespace SpookyTerraria.Utilities
         public static SoundEffectInstance GetSoundEffect(string path)
         {
             Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             SoundEffectInstance instance = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));
 
             if (instance.Volume > 1f)
@@ -1022,7 +1021,7 @@ namespace SpookyTerraria.Utilities
         public static void StopAllAmbientSounds()
         {
             Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             SoundEffectInstance a = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/ForestAmbience"));
             SoundEffectInstance b = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/OceanAmbience"));
             SoundEffectInstance c = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"Sounds/Custom/Ambient/Biome/SnowAmbience"));
@@ -1045,7 +1044,7 @@ namespace SpookyTerraria.Utilities
         public static void StopSoundList(string[] paths)
         {
             Player p = Main.player[Main.myPlayer];
-            Mod mod = ModLoader.GetMod("SpookyTerraria");
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
             foreach (string path in paths)
             {
                 SoundEffectInstance instances = Main.PlaySound(SoundLoader.customSoundType, (int)p.position.X, (int)p.position.Y, mod.GetSoundSlot(SoundType.Custom, $"{path}"));

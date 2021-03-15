@@ -8,12 +8,12 @@ namespace SpookyTerraria
         [Label("Spooky Terraria Settings (Client Side)")]
         public override ConfigScope Mode => ConfigScope.ClientSide;
         [Header("Ambience Settings")]
-        [Label("Toggle Winds")]
+        [Label("Winds/Breezes")]
         [DefaultValue(true)]
         [Tooltip("Toggle Winds blowing.")]
         public bool toggleWind;
 
-        [Label("Toggle Owl Hoots")]
+        [Label("Owl Hoots")]
         [DefaultValue(true)]
         [Tooltip("Toggle owl hooting.")]
         public bool toggleHoots;

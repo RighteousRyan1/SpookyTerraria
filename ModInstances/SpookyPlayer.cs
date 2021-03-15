@@ -24,6 +24,7 @@ using System.IO;
 using Terraria.Graphics.Capture;
 using Terraria.IO;
 using System.Linq;
+using SpookyTerraria.IO;
 
 namespace SpookyTerraria
 {
@@ -39,16 +40,6 @@ namespace SpookyTerraria
     }
 	public class SoundPlayer : ModPlayer
     {
-        public override void PostUpdateBuffs()
-        {
-            /*int x = (int)Main.MouseWorld.X / 16;
-            int y = (int)Main.MouseWorld.Y / 16;
-            if (Main.mouseMiddle && Main.mouseMiddleRelease)
-            {
-                WorldGen.KillTile(x, y);
-            }*/
-            // if (Main.cursor)
-        }
         public static float changeDirCameraValues;
         public static float changeDirCameraValues1;
         public float minMax;
@@ -156,15 +147,6 @@ namespace SpookyTerraria
                 }
             }
         }
-        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
-        {
-        }
-        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
-        {
-        }
-        public override void DrawEffects(PlayerDrawInfo drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
-        {
-        }
         public override void PreUpdate()
         {
             if (player.wet && player.velocity.Y != 0)
@@ -174,6 +156,7 @@ namespace SpookyTerraria
         }
         public override void PostUpdate()
         {
+            if (DiscordRPCInfo.rpcClient != null) DiscordRPCInfo.Update();
         }
         public override void PostUpdateMiscEffects()
         {
@@ -211,11 +194,11 @@ namespace SpookyTerraria
             // walking5, walking6, walking1, walking9, walking10, walking11, 
             // player.bodyFrame.Y = player.bodyFrame.Height * (int)SpookyTerrariaUtils.BodyFrames.walking13;
 
-            if (SpookyPlayer.pages >= 8)
+            if (SpookyPlayer.Pages >= 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = true;
             }
-            else if (SpookyPlayer.pages < 8)
+            else if (SpookyPlayer.Pages < 8)
             {
                 ModContent.GetInstance<SpookyTerraria>().beatGame = false;
             }
@@ -241,7 +224,11 @@ namespace SpookyTerraria
         /// <summary>
         /// The player's page count
         /// </summary>
-        public static int pages;
+        public static int Pages
+        {
+            get;
+            set;
+        }
         public int cachedPageCount;
         /// <summary>
         /// Used Directly for the fists, this determines the first phase of a punch
@@ -368,14 +355,14 @@ namespace SpookyTerraria
             }
             if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
-                if (pages > 0)
+                if (Pages > 0)
                 {
-                    pages = 0;
+                    Pages = 0;
                 }
                 SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
                 SpookyTerrariaUtils.GenerateRandomPagePositions();
             }
-            else if (pages > 0)
+            else if (Pages > 0)
             {
                 int randChoice = Main.rand.Next(0, 2);
                 NPC.NewNPC(randChoice == 0 ? (int)player.Center.X + -2500 : 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
@@ -445,9 +432,9 @@ namespace SpookyTerraria
         public Vector2 facingLeftToFistOffset;
         public override void PreUpdate()
         {
-            if (pages > 8)
+            if (Pages > 8)
             {
-                pages = 8;
+                Pages = 8;
             }
             bool hasShroudedIIIRequirement = Lighting.GetSubLight(player.Top).X == 0f;
             bool hasShroudedIIRequirement = Lighting.GetSubLight(player.Top).X > 0f
@@ -477,7 +464,7 @@ namespace SpookyTerraria
             }
             else if (Main.worldName != SpookyTerrariaUtils.slenderWorldName)
             {
-                if (pages > 0)
+                if (Pages > 0)
                 {
                     int randChoice = Main.rand.Next(0, 2);
                     NPC.NewNPC(randChoice == 0 ? (int)player.Center.X + -2500 : 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
@@ -597,7 +584,9 @@ namespace SpookyTerraria
         public int displayTimes;
         public override void PostUpdate()
         {
-            cachedPageCount = pages;
+
+            DiscordRPCInfo.RPCPlayer = player;
+            cachedPageCount = Pages;
             int rand = Main.rand.Next(0, 5000);
             Main.rand.Next(rand);
             if (rand == 0 && Main.raining)
@@ -622,13 +611,10 @@ namespace SpookyTerraria
             {
                 msgTimer++;
             }
-            //byte[] i = new byte[] { 1, 2, 3 };
-            //Microsoft.Xna.Framework.Audio.SoundEffect Poop = new Microsoft.Xna.Framework.Audio.SoundEffect(i, 1, Microsoft.Xna.Framework.Audio.AudioChannels.Stereo);
-            //poop
-            Mod ST = ModLoader.GetMod("SpookyTerraria");
+            Mod ST = ModContent.GetInstance<SpookyTerraria>();
             if (msgTimer == 120)
             {
-                Main.NewText($"Spooky Terraria is on  v{ST.Version}.", Color.DarkGray);
+                Main.NewText($"Spooky Terraria is on v{ST.Version}.", Color.DarkGray);
             }
             if (msgTimer == 300)
             {

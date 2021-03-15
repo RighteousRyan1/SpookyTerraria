@@ -1,8 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using ReLogic.Graphics;
+using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -45,11 +48,25 @@ namespace SpookyTerraria.Utilities
         public const short DontLook = 7;
         public const short NoX12 = 8;
     }
-    public class SlenderMenuModeID
+    public class MenuModeID
     {
+        public const int MainMenu = 0;
+        /// <summary>
+        /// The Extras (the menu to all the other menu modes)
+        /// </summary>
         public const short SlenderExtras = 505;
+        /// <summary>
+        /// The Spooky Terraria changelogs
+        /// </summary>
         public const short SlenderChangeLogs = 1010;
-
+        /// <summary>
+        /// The modes for the game (20 dollars, glowsticks)
+        /// </summary>
+        public const short SlenderModesMenu = 1515;
+        /// <summary>
+        /// The How to Play Menu
+        /// </summary>
+        public const short HowToPlay = 1551;
         public struct UIStates
         {
             public static UIState SlenderIngameInterface { get; set; }
@@ -57,6 +74,35 @@ namespace SpookyTerraria.Utilities
     }
     public class UIHelper
     {
+        public static Vector2 SingleToVec2(float value)
+        {
+            return new Vector2(value, value);
+        }
+        public static MouseState MSNew
+        {
+            get;
+            internal set;
+        }
+        public static MouseState MSOld
+        {
+            get;
+            internal set;
+        }
+        public static void ClickHandling()
+        {
+            MSNew = Mouse.GetState();
+        }
+        public static bool ClickEnded(bool leftClick)
+        {
+            if (leftClick)
+            {
+                return MSOld.LeftButton == ButtonState.Pressed && MSNew.LeftButton == ButtonState.Released;
+            }
+            else
+            {
+                return MSOld.RightButton == ButtonState.Pressed && MSNew.RightButton == ButtonState.Released;
+            }
+        }
         /// <summary>
         /// Allows the easiest any most simple creation of a menu button ever! Font being the <paramref name="font"/> you want to use,
         /// <paramref name="position"/> being the position of the text (centered)
@@ -64,34 +110,71 @@ namespace SpookyTerraria.Utilities
         /// <paramref name="text"/> being what texty you want to show, <paramref name="whatToDo"/> being all actions you want to happen when the button is clicked
         /// </para>
         /// <para>
-        /// And <paramref name="scale"/> being the scalar you want to use. Please used a once instanced float for <paramref name="scale"/>.
+        /// And <paramref name="useScale"/> being the scalar you want to use. Please used a once instanced float for <paramref name="useScale"/>.
         /// </para>
         /// </summary>
-        /// <param name="font"></param>
-        /// <param name="position"></param>
-        /// <param name="text"></param>
-        /// <param name="whatToDo"></param>
-        /// <param name="scale"></param>
-        /// <returns></returns>
-        public Rectangle CreateSimpleUIButton(DynamicSpriteFont font, Vector2 position, string text, Action whatToDo, ref float scale)
+        /// <returns>A rectangle of the button (hovering, etc)</returns>
+        public Rectangle CreateSimpleUIButton(DynamicSpriteFont font,
+            Vector2 position,
+            string text,
+            Action whatToDo,
+            ref float useScale, 
+            Color colorWhenHovered = default, 
+            float scaleMultiplier = 0.015f, 
+            Action hoveringToDo = null,
+            Color nonHoverColor = default,
+            float alpha = 1f,
+            bool waitUntilClickEnd = false)
         {
             // Mod mod = ModContent.GetInstance<SpookyTerraria>();
-            scale = MathHelper.Clamp(scale, 0.7f, 0.9f);
+            if (colorWhenHovered == default)
+            {
+                colorWhenHovered = Color.Yellow;
+            }
+            if (nonHoverColor == default)
+            {
+                nonHoverColor = new Color(86, 86, 86, 50);
+            }
+            useScale = MathHelper.Clamp(useScale, 0.65f, 0.85f);
 
             var bounds = font.MeasureString(text);
-            var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * scale), (int)position.Y - (int)bounds.Y / 2 + 5, (int)(bounds.X * scale), (int)bounds.Y - 30);
+            var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * useScale), (int)(position.Y - bounds.Y / 2 + 10), (int)(bounds.X * useScale), (int)bounds.Y - 30);
 
             bool hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, font, text, position, hovering ? Color.Yellow : Color.Gray, 0f, bounds / 2, new Vector2(scale));
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, font, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale));
             // Main.spriteBatch.Draw(mod.GetTexture("Assets/Debug/WhitePixel"), rectHoverable, Color.White * 0.1f);
-            if (Main.mouseLeft && Main.mouseLeftRelease && hovering)
+            if (!waitUntilClickEnd)
             {
-                whatToDo();
+                if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null)
+                {
+                    whatToDo();
+                }
             }
-            scale += hovering ? 0.015f : -0.015f;
+            else
+            {
+                if (ClickEnded(true) && hovering && whatToDo != null)
+                {
+                    whatToDo();
+                }
+            }
+            if (hoveringToDo != null)
+            {
+                if (hovering)
+                {
+                    hoveringToDo();
+                }
+            }
+            useScale += hovering ? scaleMultiplier : -scaleMultiplier;
             return rectHoverable;
         }
-        public Rectangle CreateUIButton(SpriteBatch sb, Texture2D texture, Vector2 position, Action whatToDo, Color color, float scale, SpriteEffects effects, Rectangle? sourceRectangle = null)
+        public Rectangle CreateUIButton(SpriteBatch sb, 
+            Texture2D texture, 
+            Vector2 position, 
+            Action whatToDo, 
+            Color color, 
+            float scale, 
+            SpriteEffects effects, 
+            Rectangle? sourceRectangle = null)
         {
             Mod mod = ModContent.GetInstance<SpookyTerraria>();
             var bounds = texture.Size();
@@ -123,15 +206,19 @@ namespace SpookyTerraria.Utilities
     }
     public class EaseOfAccess
     {
-        /// <summary>
-        /// Detects if <code>iniRect</code> and <code>collidingRect</code> are intersecting.
-        /// </summary>
-        /// <param name="iniRect"></param>
-        /// <param name="collidingRect"></param>
-        /// <returns></returns>
-        public static bool Intersecting(Rectangle iniRect, Rectangle collidingRect)
+        public static Rectangle ScreenBounds
         {
-            return iniRect.Intersects(collidingRect);
+            get
+            {
+                return new Rectangle(Main.instance.Window.ClientBounds.X, Main.instance.Window.ClientBounds.Y, Main.screenWidth, Main.screenHeight);
+            }
+        }
+        public static Vector2 Screen
+        {
+            get
+            {
+                return new Vector2(Main.screenWidth, Main.screenHeight);
+            }
         }
         /// <summary>
         /// checks <code>hoveringOver.Contains(Main.MouseScreen.ToPoint())</code> which results in checking if the mouse position is on top of said rectangle.

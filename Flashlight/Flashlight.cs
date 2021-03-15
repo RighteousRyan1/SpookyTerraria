@@ -28,7 +28,7 @@ namespace SpookyTerraria.Flashlight
             }
             if (Main.keyState.IsKeyDown(Keys.LeftAlt))
             {
-                string addedTT = "If shined directly into solid tiles, lighting will be reduced\nConsumes batteries\nBatteries deplete faster depending on whether or not you have the flashlight equipped";
+                string addedTT = $"If shined directly into solid tiles, lighting will be reduced\nConsumes batteries\nBatteries deplete faster depending on whether or not you have the flashlight equipped\nExpected Current Battery Life Left: {consumeBatteryTimer / 60}";
                 tooltips.Add(new TooltipLine(mod, "SpookyTerraria", "FlashlightMoreInfo")
                 {
                     overrideColor = Color.Gray,

@@ -9,10 +9,14 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI.Chat;
 using ReLogic.Graphics;
+using SpookyTerraria.IO;
+using System.IO;
+using Microsoft.Xna.Framework.Input;
+using DiscordRPC;
 
 namespace SpookyTerraria.Utilities
 {
-	// Thank you, Steviegt6
+    // Thank you, Steviegt6
     public static class Hooks
     {
 		public delegate void Orig_AddMenuButtons(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
@@ -50,6 +54,63 @@ namespace SpookyTerraria.Utilities
 
 	public static class MenuHelper
 	{
+        /// <summary>
+        /// Safely draws a texture without accessing a disposed object or null object.
+        /// <para>Reminder to call Begin() and End() for drawing this.</para>
+        /// </summary>
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, sourceRect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, sourceRect, color, rot, orig, effects, 1f);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, 1f);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, Vector2 scale, SpriteEffects effects)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, 1f);
+            }
+        }
+        public static void DrawUserStatistics()
+        {
+            AccountHandler.GetUserID().ToString();
+        }
 		public static void AddButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons)
 		{
 			buttonNames[buttonIndex] = text;
@@ -71,9 +132,18 @@ namespace SpookyTerraria.Utilities
         internal static float buttonScaleChangeLogs;
         internal static float buttonScaleModes;
 
+        internal static float returnFromModesScale;
+        internal static float twentyDollarsScale;
+        internal static float glowsticksScale;
+
+        internal static Vector2 shakeOffset;
+        internal static int shakeTimer;
+
         private static string changeLog;
-        public static void DrawSlenderMenuUI505()
+        public static void DrawSlenderMenuUI()
         {
+            bool isRyan = AccountHandler.accountName.ToString() == "158490005";
+            shakeTimer--;
             Mod mod = ModContent.GetInstance<SpookyTerraria>();
 
             int yOff = 42;
@@ -84,24 +154,70 @@ namespace SpookyTerraria.Utilities
             string downloadSlender = "Download Slender: The 8 Pages";
             string visitMythos = "Slender Mythos";
             string changeLogs = "Spooky Terraria Changelogs";
+            string HTP = "How to Play";
 
             Vector2 midScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
             Vector2 topMid = new Vector2(Main.screenWidth / 2, 12);
 
-            if (Main.menuMode == SlenderMenuModeID.SlenderExtras)
+            if (shakeTimer >= 0)
             {
-                Rectangle mapDL = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 4 + offsetMore), downloadMap, 
-                    delegate { Process.Start("https://cdn.discordapp.com/attachments/743141999846096959/796195488143245333/Slender_The_8_Pages.wld"); }, ref buttonScaleDownloadMap);
-                Rectangle slenderDownload = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 3 + offsetMore), downloadSlender, 
+                shakeOffset = new Vector2(Main.rand.Next(-3, 3), Main.rand.Next(-3, 3));
+            }
+            else
+            {
+                shakeOffset = Vector2.Zero;
+            }
+            // TODO: How to play, finish BadOSVersion
+            if (Main.menuMode == MenuModeID.SlenderExtras)
+            {
+                Rectangle mapDL = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff * 4 + offsetMore), downloadMap, 
+                    delegate 
+                    {
+                        byte[] modFileData = mod.GetFileBytes("SlenderWorld/Slender_The_8_Pages.wld");
+
+                        string pathTo = $"{Path.Combine(Main.WorldPath, "Slender_The_8_Pages.wld")}";
+                        if (!File.Exists(Path.Combine(Main.WorldPath, "Slender_The_8_Pages.wld")))
+                        {
+                            File.WriteAllBytes(pathTo, modFileData);
+                            SpookyTerraria.fileAddedNoticeTimer = 90;
+                        }
+                    }, 
+                    ref buttonScaleDownloadMap);
+
+                Rectangle htp = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff * 7), HTP,
+                    delegate 
+                    { 
+                        Main.menuMode = MenuModeID.HowToPlay; 
+                    }, 
+                    ref HTPButtonScale);
+
+                Rectangle slenderDownload = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff * 3 + offsetMore), downloadSlender, 
                     delegate { Process.Start("https://cdn.discordapp.com/attachments/427893900594774026/796565609852698644/Slender_v0.9.7.rar"); }, ref buttonScaleDownloadSlender);
-                Rectangle mythos = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 2 + offsetMore), visitMythos, 
+
+                Rectangle mythos = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff * 2 + offsetMore), visitMythos, 
                     delegate { Process.Start("https://theslenderman.fandom.com/wiki/Original_Mythos"); }, ref buttonScaleMythos);
-                Rectangle returnButton = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, offsetMore), @return, 
-                    delegate { Main.menuMode = 0; }, ref buttonScaleReturn);
-                Rectangle logs = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff + offsetMore), changeLogs, 
-                    delegate { Main.menuMode = SlenderMenuModeID.SlenderChangeLogs; }, ref buttonScaleChangeLogs);
-                Rectangle modes = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen - new Vector2(0, yOff * 5 + offsetMore), "Modes Menu (Coming Soon)",
-                    delegate { Main.PlaySound(SoundID.Unlock); }, ref buttonScaleModes);
+
+                Rectangle returnButton = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, offsetMore), @return, 
+                    delegate { Main.menuMode = MenuModeID.MainMenu; }, ref buttonScaleReturn, default, 0.015f, null, default, 1, true);
+
+                Rectangle logs = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff + offsetMore), changeLogs, 
+                    delegate { Main.menuMode = MenuModeID.SlenderChangeLogs; }, ref buttonScaleChangeLogs);
+
+                Rectangle modes = ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(0, 150) - new Vector2(0, yOff * 5 + offsetMore) + shakeOffset, !isRyan ? "Slender Modes Menu (Coming Soon)" : "Slender Modes Menu",
+                    delegate 
+                    { 
+                        if (!isRyan)
+                        {
+                            Main.PlaySound(SoundID.Unlock);
+                            shakeTimer = 15;
+                        }
+                        else
+                        {
+                            Main.PlaySound(SoundID.CoinPickup);
+                            Main.menuMode = MenuModeID.SlenderModesMenu;
+                        } 
+                    }, 
+                    ref buttonScaleModes, !isRyan ? Color.Red : default, 0.015f, null, !isRyan ? Color.DarkRed : default, 1f, true);
 
                 if (mapDL.Contains(Main.MouseScreen.ToPoint()))
                 {
@@ -113,29 +229,66 @@ namespace SpookyTerraria.Utilities
                 }
                 if (mythos.Contains(Main.MouseScreen.ToPoint()))
                 {
-                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Check out the Slender Mythos (Mythology) that the\n             game was made based off of!", topMid + new Vector2(0, 12), Color.White, 0f, Main.fontDeathText.MeasureString("Check out the Slender Mythos (Mythology) that the\n             game was made based off of!") / 2, new Vector2(0.3f, 0.3f));
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Check out the Slender Mythology that the\n       game and mod were based on!", topMid + new Vector2(20, 12), Color.White, 0f, Main.fontDeathText.MeasureString("Check out the Slender Mythology that the\n       game and mod were based on!") / 2, new Vector2(0.3f, 0.3f));
                 }
                 if (logs.Contains(Main.MouseScreen.ToPoint()))
                 {
                     ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Check out the Change Logs for this Mod!", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("Check out the Change Logs for this Mod!") / 2, new Vector2(0.3f, 0.3f));
                 }
+                if (htp.Contains(Main.MouseScreen.ToPoint()))
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "See how to play the Mod.", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("See how to play the Mod.") / 2, new Vector2(0.3f, 0.3f));
+                }
                 if (modes.Contains(Main.MouseScreen.ToPoint()))
                 {
-                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "WIP: Come back some other time.", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("WIP: Come back some other time.") / 2, new Vector2(0.3f, 0.3f));
+                    if (isRyan)
+                    {
+                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Welcome, tester!", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("Welcome, tester!") / 2, new Vector2(0.3f, 0.3f));
+                    }
+                    else
+                    {
+                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "WIP: Come back some other time.", topMid, Color.White, 0f, Main.fontDeathText.MeasureString("WIP: Come back some other time.") / 2, new Vector2(0.3f, 0.3f));
+                    }
                 }
+            }
+            if (Main.menuMode == MenuModeID.SlenderModesMenu)
+            {
+                Rectangle backButtonFromModes =
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, EaseOfAccess.Screen / 2 - new Vector2(0, yOff), "Back",
+                delegate
+                {
+                    Main.menuMode = MenuModeID.SlenderExtras;
+                },
+                ref returnFromModesScale);
+
+                Rectangle twentyDollarsMode =
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, EaseOfAccess.Screen / 2 - new Vector2(0, yOff * 2), SpookyTerraria.Gimme20Dollars ? "20 Dollars Mode: On" : "20 Dollars Mode: Off",
+                delegate
+                {
+                    SpookyTerraria.Gimme20Dollars = !SpookyTerraria.Gimme20Dollars;
+                },
+                ref twentyDollarsScale);
+
+                Rectangle gSticksMode =
+                ModContent.GetInstance<SpookyTerraria>().UIHelper.CreateSimpleUIButton(Main.fontDeathText, EaseOfAccess.Screen / 2 - new Vector2(0, yOff * 3), SpookyTerraria.Glowsticks ? "Glowsticks: On" : "Glowsticks: Off",
+                delegate
+                {
+                    SpookyTerraria.Glowsticks = !SpookyTerraria.Glowsticks;
+                },
+                ref glowsticksScale);
             }
         }
         public static void DrawChangeLogs()
         {
             Mod mod = ModContent.GetInstance<SpookyTerraria>();
-            if (Main.menuMode == SlenderMenuModeID.SlenderChangeLogs)
+            if (Main.menuMode == MenuModeID.SlenderChangeLogs)
             {
                 Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
 
                 var keyState = Main.keyState;
-                if (keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
+                if (keyState.IsKeyDown(Keys.Escape))
                 {
-                    Main.menuMode = SlenderMenuModeID.SlenderExtras;
+                    Main.menuMode = MenuModeID.SlenderExtras;
                 }
                 string escToReturn = "Press ESC to return";
                 string reccommend = "If you wish to reccommend anything to me or let me know of a missing feature, please visit the forums post (homepage link) or join my discord server.";
@@ -176,6 +329,13 @@ namespace SpookyTerraria.Utilities
                     changeLog = "Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.5.6.1]\n - Added some tooltip messages to the menu.\n - Removed an unintended feature.\n - Added a sneak peek of sorts.";
                 }
                 if (SlenderMain.updateLogMode == 3)
+                {
+                    changeLog = "Change Logs for [c/FFFF00:Spooky Terraria]: v[c/FFFF00:0.6]\n - Main Addition: Discord Rich Presence!\nYour friends on Discord can now see you playing this mod and see your stats."
+                        + "\nThings such as: Pages Collected, Player name, player status, menu status, and more."
+                        + "\n - Repositioned a lot of UI, including removing the logo from a lot of menus."
+                        + "\nFixed some code inconsistencies.\n - A FOR SURE fix to mod unloading.\n - Added a How to Play menu.";
+                }
+                if (SlenderMain.updateLogMode == 4)
                 {
                     changeLog = "This update does not exist yet...\nPlease check regularly on the Mod Browser for more updates!";
                 }
@@ -224,7 +384,131 @@ namespace SpookyTerraria.Utilities
                 }
             }
             // CLAMP FOR LOGS TO BE UPDATED PROPERLY LMAO
-            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 3);
+            SlenderMain.updateLogMode = Utils.Clamp<short>(SlenderMain.updateLogMode, -1, 4);
+        }
+        internal static float HTPButtonScale;
+
+        public static int HTPMenuSelected
+        {
+            get;
+            internal set;
+        }
+        internal static float buttonScale1;
+        internal static float buttonScale2;
+        internal static float buttonScale3;
+        internal static float buttonScale4;
+
+        /// <summary>
+        /// Draw the 'How to Play' menu.
+        /// </summary>
+        /// <param name="condition">Optional - when to draw </param>
+        public static void DrawHTP()
+        {
+            string wte = "You can expect to die quite a few times before winning. The mod takes a while to master asAlso, inside of narrow places, your vision will be reduced in the official map.\nYou are supplied with a flashlight, if you don't use it diligently, you can expect it to run out, or if you don't manage your stamina\nwell enough, you might die to being too slow.";
+
+            string mainIdeas = "In Spooky Terraria, the whole idea is to collect all 8 pages in a world. Of course, you can generate a new world and move on with your day, but it is\nreccommended that you download the map and play it."
+    + "You venture the world and you will (eventually!) find all 8 pages if you try hard enough.\nWhile doing this, you have to be weary, there is something chasing you!";
+
+            string basicUnderstanding = "Slenderman has a vendetta against you, and he wants to kill you.\n"
+                   + "As you collect pages, he gets faster. Looking at him will static your screen until it is completely opaque and kills you.\nOnce you collect all 8 pages, you win!\nSlenderman can teleport, and in Spooky Terraria, can fly."
+                   + "\nBe sure to not get jumpscared.\nSome simple things you need to know are keeping your stamina high and monitoriing your battery usage. \nThe more you hold/use your flashlight, the more battery will be consumed. Along with that, a max of 5 batteries can be held at any one time.\nWith stamina, you are a sitting duck after using up to 75% of it at any given time.";
+            if (HTPMenuSelected == 0) HTPMenuSelected = 1;
+            int yOff = 42;
+
+            string escToReturn = "Press ESC to return";
+
+            Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
+            Vector2 botMid = new Vector2(screenBounds.X / 2, screenBounds.Y - 10);
+            Vector2 midEscText = Main.fontDeathText.MeasureString(escToReturn) / 2;
+
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, escToReturn, botMid - new Vector2(0, 0), Color.Gray, 0f, midEscText, new Vector2(0.3f, 0.3f));
+
+            Vector2 midScreen = new Vector2(Main.screenWidth / 2, Main.screenHeight / 2);
+            Vector2 topMid = new Vector2(Main.screenWidth / 2, 12);
+
+            Mod mod = ModContent.GetInstance<SpookyTerraria>();
+
+            if (Main.keyState.IsKeyDown(Keys.Escape) && Main.menuMode == MenuModeID.HowToPlay)
+            {
+                Main.menuMode = MenuModeID.SlenderExtras;
+            }
+
+            UIHelper buttonHelper = ModContent.GetInstance<SpookyTerraria>().UIHelper;
+
+            buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, yOff), "The Basics",
+                delegate
+                {
+                    HTPMenuSelected = 1;
+                },
+                ref buttonScale1);
+                buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, 0), "What to Expect",
+                delegate
+                {
+                    HTPMenuSelected = 2;
+                },
+                ref buttonScale2);
+                buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, -yOff), "Main Ideas",
+                delegate
+                {
+                    HTPMenuSelected = 3;
+                },
+                ref buttonScale3);
+            if (Main.screenHeight < 800 || Main.screenWidth < 950)
+            {
+                buttonHelper.CreateSimpleUIButton(Main.fontDeathText, midScreen + new Vector2(midScreen.X / 2, yOff * 2), "Send Text to File",
+                delegate
+                {
+                    Main.PlaySound(SoundID.DoubleJump);
+                    string path = $"C://Users//{Environment.UserName}//Desktop//how_to_play.txt";
+                    File.WriteAllText(path,
+
+                        $"(THIS WAS AUTO-GENERATED BY SPOOKY TERRARIA)\n\n<<< MAIN IDEAS >>>\n\n{mainIdeas}\n\n<<< WHAT TO EXPECT >>>\n\n{wte}\n\n<<< BASIC UNDERSTANDING >>>\n\n{basicUnderstanding}"
+
+                        );
+                },
+                ref buttonScale4, default, 0.015f, null, default, 1f);
+            }
+
+
+            if (HTPMenuSelected == 1)
+            {
+                var howToPlay_avoidslender = mod.GetTexture("Assets/MenuUI/HowToPlay/avoidslender");
+                Main.spriteBatch.SafeDraw(howToPlay_avoidslender, midScreen - new Vector2(midScreen.X / 2, 0), null, Color.White, 0f, howToPlay_avoidslender.Size() / 2, 1f, SpriteEffects.None);
+                if (Main.screenHeight < 800 || Main.screenWidth < 950)
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Screen too small!", midScreen - new Vector2(midScreen.X / 2, 300), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+                else
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, basicUnderstanding, new Vector2(midScreen.X / 2 - 250, 100), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+            }
+            if (HTPMenuSelected == 2)
+            {
+                var howtoplay_death = mod.GetTexture("Assets/MenuUI/HowToPlay/death");
+                Main.spriteBatch.SafeDraw(howtoplay_death, midScreen - new Vector2(midScreen.X / 2, 0), null, Color.White, 0f, howtoplay_death.Size() / 2, 1f, SpriteEffects.None);
+                if (Main.screenHeight < 800 || Main.screenWidth < 950)
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Screen too small!", midScreen - new Vector2(midScreen.X / 2, 300), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+                else
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, wte, new Vector2(midScreen.X / 2 - 250, 100), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+            }
+            if (HTPMenuSelected == 3)
+            {
+                var howtoplay_pickuppage = mod.GetTexture("Assets/MenuUI/HowToPlay/pickuppage");
+                Main.spriteBatch.SafeDraw(howtoplay_pickuppage, midScreen - new Vector2(midScreen.X / 2, 0), null, Color.White, 0f, howtoplay_pickuppage.Size() / 2, 1f, SpriteEffects.None);
+                if (Main.screenHeight < 800 || Main.screenWidth < 950)
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Screen too small!", midScreen - new Vector2(midScreen.X / 2, 300), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+                else
+                {
+                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, mainIdeas, new Vector2(midScreen.X / 2 - 250, 100), Color.White, 0f, Vector2.Zero, UIHelper.SingleToVec2(.35f));
+                }
+            }
         }
         public static void DrawSocials()
         {

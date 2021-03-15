@@ -80,39 +80,39 @@ namespace SpookyTerraria.NPCs
             {
                 destination = player.Center - new Vector2(0, 0);
             }
-            if (SpookyPlayer.pages == 0)
+            if (SpookyPlayer.Pages == 0)
             {
                 npc.active = false;
             }
-            if (SpookyPlayer.pages == 1)
+            if (SpookyPlayer.Pages == 1)
             {
                 npc.velocity = (destination - npc.Center) / 500;
             }
-            if (SpookyPlayer.pages == 2)
+            if (SpookyPlayer.Pages == 2)
             {
                 npc.velocity = (destination - npc.Center) / 450;
             }
-            if (SpookyPlayer.pages == 3)
+            if (SpookyPlayer.Pages == 3)
             {
                 npc.velocity = (destination - npc.Center) / 300;
             }
-            if (SpookyPlayer.pages == 4)
+            if (SpookyPlayer.Pages == 4)
             {
                 npc.velocity = (destination - npc.Center) / 250;
             }
-            if (SpookyPlayer.pages == 5)
+            if (SpookyPlayer.Pages == 5)
             {
                 npc.velocity = (destination - npc.Center) / 150;
             }
-            if (SpookyPlayer.pages == 6)
+            if (SpookyPlayer.Pages == 6)
             {
                 npc.velocity = (destination - npc.Center) / 75;
             }
-            if (SpookyPlayer.pages == 7)
+            if (SpookyPlayer.Pages == 7)
             {
                 npc.velocity = (destination - npc.Center) / 25;
             }
-            if (SpookyPlayer.pages == 8)
+            if (SpookyPlayer.Pages == 8)
             {
                 npc.active = false;
             }

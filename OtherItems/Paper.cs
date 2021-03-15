@@ -41,11 +41,11 @@ namespace SpookyTerraria.OtherItems
         {
             player.GetModPlayer<SpookyPlayer>().pageDisplayTimer = 100;
             int randChoice = Main.rand.Next(0, 2);
-            if (SpookyPlayer.pages == 0)
+            if (SpookyPlayer.Pages == 0)
             {
                 NPC.NewNPC(randChoice == 0 ? (int)player.Center.X - 2500 : (int)player.Center.X + 2500, (int)player.Center.Y + Main.rand.Next(-100, 100), ModContent.NPCType<Slenderman>());
             }
-            SpookyPlayer.pages += item.stack;
+            SpookyPlayer.Pages += item.stack;
             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Action/PagePickup"), player.Center);
             item.TurnToAir();
             return true;
