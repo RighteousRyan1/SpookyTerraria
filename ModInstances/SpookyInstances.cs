@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
+// ReSharper disable UnassignedField.Global
 
 namespace SpookyTerraria
 {

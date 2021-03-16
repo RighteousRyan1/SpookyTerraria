@@ -1,3 +1,4 @@
+using System.Linq;
 using Terraria.Graphics.Effects;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -9,167 +10,165 @@ namespace SpookyTerraria.ModIntances
 {
     public class CurrentTile : GlobalTile
     {
-        public override bool Drop(int i, int j, int type)
-        {
-            return base.Drop(i, j, type);
-        }
-        public override bool KillSound(int i, int j, int type)
-        {
-            return base.KillSound(i, j, type);
-        }
         public override void KillTile(int i, int j, int type, ref bool fail, ref bool effectOnly, ref bool noItem)
         {
         }
+
         public override void SetDefaults()
         {
             if (Main.player[Main.myPlayer].HeldItem.type == ItemID.CarriageLantern)
-            {
                 Main.placementPreview = false;
-            }
         }
+
         public override void FloorVisuals(int type, Player player)
         {
-            if (type == TileID.Grass || type == TileID.Dirt || type == TileID.BlueMoss || type == TileID.BrownMoss
-                 || type == TileID.GreenMoss
-                  || type == TileID.LavaMoss
-                   || type == TileID.LongMoss
-                    || type == TileID.PurpleMoss
-                     || type == TileID.RedMoss
-                      || type == TileID.Silt
-                       || type == TileID.Slush
-                        || type == TileID.JungleGrass
-                         || type == TileID.Mud
-                          || type == TileID.CorruptGrass
-                           || type == TileID.FleshGrass
-                            || type == TileID.HallowedGrass
-                             || type == TileID.LivingMahoganyLeaves
-                              || type == TileID.LeafBlock
-                               || type == TileID.MushroomGrass
-                               || type == TileID.ClayBlock
-                               || type == TileID.Ash
-                               || type == TileID.Sand
-                               || type == TileID.Ebonsand
-                               || type == TileID.Pearlsand
-                               || type == TileID.Crimsand
-                               || type == TileID.Cloud
-                               || type == TileID.Asphalt
-                               || type == TileID.RainCloud
-                               || type == TileID.HoneyBlock
-                               || type == TileID.CrispyHoneyBlock
-                               || type == TileID.PumpkinBlock
-                               || type == TileID.SnowBlock)
+            var grassTiles = new[]
             {
-                player.GetModPlayer<SpookyPlayer>().isOnGrassyTile = true;
-            }
-            else
-            {
-                player.GetModPlayer<SpookyPlayer>().isOnGrassyTile = false;
-            }
-            // TODO: Include ore bricks later, as well as the ore themselves
-            if (type == TileID.Stone || type == TileID.StoneSlab || type == TileID.ActiveStoneBlock || type == TileID.GrayBrick
-                 || type == TileID.IceBlock
-                  || type == TileID.HallowedIce
-                   || type == TileID.CorruptIce
-                    || type == TileID.FleshIce
-                     || type == TileID.PinkDungeonBrick
-                      || type == TileID.GreenDungeonBrick
-                       || type == TileID.BlueDungeonBrick
-                        || type == TileID.Granite
-                         || type == TileID.Marble
-                          || type == TileID.MarbleBlock
-                           || type == TileID.GraniteBlock
-                            || type == TileID.Diamond
-                             || type == TileID.DiamondGemspark
-                              || type == TileID.DiamondGemsparkOff
-                               || type == TileID.Ruby
-                               || type == TileID.RubyGemspark
-                               || type == TileID.RubyGemsparkOff
-                               || type == TileID.Topaz
-                               || type == TileID.TopazGemspark
-                               || type == TileID.TopazGemsparkOff
-                               || type == TileID.Sapphire
-                               || type == TileID.SapphireGemspark
-                               || type == TileID.SapphireGemsparkOff
-                               || type == TileID.Amethyst
-                               || type == TileID.AmethystGemspark
-                               || type == TileID.AmethystGemsparkOff
-                               || type == TileID.Emerald
-                               || type == TileID.EmeraldGemspark
-                               || type == TileID.EmeraldGemsparkOff
-                               || type == TileID.AmberGemspark
-                               || type == TileID.AmberGemsparkOff
-                               || type == TileID.LihzahrdBrick
-                               || type == TileID.Ebonstone
-                               || type == TileID.EbonstoneBrick
-                               || type == TileID.FleshBlock
-                               || type == TileID.Crimstone
-                               || type == TileID.CrimsonSandstone
-                               || type == TileID.CorruptHardenedSand
-                               || type == TileID.CorruptSandstone
-                               || type == TileID.CrimsonHardenedSand
-                               || type == TileID.HardenedSand
-                               || type == TileID.Sandstone
-                               || type == TileID.HallowSandstone
-                               || type == TileID.SandstoneBrick
-                               || type == TileID.SandStoneSlab
-                               || type == TileID.HallowHardenedSand
-                               || type == TileID.Sunplate
-                               || type == TileID.Obsidian
-                               || type == TileID.Pearlstone
-                               || type == TileID.PearlstoneBrick
-                               || type == TileID.Mudstone
-                               || type == TileID.IridescentBrick
-                               || type == TileID.CobaltBrick
-                               || type == TileID.MythrilBrick
-                               || type == TileID.MythrilAnvil
-                               || type == TileID.Adamantite
-                               || type == TileID.Mythril
-                               || type == TileID.Cobalt
-                               || type == TileID.Titanium
-                               || type == TileID.Titanstone
-                               || type == TileID.Palladium
-                               || type == TileID.MetalBars
-                               || type == TileID.LunarOre
-                               || type == TileID.ObsidianBrick
-                               || type == TileID.SnowBrick
-                               || type == TileID.GreenCandyCaneBlock
-                               || type == TileID.CandyCaneBlock
-                               || type == TileID.GrayStucco
-                               || type == TileID.GreenStucco
-                               || type == TileID.RedStucco
-                               || type == TileID.YellowStucco
-                               || type == TileID.Copper
-                               || type == TileID.CopperBrick
-                               || type == TileID.Tin
-                               || type == TileID.TinBrick
-                               || type == TileID.Silver
-                               || type == TileID.SilverBrick
-                               || type == TileID.Tungsten
-                               || type == TileID.TungstenBrick
-                               || type == TileID.Iron
-                               || type == TileID.Lead
-                               || type == TileID.Gold
-                               || type == TileID.GoldBrick
-                               || type == TileID.Platinum
-                               || type == TileID.PlatinumBrick
-                               || type == TileID.Hellstone
-                               || type == TileID.HellstoneBrick)
+                TileID.Grass,
+                TileID.Dirt,
+                TileID.BlueMoss,
+                TileID.BrownMoss,
+                TileID.GreenMoss,
+                TileID.LavaMoss,
+                TileID.LongMoss,
+                TileID.PurpleMoss,
+                TileID.RedMoss,
+                TileID.Silt,
+                TileID.Slush,
+                TileID.JungleGrass,
+                TileID.Mud,
+                TileID.CorruptGrass,
+                TileID.FleshGrass,
+                TileID.HallowedGrass,
+                TileID.LivingMahoganyLeaves,
+                TileID.LeafBlock,
+                TileID.MushroomGrass,
+                TileID.ClayBlock,
+                TileID.Ash,
+                TileID.Sand,
+                TileID.Ebonsand,
+                TileID.Pearlsand,
+                TileID.Crimsand,
+                TileID.Cloud,
+                TileID.Asphalt,
+                TileID.RainCloud,
+                TileID.HoneyBlock,
+                TileID.CrispyHoneyBlock,
+                TileID.PumpkinBlock,
+                TileID.SnowBlock,
+            };
 
+
+            if (grassTiles.Any(x => x == type))
+                player.GetModPlayer<SpookyPlayer>().isOnGrassyTile = true;
+            else
+                player.GetModPlayer<SpookyPlayer>().isOnGrassyTile = false;
+
+            var whateverTheseBlocksAre = new[]
             {
+                TileID.Stone,
+                TileID.StoneSlab,
+                TileID.ActiveStoneBlock,
+                TileID.GrayBrick,
+                TileID.IceBlock,
+                TileID.HallowedIce,
+                TileID.CorruptIce,
+                TileID.FleshIce,
+                TileID.PinkDungeonBrick,
+                TileID.GreenDungeonBrick,
+                TileID.BlueDungeonBrick,
+                TileID.Granite,
+                TileID.Marble,
+                TileID.MarbleBlock,
+                TileID.GraniteBlock,
+                TileID.Diamond,
+                TileID.DiamondGemspark,
+                TileID.DiamondGemsparkOff,
+                TileID.Ruby,
+                TileID.RubyGemspark,
+                TileID.RubyGemsparkOff,
+                TileID.Topaz,
+                TileID.TopazGemspark,
+                TileID.TopazGemsparkOff,
+                TileID.Sapphire,
+                TileID.SapphireGemspark,
+                TileID.SapphireGemsparkOff,
+                TileID.Amethyst,
+                TileID.AmethystGemspark,
+                TileID.AmethystGemsparkOff,
+                TileID.Emerald,
+                TileID.EmeraldGemspark,
+                TileID.EmeraldGemsparkOff,
+                TileID.AmberGemspark,
+                TileID.AmberGemsparkOff,
+                TileID.LihzahrdBrick,
+                TileID.Ebonstone,
+                TileID.EbonstoneBrick,
+                TileID.FleshBlock,
+                TileID.Crimstone,
+                TileID.CrimsonSandstone,
+                TileID.CorruptHardenedSand,
+                TileID.CorruptSandstone,
+                TileID.CrimsonHardenedSand,
+                TileID.HardenedSand,
+                TileID.Sandstone,
+                TileID.HallowSandstone,
+                TileID.SandstoneBrick,
+                TileID.SandStoneSlab,
+                TileID.HallowHardenedSand,
+                TileID.Sunplate,
+                TileID.Obsidian,
+                TileID.Pearlstone,
+                TileID.PearlstoneBrick,
+                TileID.Mudstone,
+                TileID.IridescentBrick,
+                TileID.CobaltBrick,
+                TileID.MythrilBrick,
+                TileID.MythrilAnvil,
+                TileID.Adamantite,
+                TileID.Mythril,
+                TileID.Cobalt,
+                TileID.Titanium,
+                TileID.Titanstone,
+                TileID.Palladium,
+                TileID.MetalBars,
+                TileID.LunarOre,
+                TileID.ObsidianBrick,
+                TileID.SnowBrick,
+                TileID.GreenCandyCaneBlock,
+                TileID.CandyCaneBlock,
+                TileID.GrayStucco,
+                TileID.GreenStucco,
+                TileID.RedStucco,
+                TileID.YellowStucco,
+                TileID.Copper,
+                TileID.CopperBrick,
+                TileID.Tin,
+                TileID.TinBrick,
+                TileID.Silver,
+                TileID.SilverBrick,
+                TileID.Tungsten,
+                TileID.TungstenBrick,
+                TileID.Iron,
+                TileID.Lead,
+                TileID.Gold,
+                TileID.GoldBrick,
+                TileID.Platinum,
+                TileID.PlatinumBrick,
+                TileID.Hellstone,
+                TileID.HellstoneBrick
+            };
+
+            // TODO: Include ore bricks later, as well as the ore themselves
+            if (whateverTheseBlocksAre.Any(x => x == type))
                 player.GetModPlayer<SpookyPlayer>().isOnStoneTile = true;
-            }
             else
-            {
                 player.GetModPlayer<SpookyPlayer>().isOnStoneTile = false;
-            }
+
             if (!player.GetModPlayer<SpookyPlayer>().isOnStoneTile && !player.GetModPlayer<SpookyPlayer>().isOnGrassyTile)
-            {
                 player.GetModPlayer<SpookyPlayer>().isOnWoodTile = true;
-            }
             else
-            {
                 player.GetModPlayer<SpookyPlayer>().isOnWoodTile = false;
-            }
         }
     }
 }

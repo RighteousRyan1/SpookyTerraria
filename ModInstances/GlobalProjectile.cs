@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+using System.Linq;
 using SpookyTerraria.Utilities;
 using Terraria;
 using Terraria.ID;
@@ -11,27 +11,29 @@ namespace SpookyTerraria.ModIntances
         public override void PostAI(Projectile projectile)
         {
             if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
-            {
                 if (projectile.type == ProjectileID.FallingStar)
                 {
                     projectile.active = false;
                     projectile.Kill();
                 }
-            }
-            if (projectile.type == ProjectileID.Tombstone || 
-                projectile.type == ProjectileID.Obelisk|| 
-                projectile.type == ProjectileID.CrossGraveMarker|| 
-                projectile.type == ProjectileID.GraveMarker|| 
-                projectile.type == ProjectileID.Gravestone|| 
-                projectile.type == ProjectileID.RichGravestone1|| 
-                projectile.type == ProjectileID.RichGravestone2|| 
-                projectile.type == ProjectileID.RichGravestone3 ||
-                projectile.type == ProjectileID.RichGravestone4 ||
-                projectile.type == ProjectileID.RichGravestone5 ||
-                projectile.type == ProjectileID.Headstone)
+
+            var tombstones = new[]
             {
+                ProjectileID.Tombstone,
+                ProjectileID.Obelisk,
+                ProjectileID.CrossGraveMarker,
+                ProjectileID.GraveMarker,
+                ProjectileID.Gravestone,
+                ProjectileID.RichGravestone1,
+                ProjectileID.RichGravestone2,
+                ProjectileID.RichGravestone3,
+                ProjectileID.RichGravestone4,
+                ProjectileID.RichGravestone5,
+                ProjectileID.Headstone
+            };
+
+            if (tombstones.Any(x => x == projectile.type))
                 projectile.active = false;
-            }
         }
     }
 }
