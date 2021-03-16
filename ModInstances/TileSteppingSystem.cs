@@ -64,7 +64,7 @@ namespace SpookyTerraria.ModIntances
             else
                 player.GetModPlayer<SpookyPlayer>().isOnGrassyTile = false;
 
-            var whateverTheseBlocksAre = new[]
+            var stoneBlocks = new[]
             {
                 TileID.Stone,
                 TileID.StoneSlab,
@@ -160,7 +160,7 @@ namespace SpookyTerraria.ModIntances
             };
 
             // TODO: Include ore bricks later, as well as the ore themselves
-            if (whateverTheseBlocksAre.Any(x => x == type))
+            if (stoneBlocks.Any(x => x == type))
                 player.GetModPlayer<SpookyPlayer>().isOnStoneTile = true;
             else
                 player.GetModPlayer<SpookyPlayer>().isOnStoneTile = false;
