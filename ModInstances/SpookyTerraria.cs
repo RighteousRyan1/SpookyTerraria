@@ -1,36 +1,30 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using SpookyTerraria.IO;
 using SpookyTerraria.ModIntances;
 using SpookyTerraria.NPCs;
 using SpookyTerraria.Tiles;
 using SpookyTerraria.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
+using Steamworks;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.Graphics;
+using Terraria.Graphics.Capture;
 using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.ModLoader.Audio;
-using Terraria.UI;
-using ReLogic.Graphics;
 using Terraria.IO;
-using Terraria.Graphics.Capture;
-using System.Reflection;
-using Terraria.GameContent.UI.States;
-using static Terraria.GameContent.UI.States.UIVirtualKeyboard;
+using Terraria.ModLoader;
+using Terraria.UI;
 using Terraria.UI.Chat;
-using Microsoft.Xna.Framework.Input;
-using System.Windows.Forms;
-using System.IO;
-using Steamworks;
-using SpookyTerraria.IO;
+using IngameOptions = On.Terraria.IngameOptions;
+using Lang = On.Terraria.Lang;
 
 namespace SpookyTerraria
 {
@@ -50,45 +44,40 @@ namespace SpookyTerraria
 
         public override void Action(CommandCaller caller, string input, string[] args)
         {
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             if (!ModContent.GetInstance<SpookyConfigServer>().debugMode)
             {
-                Main.NewText($"Not enough permissions.", Color.Red);
+                Main.NewText("Not enough permissions.", Color.Red);
                 return;
             }
-            else
-            {
-                if (args.Length == 0)
-                {
-                    Main.NewText($"Expected Argument: <count>", Color.Red);
-                    return;
-                }
-                var pageCount = args[0];
-                if (int.TryParse(args[0], out int type1))
-                {
-                    if (type1 > 0)
-                    {
-                        if (int.Parse(args[0]) < 0 || int.Parse(args[0]) > 8)
-                        {
-                            Main.NewText("<count> was an invalid operation, please provide a valid integer.", Color.OrangeRed);
-                            return;
-                        }
-                    }
-                }
 
-                if (!int.TryParse(args[0], out int type2))
-                {
-                    if (type2 == 0)
+            if (args.Length == 0)
+            {
+                Main.NewText("Expected Argument: <count>", Color.Red);
+                return;
+            }
+
+            var pageCount = args[0];
+            if (int.TryParse(args[0], out var type1))
+                if (type1 > 0)
+                    if (int.Parse(args[0]) < 0 || int.Parse(args[0]) > 8)
                     {
-                        Main.NewText($"{pageCount} is not a valid argument. (Did you provide an integer?)", Color.OrangeRed);
+                        Main.NewText("<count> was an invalid operation, please provide a valid integer.", Color.OrangeRed);
                         return;
                     }
+
+            if (!int.TryParse(args[0], out var type2))
+                if (type2 == 0)
+                {
+                    Main.NewText($"{pageCount} is not a valid argument. (Did you provide an integer?)", Color.OrangeRed);
+                    return;
                 }
-                SpookyPlayer.Pages = type2;
-                CombatText.NewText(player.getRect(), Color.White, $"Page count was set to {type2}.");
-            }
+
+            SpookyPlayer.Pages = type2;
+            CombatText.NewText(player.getRect(), Color.White, $"Page count was set to {type2}.");
         }
     }
+
     public class PlacePage : ModCommand
     {
         public override CommandType Type
@@ -105,120 +94,115 @@ namespace SpookyTerraria
 
         public override void Action(CommandCaller caller, string input, string[] args)
         {
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             if (!ModContent.GetInstance<SpookyConfigServer>().debugMode)
-            {
-                Main.NewText($"Not enough permissions.", Color.Red);
-                return;
-            }
+                Main.NewText("Not enough permissions.", Color.Red);
             else
             {
                 if (args.Length == 0)
                 {
-                    Main.NewText($"Expected Argument: <type>", Color.Red);
+                    Main.NewText("Expected Argument: <type>", Color.Red);
                     return;
                 }
+
                 var pageCount = args[0];
-                if (int.TryParse(args[0], out int type1))
-                {
+                if (int.TryParse(args[0], out var type1))
                     if (type1 > 0)
-                    {
                         if (int.Parse(args[0]) < 1 || int.Parse(args[0]) > 4)
                         {
                             Main.NewText("<type> was an invalid operation, please provide a valid integer.", Color.OrangeRed);
                             return;
                         }
-                    }
-                }
-                if (!int.TryParse(args[0], out int type2))
-                {
+
+                if (!int.TryParse(args[0], out var type2))
                     if (type2 == 0)
                     {
                         Main.NewText($"{pageCount} is not a valid argument. (Did you provide an integer?)", Color.OrangeRed);
                         return;
                     }
-                }
+
                 if (type2 == 4)
                 {
-                    WorldGen.PlaceTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, ModContent.TileType<PageTileWall>());
-                    CombatText.NewText(player.getRect(), Color.White, $"Placed PageTileWall");
+                    WorldGen.PlaceTile((int) Main.MouseWorld.X / 16, (int) Main.MouseWorld.Y / 16, ModContent.TileType<PageTileWall>());
+                    CombatText.NewText(player.getRect(), Color.White, "Placed PageTileWall");
                 }
+
                 if (type2 == 3)
                 {
-                    WorldGen.PlaceTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, ModContent.TileType<InvisTile>());
-                    CombatText.NewText(player.getRect(), Color.White, $"Placed InvisTile!");
+                    WorldGen.PlaceTile((int) Main.MouseWorld.X / 16, (int) Main.MouseWorld.Y / 16, ModContent.TileType<InvisTile>());
+                    CombatText.NewText(player.getRect(), Color.White, "Placed InvisTile!");
                 }
+
                 if (type2 == 2)
                 {
-                    WorldGen.PlaceTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, ModContent.TileType<PageTileRight>());
-                    CombatText.NewText(player.getRect(), Color.White, $"Placed PageTileRight!");
+                    WorldGen.PlaceTile((int) Main.MouseWorld.X / 16, (int) Main.MouseWorld.Y / 16, ModContent.TileType<PageTileRight>());
+                    CombatText.NewText(player.getRect(), Color.White, "Placed PageTileRight!");
                 }
+
                 if (type2 == 1)
                 {
-                    WorldGen.PlaceTile((int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16, ModContent.TileType<PageTileLeft>());
-                    CombatText.NewText(player.getRect(), Color.White, $"Placed PageTileLeft!");
+                    WorldGen.PlaceTile((int) Main.MouseWorld.X / 16, (int) Main.MouseWorld.Y / 16, ModContent.TileType<PageTileLeft>());
+                    CombatText.NewText(player.getRect(), Color.White, "Placed PageTileLeft!");
                 }
             }
         }
     }
+
     public class SpookyTerraria : Mod
     {
         public static bool Gimme20Dollars;
         public static bool Glowsticks;
 
 
-
-
-
         public override void ModifyTransformMatrix(ref SpriteViewMatrix Transform)
         {
             // 43 + 42 = 85 (width of bathrooms)
             // 65 + (57 + 74) = 196 (width of tunnel)
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             // Main.tile[2091, 367] /* TopLeft of Bathrooms */
             // Main.tile[640,298] /* TopLeft of Tunnel */
             if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
             {
-                Rectangle insideTunnel = new Rectangle(640 * SpookyTerrariaUtils.tileScaling, 298 * SpookyTerrariaUtils.tileScaling, 138 * SpookyTerrariaUtils.tileScaling, 8 * SpookyTerrariaUtils.tileScaling);
+                var insideTunnel = new Rectangle(640 * SpookyTerrariaUtils.tileScaling, 298 * SpookyTerrariaUtils.tileScaling, 138 * SpookyTerrariaUtils.tileScaling, 8 * SpookyTerrariaUtils.tileScaling);
                 if (player.Hitbox.Intersects(insideTunnel))
-                {
                     Transform.Zoom = new Vector2(updateGameZoomTargetValue + 7f);
-                }
-                Rectangle insideBathrooms = new Rectangle(2091 * SpookyTerrariaUtils.tileScaling, 367 * SpookyTerrariaUtils.tileScaling, 85 * SpookyTerrariaUtils.tileScaling, 26 * SpookyTerrariaUtils.tileScaling);
+
+                var insideBathrooms = new Rectangle(2091 * SpookyTerrariaUtils.tileScaling, 367 * SpookyTerrariaUtils.tileScaling, 85 * SpookyTerrariaUtils.tileScaling, 26 * SpookyTerrariaUtils.tileScaling);
                 if (player.Hitbox.Intersects(insideBathrooms))
-                {
                     Transform.Zoom = new Vector2(updateGameZoomTargetValue + 8.75f);
-                }
             }
         }
+
         private bool stopTitleMusic;
         private ManualResetEvent titleMusicStopped;
         private int customTitleMusicSlot;
+
         private void ChangeMenuMusic(ILContext il)
         {
-            ILCursor ilcursor = new ILCursor(il);
-            ILCursor ilcursor2 = ilcursor;
-            MoveType moveType = MoveType.After;
-            Func<Instruction, bool>[] array = new Func<Instruction, bool>[1];
-            array[0] = (Instruction i) => ILPatternMatchingExt.MatchLdfld<Main>(i, "newMusic");
+            var ilcursor = new ILCursor(il);
+            var ilcursor2 = ilcursor;
+            var moveType = MoveType.After;
+            var array = new Func<Instruction, bool>[1];
+            array[0] = i => i.MatchLdfld<Main>("newMusic");
             ilcursor2.GotoNext(moveType, array);
-            ilcursor.EmitDelegate<Func<int, int>>(delegate (int newMusic)
+            ilcursor.EmitDelegate<Func<int, int>>(delegate(int newMusic)
             {
-                if (newMusic != 6)
-                {
-                    return newMusic;
-                }
+                if (newMusic != 6) return newMusic;
+
                 return customTitleMusicSlot;
             });
         }
+
         public void MenuMusicSet_Slender()
         {
             customTitleMusicSlot = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
-            IL.Terraria.Main.UpdateAudio += new ILContext.Manipulator(ChangeMenuMusic);
+            IL.Terraria.Main.UpdateAudio += ChangeMenuMusic;
         }
+
         public bool beatGame;
         public static ModHotKey Sprint;
         public static int volRaisedNotifTimer;
+
         public override void PostSetupContent()
         {
             if (Main.soundVolume == 0f)
@@ -226,22 +210,20 @@ namespace SpookyTerraria
                 volRaisedNotifTimer = 90;
                 Main.soundVolume = 0.5f;
             }
+
             if (Main.musicVolume == 0f)
             {
                 volRaisedNotifTimer = 90;
                 Main.musicVolume = 0.25f;
             }
-            if (ModLoader.GetMod("TerrariaOverhaul") == null)
-            {
-                MenuMusicSet_Slender();
-            }
-            SpookyConfigClient recievedInstance = ModContent.GetInstance<SpookyConfigClient>();
-            if (recievedInstance.betterUI)
-            {
-                SpookyTerrariaUtils.ModifyUITextures();
-            }
+
+            if (ModLoader.GetMod("TerrariaOverhaul") == null) MenuMusicSet_Slender();
+
+            var recievedInstance = ModContent.GetInstance<SpookyConfigClient>();
+            if (recievedInstance.betterUI) SpookyTerrariaUtils.ModifyUITextures();
         }
-        int rand;
+
+        private int rand;
 
         public static SoundEffect tick;
         public static SoundEffect open;
@@ -249,13 +231,8 @@ namespace SpookyTerraria
         public static Texture2D storedLogo;
         public static Texture2D storedLogo2;
 
-        public static bool BadOSVersion
-        {
-            get
-            {
-                return Environment.OSVersion.ToString() == Environment.OSVersion.Version.ToString();
-            }
-        }
+        public static bool BadOSVersion => Environment.OSVersion.ToString() == Environment.OSVersion.Version.ToString();
+
         public override void Load()
         {
             Logger.Info(Environment.OSVersion.ToString());
@@ -287,9 +264,10 @@ namespace SpookyTerraria
             Hooks.On_ModLoaderMenus += Hooks_On_ModLoaderMenus;
             if (!Main.dedServ)
             {
-                On.Terraria.Lang.GetRandomGameTitle += Lang_GetRandomGameTitle;
+                Lang.GetRandomGameTitle += Lang_GetRandomGameTitle;
                 Main.chTitle = true;
             }
+
             // MaxMenuItems = 16
             On.Terraria.Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
             On.Terraria.Main.DrawPlayers += Main_DrawPlayers;
@@ -298,8 +276,8 @@ namespace SpookyTerraria
             Main.OnTick += Main_OnTick;
             On.Terraria.Main.DrawInterface_35_YouDied += nothing => { };
 
-            On.Terraria.IngameOptions.DrawLeftSide += IngameOptions_DrawLeftSide;
-            On.Terraria.IngameOptions.Draw += IngameOptions_Draw;
+            IngameOptions.DrawLeftSide += IngameOptions_DrawLeftSide;
+            IngameOptions.Draw += IngameOptions_Draw;
 
             // IL.Terraria.Main.DrawMenu += MoveOptionUI;
             // Shader initialization
@@ -307,12 +285,13 @@ namespace SpookyTerraria
             if (!Main.dedServ)
             {
                 // Shaders
-                Ref<Effect> Darkness = new Ref<Effect>(GetEffect("Effects/Darkness"));
+                var Darkness = new Ref<Effect>(GetEffect("Effects/Darkness"));
                 Filters.Scene["Darkness"] = new Filter(new ScreenShaderData(Darkness, "Darkness"), EffectPriority.VeryHigh);
                 // Skies
                 Filters.Scene["SpookyTerraria:BlackSky"] = new Filter(new ScreenShaderData("FilterTower").UseColor(0.0f, 0.0f, 0.0f).UseOpacity(0f), EffectPriority.Medium);
                 SkyManager.Instance["SpookyTerraria:BlackSky"] = new BlackSky();
             }
+
             /*ContentInstance.Register(new AmbienceHelper());
             ModContent.GetInstance<AmbienceHelper>().InitializeSoundInstances();*/
         }
@@ -322,7 +301,7 @@ namespace SpookyTerraria
             if (DiscordRPCInfo.rpcClient != null && !DiscordRPCInfo.rpcClient.IsDisposed) DiscordRPCInfo.Update();
         }
 
-        private void IngameOptions_Draw(On.Terraria.IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
+        private void IngameOptions_Draw(IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
         {
             /*int num17 = 20;
             Vector2 value4 = new Vector2(Main.screenWidth, Main.screenHeight);
@@ -360,25 +339,24 @@ namespace SpookyTerraria
             }*/
         }
 
-        private bool IngameOptions_DrawLeftSide(On.Terraria.IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
+        private bool IngameOptions_DrawLeftSide(IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
         {
             /*
             if (i > 4 && i < 8)
             {
                 return orig(sb, txt, i, anchor, offset + new Vector2(0, 5), scales, minscale, maxscale, scalespeed);
             }*/
-            /*else*/ return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
+            /*else*/
+            return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
         }
 
         private void Hooks_On_ModLoaderMenus(Hooks.Orig_ModLoaderMenus orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown)
         {
             orig(main, selectedMenu, buttonNames, buttonScales, buttonVerticalSpacing, ref offY, ref spacing, ref numButtons, ref backButtonDown);
-            for (int i = 0; i < buttonVerticalSpacing.Length; i++)
-            {
-                
-            }
+            
             buttonNames[6] += " (PLEASE DO NOT DO)"; // idk man
-        }   
+        }
+
         private void Main_DrawInterface_30_Hotbar(On.Terraria.Main.orig_DrawInterface_30_Hotbar orig, Main self)
         {
             orig(self);
@@ -393,16 +371,14 @@ namespace SpookyTerraria
             Main.soundMenuClose = close;
             Main.soundMenuOpen = open;
             Main.logoTexture = storedLogo;
-            IL.Terraria.Main.UpdateAudio -= new ILContext.Manipulator(ChangeMenuMusic);
+            IL.Terraria.Main.UpdateAudio -= ChangeMenuMusic;
             customTitleMusicSlot = 6;
-            ManualResetEvent evt = titleMusicStopped;
-            if (evt != null)
-            {
-                evt.Set();
-            }
+            var evt = titleMusicStopped;
+            if (evt != null) evt.Set();
+
             titleMusicStopped = null;
             // Wtf...
-            Main.versionNumber = $"v1.3.5.3";
+            Main.versionNumber = "v1.3.5.3";
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
             /*for (int texIteration = 0; texIteration < _texturesDisposable.Length - 1; texIteration++)
             {
@@ -416,6 +392,7 @@ namespace SpookyTerraria
             }*/
             Sprint = null;
         }
+
         public override void PostUpdateEverything()
         {
             // ModContent.GetInstance<AmbienceHelper>().HandleAmbiences();
@@ -426,27 +403,23 @@ namespace SpookyTerraria
             playMusicTimer_UseOnce++;
             // Main.NewText($"X: {(int)Main.MouseWorld.X / 16} | Y: {(int)Main.MouseWorld.Y / 16}");
             updateGameZoomTargetValue = Main.GameZoomTarget;
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             if (Main.hasFocus)
             {
                 player.GetModPlayer<SpookyPlayer>().deathTextTimer--;
                 if (player.GetModPlayer<SpookyPlayer>().deathTextTimer < 0)
-                {
                     player.GetModPlayer<SpookyPlayer>().deathTextTimer = 0;
-                }
             }
+
             if (player.respawnTimer == 25)
-            {
                 if (Main.worldName == SpookyTerrariaUtils.slenderWorldName)
                 {
                     SpookyPlayer.Pages = 0;
                     SpookyTerrariaUtils.RemoveAllPossiblePagePositions();
                     Main.SaveSettings();
 
-                    if (Main.netMode == NetmodeID.SinglePlayer)
-                    {
-                        WorldFile.CacheSaveTime();
-                    }
+                    if (Main.netMode == NetmodeID.SinglePlayer) WorldFile.CacheSaveTime();
+
                     Main.invasionProgress = 0;
                     Main.invasionProgressDisplayLeft = 0;
                     Main.invasionProgressAlpha = 0f;
@@ -455,7 +428,7 @@ namespace SpookyTerraria
                     CaptureInterface.ResetFocus();
                     Main.ActivePlayerFileData.StopPlayTimer();
 
-                    Player.SavePlayer(Main.ActivePlayerFileData, false);
+                    Player.SavePlayer(Main.ActivePlayerFileData);
 
                     if (Main.netMode == NetmodeID.SinglePlayer)
                     {
@@ -471,21 +444,18 @@ namespace SpookyTerraria
                     Main.UpdateSundial();
                     Main.menuMode = MenuModeID.MainMenu;
                 }
-            }
+
             Main.soundInstanceMenuTick.Volume = 0f;
             Main.soundInstanceMenuOpen.Volume = 0f;
             Main.soundInstanceMenuClose.Volume = 0f;
             if (Main.netMode != NetmodeID.Server)
-            {
-                for (int i = 0; i < Main.maxNPCs; i++)
+                for (var i = 0; i < Main.maxNPCs; i++)
                 {
-                    NPC npc = Main.npc[i];
+                    var npc = Main.npc[i];
                     if (npc.type == ModContent.NPCType<Stalker>())
-                    {
                         Filters.Scene["Darkness"].GetShader().UseIntensity(player.Distance(npc.Center) / 8);
-                    }
                 }
-            }
+
             Main.slimeRain = false;
             Main.invasionSize = 0;
             Main.invasionProgress = 0;
@@ -500,48 +470,48 @@ namespace SpookyTerraria
                 Main.time = 18000;
             }
         }
+
         public Rectangle staticFrame = new Rectangle(0, 0, 1271, 650);
         public int timerToLightStatic;
         public int timerToMediumStatic;
         public int timerToSevereStatic;
         public float fadeScale;
+
         private void Main_DrawPlayers(On.Terraria.Main.orig_DrawPlayers orig, Main self)
         {
             orig(self);
             Mod mod = this;
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             if (player.dead)
             {
                 Main.hideUI = true;
                 fadeScale = 0f;
             }
+
             if (!Main.hasFocus)
             {
                 timerToLightStatic = 0;
                 timerToMediumStatic = 0;
                 timerToSevereStatic = 0;
             }
-            for (int ll = 0; ll < Main.maxNPCs; ll++)
+
+            for (var ll = 0; ll < Main.maxNPCs; ll++)
             {
-                NPC npc = Main.npc[ll];
-                float distance = npc.Distance(Main.player[Main.myPlayer].Center);
+                var npc = Main.npc[ll];
+                var distance = npc.Distance(Main.player[Main.myPlayer].Center);
                 if (npc.active && distance <= 1000f)
                 {
                     if (npc.type == ModContent.NPCType<Slenderman>())
                     {
-                        bool noLight = Lighting.GetSubLight(npc.Top).X < 0.05f;
-                        if (Main.GameUpdateCount % 3 == 0)
-                        {
-                            staticFrame.Y += 650;
-                        }
-                        if (staticFrame.Y >= 1950)
-                        {
-                            staticFrame.Y = 0;
-                        }
-                        bool facingTowardsSlendermanLeft = npc.Center.X < player.Center.X && player.direction == -1;
-                        bool facingTowardsSlendermanRight = npc.Center.X > player.Center.X && player.direction == 1;
+                        var noLight = Lighting.GetSubLight(npc.Top).X < 0.05f;
+                        if (Main.GameUpdateCount % 3 == 0) staticFrame.Y += 650;
+
+                        if (staticFrame.Y >= 1950) staticFrame.Y = 0;
+
+                        var facingTowardsSlendermanLeft = npc.Center.X < player.Center.X && player.direction == -1;
+                        var facingTowardsSlendermanRight = npc.Center.X > player.Center.X && player.direction == 1;
                         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                        Main.spriteBatch.Draw(mod.GetTexture("Assets/Static"), new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), sourceRectangle: staticFrame, Color.White * fadeScale, 0f, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), 5f, SpriteEffects.None, 1f);
+                        Main.spriteBatch.Draw(mod.GetTexture("Assets/Static"), new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), staticFrame, Color.White * fadeScale, 0f, new Vector2(Main.screenWidth / 2, Main.screenHeight / 2), 5f, SpriteEffects.None, 1f);
                         Main.spriteBatch.End();
                         if (facingTowardsSlendermanLeft || facingTowardsSlendermanRight && !noLight)
                         {
@@ -555,16 +525,17 @@ namespace SpookyTerraria
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                                 }
+
                                 if (timerToLightStatic == 2)
-                                {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
-                                }
+
                                 if (timerToLightStatic >= 480)
                                 {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticLight"));
                                     timerToLightStatic = 0;
                                 }
                             }
+
                             if (fadeScale >= 0.4 && fadeScale < 0.8f)
                             {
                                 timerToLightStatic = 0;
@@ -575,16 +546,17 @@ namespace SpookyTerraria
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                                 }
+
                                 if (timerToMediumStatic == 2)
-                                {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
-                                }
+
                                 if (timerToMediumStatic >= 480)
                                 {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticMedium"));
                                     timerToMediumStatic = 0;
                                 }
                             }
+
                             if (fadeScale >= 0.8f)
                             {
                                 timerToMediumStatic = 0;
@@ -595,32 +567,28 @@ namespace SpookyTerraria
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
                                     AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
                                 }
+
                                 if (timerToSevereStatic == 2)
-                                {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
-                                }
+
                                 if (timerToSevereStatic >= 132)
                                 {
                                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Slender/StaticSevere"));
                                     timerToSevereStatic = 0;
                                 }
                             }
+
                             // MAJOR TODO: MAKE STATIC
-                            if (!Collision.SolidCollision(npc.position, npc.width, 20) && distance <= 1000 && Collision.CanHitLine(player.Top, player.width, 10, npc.Top, npc.width, 20))
+                            if (!Collision.SolidCollision(npc.position, npc.width, 20) && distance <= 1000 &&
+                                Collision.CanHitLine(player.Top, player.width, 10, npc.Top, npc.width, 20))
                             {
                                 if (!noLight)
                                 {
-                                    if (Main.GameUpdateCount % 3 == 0)
-                                    {
-                                        fadeScale += 0.005f;
-                                    }
+                                    if (Main.GameUpdateCount % 3 == 0) fadeScale += 0.005f;
                                 }
                                 else
                                 {
-                                    if (Main.GameUpdateCount % 10 == 0)
-                                    {
-                                        fadeScale += 0.005f;
-                                    }
+                                    if (Main.GameUpdateCount % 10 == 0) fadeScale += 0.005f;
                                 }
                             }
                         }
@@ -631,48 +599,36 @@ namespace SpookyTerraria
                             timerToSevereStatic = 0;
                             if (!noLight)
                             {
-                                if (Main.GameUpdateCount % 3 == 0)
-                                {
-                                    fadeScale -= 0.005f;
-                                }
+                                if (Main.GameUpdateCount % 3 == 0) fadeScale -= 0.005f;
                             }
                             else
                             {
-                                if (Main.GameUpdateCount % 10 == 0)
-                                {
-                                    fadeScale -= 0.005f;
-                                }
+                                if (Main.GameUpdateCount % 10 == 0) fadeScale -= 0.005f;
                             }
                         }
                         else if (distance > 1000f)
                         {
-                            if (Main.GameUpdateCount % 3 == 0)
-                            {
-                                fadeScale -= 0.005f;
-                            }
+                            if (Main.GameUpdateCount % 3 == 0) fadeScale -= 0.005f;
                         }
-                        if (fadeScale > 1f)
-                        {
-                            fadeScale = 1f;
-                        }
-                        if (fadeScale < 0f)
-                        {
-                            fadeScale = 0f;
-                        }
+
+                        if (fadeScale > 1f) fadeScale = 1f;
+
+                        if (fadeScale < 0f) fadeScale = 0f;
+
                         if (fadeScale >= 1f)
-                        {
-                            player.KillMe(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{player.name} stared at death for too long."), player.statLife + 50, 0, false);
-                        }
+                            player.KillMe(
+                                PlayerDeathReason.ByCustomReason(
+                                    $"{player.name} stared at death for too long."), player.statLife + 50, 0);
+
                         if (fadeScale == 0f)
-                        {
                             if (Main.hasFocus)
                             {
                                 AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
                                 AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticLight");
                                 AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticSevere");
                             }
-                        }
                     }
+
                     if (npc.type == ModContent.NPCType<Slenderman>() && !npc.active)
                     {
                         AmbienceHandler.StopAmbientSound("Sounds/Custom/Slender/StaticMedium");
@@ -683,10 +639,12 @@ namespace SpookyTerraria
                         fadeScale -= 0.005f;
                     }
                 }
+
                 // Main.NewText($"L: {timerToLightStatic} | M: {timerToMediumStatic} | S: {timerToSevereStatic}");
             }
         }
-        private string Lang_GetRandomGameTitle(On.Terraria.Lang.orig_GetRandomGameTitle orig)
+
+        private string Lang_GetRandomGameTitle(Lang.orig_GetRandomGameTitle orig)
         {
             return $"Spooky Terraria: {MenuHelper.msgOfTheDay}";
         }
@@ -699,12 +657,7 @@ namespace SpookyTerraria
             offY = Main.screenHeight > 800 ? 500 : 250;
             spacing = 35;
 
-            MenuHelper.AddButton("Slender Extras",
-            delegate
-            {
-                Main.menuMode = MenuModeID.SlenderExtras;
-            },
-            selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
+            MenuHelper.AddButton("Slender Extras", delegate { Main.menuMode = MenuModeID.SlenderExtras; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         }
 
         public virtual string ChooseRandomMessage(int type)
@@ -754,6 +707,7 @@ namespace SpookyTerraria
                     return "No pain, no gain.";
             }
         }
+
         internal static string ChooseRandomSubString(int type)
         {
             switch (type)
@@ -774,15 +728,16 @@ namespace SpookyTerraria
         private static Vector2 drawPos;
         private static float rotationTimer_BasedOnSineWave;
         private static float scaleTimer_BasedOnSineWave;
+
         private void Main_DrawBG(On.Terraria.Main.orig_DrawBG orig, Main self)
         {
             scaleTimer_BasedOnSineWave += 0.1f;
             rotationTimer_BasedOnSineWave += 0.01f;
 
-            Vector2 screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
-            float sinValueRot = (float)Math.Sin(rotationTimer_BasedOnSineWave);
-            float sinValueScale = (float)Math.Sin(scaleTimer_BasedOnSineWave / 2);
-            bool inSettingsOrMPUI = Main.menuMode > 0 && Main.menuMode != 888 && Main.menuMode != 1010;
+            var screenBounds = new Vector2(Main.screenWidth, Main.screenHeight);
+            var sinValueRot = (float) Math.Sin(rotationTimer_BasedOnSineWave);
+            var sinValueScale = (float) Math.Sin(scaleTimer_BasedOnSineWave / 2);
+            var inSettingsOrMPUI = Main.menuMode > 0 && Main.menuMode != 888 && Main.menuMode != 1010;
             if (Main.gameMenu)
             {
                 Main.spriteBatch.End();
@@ -790,9 +745,7 @@ namespace SpookyTerraria
                 Main.spriteBatch.SafeDraw(blackPixel, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Main.screenWidth, Main.screenHeight), SpriteEffects.None);
                 Main.spriteBatch.SafeDraw(chad, new Vector2(150, Main.screenHeight - 30), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None);
                 if (Main.menuMode == 0 && Main.screenHeight > 800)
-                {
-                    Main.spriteBatch.SafeDraw(slenderLogo, new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(slenderLogo.Width / 2, slenderLogo.Height / 2), 1f + (sinValueScale / 80), SpriteEffects.None);
-                }
+                    Main.spriteBatch.SafeDraw(slenderLogo, new Vector2(Main.screenWidth / 2, 220), null, Color.White, sinValueRot / 50, new Vector2(slenderLogo.Width / 2, slenderLogo.Height / 2), 1f + sinValueScale / 80, SpriteEffects.None);
             }
             else
             {
@@ -804,156 +757,131 @@ namespace SpookyTerraria
         public static Texture2D chad;
         public static Texture2D slenderLogo;
 
-        private static Texture2D[] _texturesDisposable = new Texture2D[]
+        private static readonly Texture2D[] _texturesDisposable =
         {
             blackPixel,
             chad,
             slenderLogo
         };
 
-        public UIHelper UIHelper
-        {
-            get
-            {
-                return ModContent.GetInstance<UIHelper>();
-            }
-        }
-        public DiscordRPCInfo DiscordInfo
-        {
-            get
-            {
-                return ModContent.GetInstance<DiscordRPCInfo>();
-            }
-        }
+        public UIHelper UIHelper => ModContent.GetInstance<UIHelper>();
+
+        public DiscordRPCInfo DiscordInfo => ModContent.GetInstance<DiscordRPCInfo>();
+
         public static int fileAddedNoticeTimer;
+
         private void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"{DiscordInfo.userName}", new Vector2(Main.screenWidth / 2, Main.screenHeight - 8), Color.LightGray, 0f, Main.fontDeathText.MeasureString($"Added a world to your worlds!") / 2, new Vector2(0.275f, 0.275f));
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"{DiscordInfo.userName}", new Vector2(Main.screenWidth / 2, Main.screenHeight - 8), Color.LightGray, 0f, Main.fontDeathText.MeasureString("Added a world to your worlds!") / 2, new Vector2(0.275f, 0.275f));
             UIHelper.ClickHandling();
-            if (Main.menuMode == MenuModeID.HowToPlay)
-            {
-                MenuHelper.DrawHTP();
-            }
+            if (Main.menuMode == MenuModeID.HowToPlay) MenuHelper.DrawHTP();
+
             fileAddedNoticeTimer--;
             if (fileAddedNoticeTimer >= 0)
-            {
-                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"Added a world to your worlds!", new Vector2(Main.screenWidth / 2, Main.screenHeight - 8), Color.LightGray, 0f, Main.fontDeathText.MeasureString($"Added a world to your worlds!") / 2, new Vector2(0.275f, 0.275f));
-            }
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Added a world to your worlds!", new Vector2(Main.screenWidth / 2, Main.screenHeight - 8), Color.LightGray, 0f, Main.fontDeathText.MeasureString("Added a world to your worlds!") / 2, new Vector2(0.275f, 0.275f));
+
             // UIHelper.CreateSimpleUIButton(Main.fontDeathText, new Vector2(300, 100), $"{Environment.OSVersion.Platform} {Environment.OSVersion.Version}", null, ref scaleTimer_BasedOnSineWave);
-            if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"Authenticated as: {SteamUser.GetSteamID().GetAccountID()} ({SteamFriends.GetPersonaName()})", new Vector2(6,6), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.275f, 0.275f));
+            if (Main.menuMode == 0)
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, $"Authenticated as: {SteamUser.GetSteamID().GetAccountID()} ({SteamFriends.GetPersonaName()})", new Vector2(6, 6), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.275f, 0.275f));
             MenuHelper.DrawUserStatistics();
             AmbienceHandler.StopAllAmbientSounds();
             MenuHelper.DrawSlenderMenuUI();
             MenuHelper.DrawChangeLogs();
-            
+
             if (volRaisedNotifTimer >= 0)
-            {
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, "Volume Adjusted Automatically.", new Vector2(Main.screenWidth / 2, Main.screenHeight - 10), Color.Gray * volRaisedNotifTimer, 0f, Main.fontDeathText.MeasureString("Volume Adjusted Automatically.") / 2, new Vector2(0.3f, 0.3f));
-            }
-            if (Main.menuMode == MenuModeID.SlenderExtras)
-            {
-                MenuHelper.DrawSocials();
-            }
+
+            if (Main.menuMode == MenuModeID.SlenderExtras) MenuHelper.DrawSocials();
+
             volRaisedNotifTimer--;
             SpookyTerrariaUtils.HandleKeyboardInputs();
             SpookyTerrariaUtils.oldKeyboardState = SpookyTerrariaUtils.newKeyboardState;
             UIHelper.MSOld = UIHelper.MSNew;
             orig(self, gameTime);
         }
+
         public override void AddRecipes()
         {
-            ModRecipe recipe = new ModRecipe(this);
+            var recipe = new ModRecipe(this);
             recipe.AddRecipeGroup(RecipeGroupID.IronBar, 5);
             recipe.AddIngredient(ItemID.Torch);
             recipe.AddTile(TileID.WorkBenches);
             recipe.SetResult(ItemID.CarriageLantern);
             recipe.AddRecipe();
         }
+
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // Vanilla: Info Accessories Bar
         {
-            int miniMapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map / Minimap"));
+            var miniMapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map / Minimap"));
             if (miniMapIndex > -1)
-            {
                 if (ModContent.GetInstance<SpookyTerraria>() != null)
-                {
                     layers.RemoveAt(miniMapIndex);
-                }
-            }
-            Player player = Main.player[Main.myPlayer];
-            string heartRateText = $"BPM: {player.GetModPlayer<SpookyPlayer>().heartRate}";
-            int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
+
+            var player = Main.player[Main.myPlayer];
+            var heartRateText = $"BPM: {player.GetModPlayer<SpookyPlayer>().heartRate}";
+            var mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
             if (mouseTextIndex != -1)
-            {
-                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                    "SpookyTerraria: BPM",
-                    delegate
+                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer("SpookyTerraria: BPM", delegate
                     {
                         if (player.GetModPlayer<SpookyPlayer>().accHeartMonitor)
-                        {
-                            Utils.DrawBorderString(Main.spriteBatch,
-                                heartRateText,
-                                new Vector2(Main.screenWidth - 375f, 5f),
-                                player.GetModPlayer<SpookyPlayer>().heartRate < 100 ? new Color(93, 199, 90) : Color.IndianRed);
-                        }
+                            Utils.DrawBorderString(Main.spriteBatch, heartRateText, new Vector2(Main.screenWidth - 375f, 5f), player.GetModPlayer<SpookyPlayer>().heartRate < 100 ? new Color(93, 199, 90) : Color.IndianRed);
+
                         return true;
                     },
                     InterfaceScaleType.UI)
                 );
-            }
-            string staminaPercent = $"Stamina: {player.GetModPlayer<StaminaPlayer>().Stamina}%";
-            int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
+
+            var staminaPercent = $"Stamina: {player.GetModPlayer<StaminaPlayer>().Stamina}%";
+            var index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Info Accessories Bar"));
             if (index != -1)
-            {
-                layers.Insert(index, new LegacyGameInterfaceLayer(
-                    "SpookyTerraria: Stamina",
-                    delegate
+                layers.Insert(index, new LegacyGameInterfaceLayer("SpookyTerraria: Stamina", delegate
                     {
-                        Utils.DrawBorderString(Main.spriteBatch,
-                        staminaPercent,
-                        new Vector2(Main.screenWidth - 415f, 30f),
-                        Color.Crimson);
+                        Utils.DrawBorderString(Main.spriteBatch, staminaPercent, new Vector2(Main.screenWidth - 415f, 30f), Color.Crimson);
                         return true;
                     },
                     InterfaceScaleType.UI)
                 );
-            }
         }
+
         public static bool PlayerIsInForest(Player player)
         {
             return !player.ZoneJungle
-                && !player.ZoneDungeon
-                && !player.ZoneCorrupt
-                && !player.ZoneCrimson
-                && !player.ZoneHoly
-                && !player.ZoneSnow
-                && !player.ZoneUndergroundDesert
-                && !player.ZoneGlowshroom
-                && !player.ZoneMeteor
-                && !player.ZoneBeach
-                && !player.ZoneDesert
-                && player.ZoneOverworldHeight;
+                   && !player.ZoneDungeon
+                   && !player.ZoneCorrupt
+                   && !player.ZoneCrimson
+                   && !player.ZoneHoly
+                   && !player.ZoneSnow
+                   && !player.ZoneUndergroundDesert
+                   && !player.ZoneGlowshroom
+                   && !player.ZoneMeteor
+                   && !player.ZoneBeach
+                   && !player.ZoneDesert
+                   && player.ZoneOverworldHeight;
         }
+
         public static bool PlayerIsInNoBiome(Player player)
         {
             return !player.ZoneJungle
-                && !player.ZoneDungeon
-                && !player.ZoneCorrupt
-                && !player.ZoneCrimson
-                && !player.ZoneHoly
-                && !player.ZoneSnow
-                && !player.ZoneUndergroundDesert
-                && !player.ZoneGlowshroom
-                && !player.ZoneMeteor
-                && !player.ZoneBeach
-                && !player.ZoneDesert
-                && !player.ZoneOverworldHeight;
+                   && !player.ZoneDungeon
+                   && !player.ZoneCorrupt
+                   && !player.ZoneCrimson
+                   && !player.ZoneHoly
+                   && !player.ZoneSnow
+                   && !player.ZoneUndergroundDesert
+                   && !player.ZoneGlowshroom
+                   && !player.ZoneMeteor
+                   && !player.ZoneBeach
+                   && !player.ZoneDesert
+                   && !player.ZoneOverworldHeight;
         }
+
         public static bool PlayerUnderground(Player player)
         {
             return !player.ZoneOverworldHeight
-                && !player.ZoneDirtLayerHeight
-                && player.ZoneRockLayerHeight;
+                   && !player.ZoneDirtLayerHeight
+                   && player.ZoneRockLayerHeight;
         }
+
         public override void PreSaveAndQuit()
         {
             // Directory.CreateDirectory LUL
@@ -961,7 +889,7 @@ namespace SpookyTerraria
             Main.chTitle = true;
             playMusicTimer_UseOnce = 0;
             // SoundEngine.StopAllAmbientSounds();
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             Main.mapEnabled = true;
             Main.mapStyle = 3;
             player.controlMap = true;
@@ -972,94 +900,86 @@ namespace SpookyTerraria
             player.mapAlphaUp = true;
             player.mapStyle = true;
             if (ModLoader.GetMod("TerrariaOverhaul") == null && ModLoader.GetMod("CalamityModMusic") == null && ModLoader.GetMod("MusicFromOnePointFour") == null && ModLoader.GetMod("MusicFromOnePointFour") == null)
-            {
+                //TODO: Set Loading Priority Ryan - Stachel
                 MenuMusicSet_Slender(); // Mirsario, you suck ass. Your mod takes all priority. So do you, Fabsol.
-            }
             else
-            {
                 return;
-            }
+
             base.PreSaveAndQuit();
         }
+
         public override void Close()
         {
-            for (int texIteration = 0; texIteration < _texturesDisposable.Length - 1; texIteration++)
-            {
+            for (var texIteration = 0; texIteration < _texturesDisposable.Length - 1; texIteration++)
                 if (_texturesDisposable[texIteration] != null)
-                {
                     lock (_texturesDisposable[texIteration])
-                    {
                         _texturesDisposable[texIteration] = null;
-                    }
-                }
-            }
-            int soundSlot2 = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
-            if (Utils.IndexInRange(Main.music, soundSlot2))
+
+            var soundSlot2 = GetSoundSlot(SoundType.Music, "Sounds/Music/MainMenu/Slender_MainMenu");
+            if (Main.music.IndexInRange(soundSlot2))
             {
-                Music musicIndex = Main.music[soundSlot2];
-                if (musicIndex != null && musicIndex.IsPlaying)
-                {
-                    Main.music[soundSlot2].Stop(AudioStopOptions.Immediate);
-                }
+                var musicIndex = Main.music[soundSlot2];
+                if (musicIndex != null && musicIndex.IsPlaying) Main.music[soundSlot2].Stop(AudioStopOptions.Immediate);
             }
+
             SpookyTerrariaUtils.ReturnTexturesToDefaults();
             base.Close();
         }
+
         /// <summary>
-        /// Timer until the old man respawns
+        ///     Timer until the old man respawns
         /// </summary>
         public int oldManTimer;
+
         public override void MidUpdateDustTime()
         {
             Main.soundInstanceMenuTick.Volume = 0f;
             Main.soundInstanceMenuOpen.Volume = 0f;
             Main.soundInstanceMenuClose.Volume = 0f;
         }
+
         public float updateGameZoomTargetValue;
+
         /// <summary>
-        /// Determining play values for slender music.
+        ///     Determining play values for slender music.
         /// </summary>
         public int playMusicTimer_UseOnce;
+
         public override void ModifyLightingBrightness(ref float scale)
         {
-            Player player = Main.player[Main.myPlayer];
+            var player = Main.player[Main.myPlayer];
             if ((player.ZoneRockLayerHeight || player.ZoneDirtLayerHeight) && !ModContent.GetInstance<SpookyTerraria>().beatGame)
-            {
                 scale = ModContent.GetInstance<SpookyConfigServer>().lightingScale * 0.8f;
-            }
+
             if (player.ZoneOverworldHeight && !ModContent.GetInstance<SpookyTerraria>().beatGame)
-            {
                 scale = ModContent.GetInstance<SpookyConfigServer>().lightingScale;
-            }
         }
-        public static string[] MusicTypes = new string[] { "The 8 Pages", "Slender's Shadow", "7th Street" };
+
+        public static string[] MusicTypes = {"The 8 Pages", "Slender's Shadow", "7th Street"};
         public static string musicType;
+
         public override void UpdateMusic(ref int music, ref MusicPriority priority)
         {
-            if (stopTitleMusic || (!Main.gameMenu && customTitleMusicSlot != 6 && Main.ActivePlayerFileData != null && Main.ActiveWorldFileData != null))
+            if (stopTitleMusic || !Main.gameMenu && customTitleMusicSlot != 6 && Main.ActivePlayerFileData != null && Main.ActiveWorldFileData != null)
             {
                 if (!stopTitleMusic)
-                {
                     music = 6;
-                }
                 else
-                {
                     stopTitleMusic = true;
-                }
+
                 customTitleMusicSlot = 6;
-                Music music2 = GetMusic("Sounds/Music/MainMenu/Slender_MainMenu");
-                if (music2.IsPlaying)
-                {
-                    music2.Stop(AudioStopOptions.Immediate);
-                }
+                var music2 = GetMusic("Sounds/Music/MainMenu/Slender_MainMenu");
+                if (music2.IsPlaying) music2.Stop(AudioStopOptions.Immediate);
+
                 titleMusicStopped?.Set();
                 stopTitleMusic = false;
             }
-            Player player = Main.player[Main.myPlayer];
-            bool pageReqMetTier1 = SpookyPlayer.Pages >= 1 && SpookyPlayer.Pages < 3;
-            bool pageReqMetTier2 = SpookyPlayer.Pages >= 3 && SpookyPlayer.Pages < 5;
-            bool pageReqMetTier3 = SpookyPlayer.Pages >= 5 && SpookyPlayer.Pages < 7;
-            bool pageReqMetTier4 = SpookyPlayer.Pages >= 7 && SpookyPlayer.Pages < 8;
+
+            var player = Main.player[Main.myPlayer];
+            var pageReqMetTier1 = SpookyPlayer.Pages >= 1 && SpookyPlayer.Pages < 3;
+            var pageReqMetTier2 = SpookyPlayer.Pages >= 3 && SpookyPlayer.Pages < 5;
+            var pageReqMetTier3 = SpookyPlayer.Pages >= 5 && SpookyPlayer.Pages < 7;
+            var pageReqMetTier4 = SpookyPlayer.Pages >= 7 && SpookyPlayer.Pages < 8;
 
             if (musicType == MusicTypes[SlenderMusicID.TheEightPages])
             {
@@ -1068,16 +988,19 @@ namespace SpookyTerraria
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage1");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier2)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage2");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier3)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage3");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier4)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/MusicStage4");
@@ -1091,16 +1014,19 @@ namespace SpookyTerraria
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage1");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier2)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage2");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier3)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage3");
                     priority = MusicPriority.BossHigh;
                 }
+
                 if (pageReqMetTier4)
                 {
                     music = GetSoundSlot(SoundType.Music, "Sounds/Music/Slender/ShadowStage4");
@@ -1111,11 +1037,20 @@ namespace SpookyTerraria
             {
                 if (SpookyPlayer.Pages > 0)
                 {
-                    music = GetSoundSlot(SoundType.Music, $"Sounds/Music/Slender/7thStreet/7thStreetStage{SpookyPlayer.Pages}");
+                    music = GetSoundSlot(SoundType.Music,
+                        $"Sounds/Music/Slender/7thStreet/7thStreetStage{SpookyPlayer.Pages}");
                     priority = MusicPriority.BossHigh;
                 }
             }
-            if ((PlayerIsInForest(player) || player.ZoneSnow || player.ZoneBeach || player.ZoneCorrupt || player.ZoneCrimson || PlayerUnderground(player) || player.ZoneDirtLayerHeight || player.ZoneUndergroundDesert || player.ZoneUnderworldHeight || player.ZoneSkyHeight || player.ZoneCorrupt || player.ZoneCrimson || player.ZoneHoly || player.ZoneJungle || (player.ZoneDesert && !player.ZoneBeach) || player.ZoneDungeon || player.ZoneGlowshroom || player.ZoneMeteor || player.ZoneRain || player.ZoneOldOneArmy || player.ZoneSandstorm) && !pageReqMetTier1 && !pageReqMetTier2 && !pageReqMetTier3 && !pageReqMetTier4)
+
+            // What the fuck - Stachel
+            if ((PlayerIsInForest(player) || player.ZoneSnow || player.ZoneBeach || player.ZoneCorrupt ||
+                 player.ZoneCrimson || PlayerUnderground(player) || player.ZoneDirtLayerHeight ||
+                 player.ZoneUndergroundDesert || player.ZoneUnderworldHeight || player.ZoneSkyHeight ||
+                 player.ZoneCorrupt || player.ZoneCrimson || player.ZoneHoly || player.ZoneJungle ||
+                 player.ZoneDesert && !player.ZoneBeach || player.ZoneDungeon || player.ZoneGlowshroom ||
+                 player.ZoneMeteor || player.ZoneRain || player.ZoneOldOneArmy || player.ZoneSandstorm) &&
+                !pageReqMetTier1 && !pageReqMetTier2 && !pageReqMetTier3 && !pageReqMetTier4)
             {
                 music = GetSoundSlot(SoundType.Music, "Sounds/Music/Nothingness");
                 priority = MusicPriority.BossMedium;
